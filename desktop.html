@@ -117,6 +117,8 @@
   .stat-label { font-size: 10px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
   .stat-val { font-size: 18px; font-weight: 700; color: #94a3b8; font-family: 'Exo 2', sans-serif; }
 
+  .heat-output-size { font-size: 18px; line-height: 1; }
+
   /* ── Table ── */
   .table-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; max-height: 360px; overflow-y: auto; }
   .table-title { font-size: 12px; color: #e2e8f0; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
@@ -291,19 +293,19 @@
           </div>
           <div style="display:flex;justify-content:space-between;font-size:9px;color:#cbd5e1;margin-top:2px;">
             <span>0</span>
-            <span style="color:#f87171;font-weight:700">MIN 1.43M</span>
-            <span style="color:#f87171;font-weight:700">MAX 14.29M</span>
+            <span style="color:#f87171;font-weight:700;" class="heat-output-size">MIN 1.43M</span>
+            <span style="color:#f87171;font-weight:700;" class="heat-output-size">MAX 14.29M</span>
           </div>
         </div>
         <!-- Heat Output display -->
         <div style="display:flex;justify-content:space-between;align-items:center;background:#1e293b;border-radius:6px;padding:7px 12px;margin-top:10px;">
           <div>
             <div style="font-size:10px;color:#86efac;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;">Heat Output</div>
-            <div style="font-size:18px;font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;line-height:1;text-shadow:0 0 10px #4ade8040;" id="btuOutDisplay">0.000 <span style="font-size:11px;color:#86efac;">MMBTU/hr</span></div>
+            <div class="heat-output-size" style="font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;text-shadow:0 0 10px #4ade8040;" id="btuOutDisplay">0.000 <span style="font-size:11px;color:#86efac;">MMBTU/hr</span></div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:10px;color:#86efac;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;">Efficiency</div>
-            <div style="font-size:18px;font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;line-height:1;" id="btuOutEffDisplay">—</div>
+            <div class="heat-output-size" style="font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;" id="btuOutEffDisplay">—</div>
           </div>
         </div>
       </div>
