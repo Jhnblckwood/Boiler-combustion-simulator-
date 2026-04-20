@@ -1,4 +1,4 @@
-# Boiler-combustion-simulator-
+# Boiler-combustion-simulator
 A program to practice tuning combustion for a boiler. Wip 
 
 Cleaver Brooks CBEX-2D 30ppm nox 
