@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boiler Combustion Simulator</title>
+
+  <script>
+    function goToVersion() {
+      const isPhone = /iPhone|Android.+Mobile/i.test(navigator.userAgent);
+      const smallScreen = window.innerWidth < 900;
+
+      if (isPhone || smallScreen) {
+        window.location.replace("mobile.html");
+      } else {
+        window.location.replace("desktop.html");
+      }
+    }
+    goToVersion();
+  </script>
+</head>
+<body>
+  Redirecting...
+</body>
+</html>
