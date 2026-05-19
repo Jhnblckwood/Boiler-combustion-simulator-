@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -17,7 +17,7 @@
     padding-bottom: 40px;
   }
 
-  /* ── Range inputs ── */
+  /* â”€â”€ Range inputs â”€â”€ */
   input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 4px; outline: none; cursor: pointer; }
   input[type=range]:disabled { cursor: not-allowed; opacity: 0.4; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #38bdf8; border: 2px solid #0f172a; cursor: pointer; box-shadow: 0 0 10px #38bdf880; transition: transform 0.15s; }
@@ -28,7 +28,7 @@
   input[type=range].vfd::-webkit-slider-thumb  { background: #22d3ee; box-shadow: 0 0 10px #22d3ee80; }
   input[type=range].fgr::-webkit-slider-thumb  { background: #a78bfa; box-shadow: 0 0 10px #a78bfa80; }
 
-  /* ── Buttons ── */
+  /* â”€â”€ Buttons â”€â”€ */
   .btn { font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; border-radius: 10px; border: 2px solid; padding: 14px 0; cursor: pointer; transition: all 0.2s; width: 100%; }
   .btn:disabled { cursor: not-allowed; opacity: 0.5; }
   .btn-save  { background: #166534; border-color: #16a34a; color: #4ade80; }
@@ -41,7 +41,7 @@
   .btn-export { background: #0f0f2e; border: 2px solid #818cf8; border-radius: 8px; color: #818cf8; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Share Tech Mono', monospace; padding: 10px 0; width: 100%; letter-spacing: 0.05em; transition: all 0.2s; }
   .btn-export.flash { background: #1e1b4b; }
 
-  /* ── Layout ── */
+  /* â”€â”€ Layout â”€â”€ */
   #header {
     background: linear-gradient(180deg, #0f172a 0%, #020817 100%);
     border-bottom: 1px solid #1e293b;
@@ -74,7 +74,7 @@
   #main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  /* ── Cards ── */
+  /* â”€â”€ Cards â”€â”€ */
   .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
   .card.unstable { border-color: #7f1d1d; }
   .point-header { display: flex; justify-content: space-between; align-items: center; }
@@ -84,7 +84,7 @@
   .firing-label { font-size: 10px; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
   .firing-val { font-size: 32px; font-weight: 700; color: #818cf8; line-height: 1; font-family: 'Exo 2', sans-serif; }
 
-  /* ── Sliders ── */
+  /* â”€â”€ Sliders â”€â”€ */
   .slider-wrap { margin-bottom: 16px; }
   .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
   .slider-label { font-size: 12px; font-weight: 600; color: #cbd5e1; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -93,14 +93,14 @@
   /* VFD sub-display */
   .vfd-sub { font-size: 11px; color: #cbd5e1; margin-top: 3px; text-align: right; letter-spacing: 0.05em; font-weight: 500; }
 
-  /* ── Gauge bars ── */
+  /* â”€â”€ Gauge bars â”€â”€ */
   .gauge-wrap { margin-bottom: 8px; }
   .gauge-header { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 3px; font-family: 'Share Tech Mono', monospace; }
   .gauge-val { font-weight: 700; }
   .gauge-track { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
   .gauge-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.3s; }
 
-  /* ── AirEff display ── */
+  /* â”€â”€ AirEff display â”€â”€ */
   .aireff-row { display: flex; justify-content: space-between; align-items: center;
     background: #1e293b; border-radius: 6px; padding: 6px 12px; margin-top: 8px; margin-bottom: 0; }
   .aireff-label { font-size: 10px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
@@ -117,9 +117,7 @@
   .stat-label { font-size: 10px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
   .stat-val { font-size: 18px; font-weight: 700; color: #94a3b8; font-family: 'Exo 2', sans-serif; }
 
-  .heat-output-size { font-size: 18px; line-height: 1; }
-
-  /* ── Table ── */
+  /* â”€â”€ Table â”€â”€ */
   .table-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; max-height: 360px; overflow-y: auto; }
   .table-title { font-size: 12px; color: #e2e8f0; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
   table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -134,7 +132,7 @@
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
   .btn-row2 { display: flex; gap: 10px; }
 
-  /* ── Tune Mode Toggle ── */
+  /* â”€â”€ Tune Mode Toggle â”€â”€ */
   .tune-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid #334155; margin-bottom: 12px; }
   .tune-toggle-btn { flex: 1; padding: 10px 0; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.25s; text-align: center; }
   .tune-toggle-btn.rough { background: #0f172a; color: #475569; }
@@ -159,7 +157,7 @@
   <div class="header-inner">
     <div class="header-top">
       <div>
-        <div class="header-subtitle">Cleaver-Brooks CBEX-2D &nbsp;·&nbsp; <span style="color:#fbbf24;letter-spacing:0.12em;">Hawk ICS Parallel Positioning</span> &nbsp;·&nbsp; 30 ppm NOₓ</div>
+        <div class="header-subtitle">Cleaver-Brooks CBEX-2D &nbsp;Â·&nbsp; <span style="color:#fbbf24;letter-spacing:0.12em;">Hawk ICS Parallel Positioning</span> &nbsp;Â·&nbsp; 30 ppm NOâ‚“</div>
         <h1>Boiler Combustion Simulator</h1>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -205,8 +203,8 @@
 
       <!-- Tune Mode Toggle -->
       <div class="tune-toggle" id="tuneModeToggle">
-        <button class="tune-toggle-btn rough active" id="btnRoughMode">⬆ ROUGH TUNE</button>
-        <button class="tune-toggle-btn fine" id="btnFineMode">⬇ FINE TUNE</button>
+        <button class="tune-toggle-btn rough active" id="btnRoughMode">â¬† ROUGH TUNE</button>
+        <button class="tune-toggle-btn fine" id="btnFineMode">â¬‡ FINE TUNE</button>
       </div>
       <div class="fine-hint" id="fineHint" style="display:none"></div>
 
@@ -265,7 +263,7 @@
       <div class="card" id="flowCard">
         <div class="sim-header" style="margin-bottom:10px">
           <span class="sim-title">Gas Flow Meter</span>
-          <span style="font-size:9px;color:#94a3b8;letter-spacing:0.04em;">CBEX-2D · Butterfly Valve</span>
+          <span style="font-size:9px;color:#94a3b8;letter-spacing:0.04em;">CBEX-2D Â· Butterfly Valve</span>
         </div>
         <!-- CFH large display -->
         <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;">
@@ -293,19 +291,19 @@
           </div>
           <div style="display:flex;justify-content:space-between;font-size:9px;color:#cbd5e1;margin-top:2px;">
             <span>0</span>
-            <span style="color:#f87171;font-weight:700;" class="heat-output-size">MIN 1.43M</span>
-            <span style="color:#f87171;font-weight:700;" class="heat-output-size">MAX 14.29M</span>
+            <span style="color:#f87171;font-weight:700">MIN 1.43M</span>
+            <span style="color:#f87171;font-weight:700">MAX 14.29M</span>
           </div>
         </div>
         <!-- Heat Output display -->
         <div style="display:flex;justify-content:space-between;align-items:center;background:#1e293b;border-radius:6px;padding:7px 12px;margin-top:10px;">
           <div>
             <div style="font-size:10px;color:#86efac;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;">Heat Output</div>
-            <div class="heat-output-size" style="font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;text-shadow:0 0 10px #4ade8040;" id="btuOutDisplay">0.000 <span style="font-size:11px;color:#86efac;">MMBTU/hr</span></div>
+            <div style="font-size:18px;font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;line-height:1;text-shadow:0 0 10px #4ade8040;" id="btuOutDisplay">0.000 <span style="font-size:11px;color:#86efac;">MMBTU/hr</span></div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:10px;color:#86efac;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;">Efficiency</div>
-            <div class="heat-output-size" style="font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;" id="btuOutEffDisplay">—</div>
+            <div style="font-size:18px;font-weight:900;font-family:'Exo 2',sans-serif;color:#4ade80;line-height:1;" id="btuOutEffDisplay">â€”</div>
           </div>
         </div>
       </div>
@@ -316,12 +314,12 @@
       <!-- Save / Next -->
       <div class="btn-row">
         <button class="btn btn-save" id="btnSave">SAVE POINT</button>
-        <button class="btn btn-next" id="btnNext" disabled>NEXT →</button>
+        <button class="btn btn-next" id="btnNext" disabled>NEXT â†’</button>
       </div>
 
       <!-- Back / Export -->
       <div class="btn-row2">
-        <button class="btn-back" id="btnBack" style="display:none">← BACK</button>
+        <button class="btn-back" id="btnBack" style="display:none">â† BACK</button>
         <button class="btn-export" id="btnExport" style="display:none">EXPORT L5X</button>
       </div>
     </div>
@@ -335,34 +333,34 @@
             <span class="sim-title">Live Simulation</span>
             <div id="lagDisplay" style="font-size:10px;color:#475569;letter-spacing:0.04em;margin-top:2px;"></div>
           </div>
-          <span class="flame-badge flame-stable" id="flameBadge">● FLAME STABLE</span>
+          <span class="flame-badge flame-stable" id="flameBadge">â— FLAME STABLE</span>
         </div>
         <div class="gauge-wrap">
-          <div class="gauge-header"><span>O₂</span><span class="gauge-val" id="o2Val" style="color:#4ade80">—</span></div>
+          <div class="gauge-header"><span>Oâ‚‚</span><span class="gauge-val" id="o2Val" style="color:#4ade80">â€”</span></div>
           <div class="gauge-track"><div class="gauge-fill" id="o2Bar" style="width:0%;background:#4ade80"></div></div>
         </div>
         <div class="gauge-wrap">
-          <div class="gauge-header"><span>CO₂</span><span class="gauge-val" id="co2Val" style="color:#60a5fa">—</span></div>
+          <div class="gauge-header"><span>COâ‚‚</span><span class="gauge-val" id="co2Val" style="color:#60a5fa">â€”</span></div>
           <div class="gauge-track"><div class="gauge-fill" id="co2Bar" style="width:0%;background:#60a5fa"></div></div>
         </div>
         <div class="gauge-wrap">
-          <div class="gauge-header"><span>CO</span><span class="gauge-val" id="coVal" style="color:#4ade80">—</span></div>
+          <div class="gauge-header"><span>CO</span><span class="gauge-val" id="coVal" style="color:#4ade80">â€”</span></div>
           <div class="gauge-track"><div class="gauge-fill" id="coBar" style="width:0%;background:#4ade80"></div></div>
         </div>
         <div class="gauge-wrap">
-          <div class="gauge-header"><span>NOₓ</span><span class="gauge-val" id="noxVal" style="color:#4ade80">—</span></div>
+          <div class="gauge-header"><span>NOâ‚“</span><span class="gauge-val" id="noxVal" style="color:#4ade80">â€”</span></div>
           <div class="gauge-track"><div class="gauge-fill" id="noxBar" style="width:0%;background:#4ade80"></div></div>
         </div>
         <div class="gauge-wrap">
-          <div class="gauge-header"><span>Efficiency</span><span class="gauge-val" id="effVal" style="color:#4ade80">—</span></div>
+          <div class="gauge-header"><span>Efficiency</span><span class="gauge-val" id="effVal" style="color:#4ade80">â€”</span></div>
           <div class="gauge-track"><div class="gauge-fill" id="effBar" style="width:0%;background:#4ade80"></div></div>
         </div>
         <div id="coHint" style="display:none;font-size:10px;color:#fbbf24;background:#292100;border:1px solid #854d0e;border-radius:6px;padding:7px 10px;margin-top:10px;letter-spacing:0.03em;"></div>
         <div id="noxTarget" style="display:none;font-size:10px;border:1px solid;border-radius:6px;padding:7px 10px;margin-top:8px;letter-spacing:0.03em;"></div>
         <div class="stat-grid">
-          <div class="stat-box"><div class="stat-label">Excess Air</div><div class="stat-val" id="eaVal">—</div></div>
-          <div class="stat-box"><div class="stat-label">Lambda (λ)</div><div class="stat-val" id="lambdaVal">—</div></div>
-          <div class="stat-box"><div class="stat-label">Stack Temp</div><div class="stat-val" id="stackTempVal" style="color:#fb923c">—</div></div>
+          <div class="stat-box"><div class="stat-label">Excess Air</div><div class="stat-val" id="eaVal">â€”</div></div>
+          <div class="stat-box"><div class="stat-label">Lambda (Î»)</div><div class="stat-val" id="lambdaVal">â€”</div></div>
+          <div class="stat-box"><div class="stat-label">Stack Temp</div><div class="stat-val" id="stackTempVal" style="color:#fb923c">â€”</div></div>
         </div>
       </div>
 
@@ -374,7 +372,7 @@
             <tr>
               <th style="text-align:left">PT</th>
               <th>GAS%</th><th>AIR%</th><th>VFD%</th><th>FGR%</th>
-              <th>O2%</th><th>CO₂%</th><th>CO</th><th>NOx</th><th>STK°F</th>
+              <th>O2%</th><th>COâ‚‚%</th><th>CO</th><th>NOx</th><th>STKÂ°F</th>
             </tr>
           </thead>
           <tbody id="curveTable"></tbody>
@@ -386,49 +384,49 @@
 </div>
 
 <script>
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
-const VFD_MAX_HZ = 60.0;   // 60Hz motor — full speed at 60 Hz
+// â”€â”€â”€ CONSTANTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const VFD_MAX_HZ = 60.0;   // 60Hz motor â€” full speed at 60 Hz
 
-// ─── NAMEPLATE DATA (CB CBEX-2D 200-350-250ST) ─────────────────────────────
+// â”€â”€â”€ NAMEPLATE DATA (CB CBEX-2D 200-350-250ST) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const NAMEPLATE_MIN_INPUT  = 1429000;   // BTU/hr min gas input
 const NAMEPLATE_MAX_INPUT  = 14288000;  // BTU/hr max gas input
 const NAMEPLATE_GROSS_OUT  = 11716000;  // BTU/hr gross output
 const NAMEPLATE_MANIFOLD_P = 23.6;      // in W.C. manifold pressure
-const GAS_HHV             = 1020;       // BTU/ft³ natural gas HHV
+const GAS_HHV             = 1020;       // BTU/ftÂ³ natural gas HHV
 const NAMEPLATE_MAX_CFH   = NAMEPLATE_MAX_INPUT / GAS_HHV;  // ~14,008 CFH
 const NAMEPLATE_MIN_CFH   = NAMEPLATE_MIN_INPUT / GAS_HHV;  // ~1,401 CFH
 
-// ─── PHYSICS CONSTANTS (v11 — CB Hawk ICS Calibration) ───────────────────────
+// â”€â”€â”€ PHYSICS CONSTANTS (v11 â€” CB Hawk ICS Calibration) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Model: lambda = K * (airEff/100)^Pa / flowFrac
-//   flowFrac = butterflyFlow(gasActuator%)  — actual gas flow, not valve position
+//   flowFrac = butterflyFlow(gasActuator%)  â€” actual gas flow, not valve position
 //   airEff   = airDamperFlow(damper%) * (VFD_Hz / 60) * 100
 //
 // v11 changes from v10:
-//   • Lambda now uses butterfly valve flowFrac (actual gas flow) instead of
+//   â€¢ Lambda now uses butterfly valve flowFrac (actual gas flow) instead of
 //     valve position raised to a power (Pg removed). Eliminates disconnect
 //     between gas flow meter and air/fuel ratio calculation.
-//   • FGR dilution realistic: FGR displaces fresh air at fan inlet.
+//   â€¢ FGR dilution realistic: FGR displaces fresh air at fan inlet.
 //     20% FGR = fan moves 80% fresh air + 20% inert flue gas.
 //     Factor 0.72 accounts for residual O2 in flue gas (~2.5%), duct leakage,
 //     and imperfect mixing. Result: adding FGR drops O2 significantly and
-//     forces air damper compensation — matches real CB induced FGR behavior.
-//   • Added CO₂% output (max 11.7% for natural gas at stoichiometric)
-//   • Stack temperature output for analyzer display
-//   • Recalibrated K and Pa for flowFrac-based lambda
+//     forces air damper compensation â€” matches real CB induced FGR behavior.
+//   â€¢ Added COâ‚‚% output (max 11.7% for natural gas at stoichiometric)
+//   â€¢ Stack temperature output for analyzer display
+//   â€¢ Recalibrated K and Pa for flowFrac-based lambda
 //
 // Dual-anchor calibration:
-//   Light-off: gas=3%, air=10%, VFD=42Hz (70%)  → O2 ≈ 8.5%  (lean ignition)
-//   Full fire:  gas=100%, air=75%, VFD=57Hz (95%) → O2 ≈ 3.5% (tight high-fire trim)
+//   Light-off: gas=3%, air=10%, VFD=42Hz (70%)  â†’ O2 â‰ˆ 8.5%  (lean ignition)
+//   Full fire:  gas=100%, air=75%, VFD=57Hz (95%) â†’ O2 â‰ˆ 3.5% (tight high-fire trim)
 //
 // NOx: 90 ppm thermal base (LNE staged air) + 8 ppm prompt (Fenimore)
 // FGR suppression exp = -7.5  gives ~30ppm at 18-19% FGR (CB induced FGR target)
 // With realistic FGR dilution, operator must open air damper ~15% more to
-// compensate for FGR — matches real commissioning experience.
+// compensate for FGR â€” matches real commissioning experience.
 //
 // Default CB Hawk ICS curve:
 //   FGR starts at Pt3 (20% fire, FGR=8%)
-//   30ppm NOx first achieved around Pt5 (40% fire, FGR=17-19%) ← CB LNE target
-//   O2 tapers 8.5% → 3.5% across firing range
+//   30ppm NOx first achieved around Pt5 (40% fire, FGR=17-19%) â† CB LNE target
+//   O2 tapers 8.5% â†’ 3.5% across firing range
 const Pa = 1.02;    // air exponent (recalibrated for flowFrac-based lambda)
 const K  = 1.53;    // air scale factor (recalibrated for flowFrac-based lambda)
 
@@ -439,7 +437,7 @@ const DEF_AIR = [ 10,  22,  34,  42,  50,  57,  62,  66,  70,  73,  75];
 const DEF_VFD = [42.0,43.2,44.4,45.6,46.8,48.0,49.8,51.6,53.4,55.2,57.0];
 const DEF_FGR = [  0,   0,   8,  17,  17,  18,  19,  20,  20,  20,  20];
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const POINTS = [
   { id:0,  label:"Low Fire", pct:0   },
   { id:1,  label:"Point 2",   pct:10  },
@@ -456,22 +454,22 @@ const POINTS = [
 
 // Low-fire defaults: VFD=42Hz (70%), FGR=0%. Gas and Air are randomized each
 // fresh session / relight so the operator starts with a different position and
-// must tune in manually — like a real boiler relight procedure.
+// must tune in manually â€” like a real boiler relight procedure.
 //
 // Why the ranges matter:
-//   Gas max = 7%: at gas > 8%, no air value within 3–14% can produce stable
-//   combustion (flowFrac too large → always rich regardless of air damper).
-//   Checking test.stable is the only reliable guard — lambda alone is not enough
-//   because highCO triggers at λ=0.90–1.06 even though lambda looks "safe".
+//   Gas max = 7%: at gas > 8%, no air value within 3â€“14% can produce stable
+//   combustion (flowFrac too large â†’ always rich regardless of air damper).
+//   Checking test.stable is the only reliable guard â€” lambda alone is not enough
+//   because highCO triggers at Î»=0.90â€“1.06 even though lambda looks "safe".
 //   calcCombustion is a function declaration (hoisted) so it's safe to call here.
 function freshLightOff() {
   const SAFE_FALLBACK = { gas: 3.0, air: 10.0, vfd: 42.0, fgr: 0 };
   let gas, air, attempts = 0;
   do {
-    gas = 1.0 + Math.round(Math.random() * 6.0 * 10) / 10;  // 1.0–7.0%
-    air = 3.0 + Math.round(Math.random() * 11.0 * 10) / 10; // 3.0–14.0%
+    gas = 1.0 + Math.round(Math.random() * 6.0 * 10) / 10;  // 1.0â€“7.0%
+    air = 3.0 + Math.round(Math.random() * 11.0 * 10) / 10; // 3.0â€“14.0%
     const test = calcCombustion(gas, air, 42.0, 0);
-    if (test.stable) break;   // must be fully stable — lambda, CO, O2 all clear
+    if (test.stable) break;   // must be fully stable â€” lambda, CO, O2 all clear
     attempts++;
   } while (attempts < 40);
   // Fallback: if no stable combo found (should be extremely rare), use a
@@ -494,29 +492,29 @@ let hintsUnlocked    = false;     // hints hidden until first flameout (Advanced
 let skillMode        = 'beginner'; // 'beginner' or 'advanced'
 function hintsOn() { return skillMode === 'beginner' || hintsUnlocked; }
 
-// ─── ANALYZER LAG ────────────────────────────────────────────────────────────
+// â”€â”€â”€ ANALYZER LAG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Real flue gas analyzers respond slowly due to sample transport and cell response.
-// Modelled as first-order exponential lag:  Y(n) = Y(n-1) + (X - Y(n-1)) * α
-// where α = Δt / τ  (scan interval / time constant)
+// Modelled as first-order exponential lag:  Y(n) = Y(n-1) + (X - Y(n-1)) * Î±
+// where Î± = Î”t / Ï„  (scan interval / time constant)
 // Scan interval tied to render loop (~250ms assumed)
 const LAG_DT       = 0.25;   // seconds per render tick (250 ms)
-const TAU_O2       = 8.0;    // O2 electrochemical cell  T63 ≈ 8s
-const TAU_CO       = 12.0;   // CO NDIR / electrochemical T63 ≈ 12s
-const TAU_NOX      = 15.0;   // NOx chemiluminescent      T63 ≈ 15s
-const TAU_CO2      = 8.0;    // CO₂ NDIR cell T63 ≈ 8s (similar to O2)
+const TAU_O2       = 8.0;    // O2 electrochemical cell  T63 â‰ˆ 8s
+const TAU_CO       = 12.0;   // CO NDIR / electrochemical T63 â‰ˆ 12s
+const TAU_NOX      = 15.0;   // NOx chemiluminescent      T63 â‰ˆ 15s
+const TAU_CO2      = 8.0;    // COâ‚‚ NDIR cell T63 â‰ˆ 8s (similar to O2)
 const ALPHA_O2     = Math.min(1, LAG_DT / TAU_O2);
 const ALPHA_CO     = Math.min(1, LAG_DT / TAU_CO);
 const ALPHA_NOX    = Math.min(1, LAG_DT / TAU_NOX);
 const ALPHA_CO2    = Math.min(1, LAG_DT / TAU_CO2);
 
 let lagO2  = 0;   // running lag state for O2
-let lagCO2 = 0;   // running lag state for CO₂
+let lagCO2 = 0;   // running lag state for COâ‚‚
 let lagCO  = 0;   // running lag state for CO
 let lagNOx = 0;   // running lag state for NOx
 
-// ─── BUTTERFLY VALVE CHARACTERISTIC ─────────────────────────────────────────
+// â”€â”€â”€ BUTTERFLY VALVE CHARACTERISTIC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CB gas butterfly valve: highly nonlinear, most flow change in mid-range
-// Calibrated so 3% valve ≈ 10% flow (min fire) and 100% valve = 100% flow
+// Calibrated so 3% valve â‰ˆ 10% flow (min fire) and 100% valve = 100% flow
 function butterflyFlow(valvePct) {
   const x = Math.max(0, valvePct / 100);
   if (x < 0.005) return 0;
@@ -524,9 +522,9 @@ function butterflyFlow(valvePct) {
   return Math.min(1.0, Math.pow(Math.sin(theta), 0.65));
 }
 
-// ─── AIR DAMPER CHARACTERISTIC ──────────────────────────────────────────────
+// â”€â”€â”€ AIR DAMPER CHARACTERISTIC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CB butterfly / opposed-blade air damper: quick-opening characteristic.
-// At 50% position ≈ 64% of max airflow; at 10% ≈ 22%.
+// At 50% position â‰ˆ 64% of max airflow; at 10% â‰ˆ 22%.
 // Uses x^0.65 power law (same family as gas butterfly).
 function airDamperFlow(damperPct) {
   const x = Math.max(0, damperPct / 100);
@@ -534,8 +532,8 @@ function airDamperFlow(damperPct) {
   return Math.min(1.0, Math.pow(x, 0.65));
 }
 
-// ─── ACTUATOR DEADBAND ──────────────────────────────────────────────────────
-// Real Honeywell/Siemens actuators have ±0.5% deadband / hysteresis.
+// â”€â”€â”€ ACTUATOR DEADBAND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Real Honeywell/Siemens actuators have Â±0.5% deadband / hysteresis.
 // Commanded 42.0% might land at 41.6% or 42.3%.
 // Uses deterministic pseudo-noise so identical commands give consistent results
 // but small slider changes create realistic jitter.
@@ -545,19 +543,19 @@ function actuatorPos(commanded, seed) {
   return Math.max(0, commanded + noise);
 }
 
-// ─── PHYSICS ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ PHYSICS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   // mode: 'rough' = cold furnace (default), 'fine' = hot/heat-soaked furnace
   mode = mode || 'rough';
 
-  // ── Actuator deadband — real positions differ from commanded ────────────
-  const gasAct = actuatorPos(gas, 137.036);
+  // â”€â”€ Actuator deadband â€” real positions differ from commanded â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const gasAct = Math.max(0, gas);  // Gas valve: linear response — commanded = actual (no actuator deadband)
   const airAct = actuatorPos(air, 173.205);
   const vfdAct = actuatorPos(vfd_hz, 7.071);
   const fgrAct = actuatorPos(fgr, 271.801);
 
-  // Combined air: nonlinear damper characteristic × VFD speed (fan law: flow ∝ speed)
-  // airEff = airDamperFlow(damper%) × (VFD_Hz / 60) × 100
+  // Combined air: nonlinear damper characteristic Ã— VFD speed (fan law: flow âˆ speed)
+  // airEff = airDamperFlow(damper%) Ã— (VFD_Hz / 60) Ã— 100
   const vfdSpd  = (Math.max(vfdAct, 0) / VFD_MAX_HZ) * 100;      // 0-100%
   const airDamp = airDamperFlow(airAct);                            // nonlinear 0-1
   const airEff  = airDamp * vfdSpd;                                 // effective air %
@@ -576,16 +574,16 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   const airNorm = K * Math.pow(Math.max(airEff, 0.1) / 100, Pa);
 
   // v11: FGR displaces fresh air at the FD fan inlet (induced FGR system).
-  // Fresh air = 20.9% O2. Recirculated flue gas ≈ 2-3% residual O2.
+  // Fresh air = 20.9% O2. Recirculated flue gas â‰ˆ 2-3% residual O2.
   // Factor 0.72 = 1 - (residual_O2_in_FGR / ambient_O2) adjusted for
   // imperfect mixing and duct in-leakage. At 20% FGR, effective fresh air
-  // fraction = 1 - 0.20×0.72 = 0.856 → O2 drops ~1.5-2.0 points.
-  // Operator must compensate by opening air damper — just like a real boiler.
+  // fraction = 1 - 0.20Ã—0.72 = 0.856 â†’ O2 drops ~1.5-2.0 points.
+  // Operator must compensate by opening air damper â€” just like a real boiler.
   const fgrDilution = 1 - fgrFrac * 0.72;
   const effAir  = airNorm * fgrDilution;
   let   lambda  = Math.max(0.40, Math.min(7.0, effAir / Math.max(flowFrac, 0.001)));
 
-  // ── Hot-boiler adjustments (fine-tune mode) ──────────────────────────────
+  // â”€â”€ Hot-boiler adjustments (fine-tune mode) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Heat-soaked furnace: better combustion, O2 reads 0.3-0.5% lower,
   // hotter refractory = higher flame temp = more NOx, tighter CO response
   const isHot = mode === 'fine';
@@ -597,28 +595,28 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   const o2 = Math.max(0, rawO2 - heatSoakO2);
   const ea = Math.max(0, (lambda - 1) * 100);
 
-  // ── CO (v10 — computed BEFORE stability so CO informs flame state) ───────
+  // â”€â”€ CO (v10 â€” computed BEFORE stability so CO informs flame state) â”€â”€â”€â”€â”€â”€â”€
   // Real CB firetube CO vs O2: flat at 10-30 ppm, then near-vertical wall
-  // at O2 ≈ 1.0-1.5% (λ ≈ 1.05-1.08). The "cliff" is the defining feature
-  // of a CO trim — you're fine until suddenly you're not.
+  // at O2 â‰ˆ 1.0-1.5% (Î» â‰ˆ 1.05-1.08). The "cliff" is the defining feature
+  // of a CO trim â€” you're fine until suddenly you're not.
   //
   // IMPORTANT: CO is calculated first, then used as a stability input.
-  // On a real boiler, high CO means incomplete combustion — the flame is
+  // On a real boiler, high CO means incomplete combustion â€” the flame is
   // degrading even if lambda arithmetic says you're "close to stoichiometric."
   // A UV flame scanner sees a weak, intermittent signal when CO is spiking.
   //
-  // Calibration targets (stable, FGR≈0):
-  //   λ=2.5  →  ~5 ppm      (very lean)
-  //   λ=1.8  →  ~10 ppm     (lean light-off zone)
-  //   λ=1.4  →  ~20 ppm     (normal low-fire)
-  //   λ=1.15 →  ~30 ppm     (tight trim, safe)
-  //   λ=1.08 →  ~50 ppm     (approaching the wall)
-  //   λ=1.06 →  ~320 ppm    (THE KNEE — cliff starts here)
-  //   λ=1.03 →  ~700 ppm    (over the edge)
-  //   λ=1.00 →  ~1800 ppm   (stoichiometric — deep trouble)
+  // Calibration targets (stable, FGRâ‰ˆ0):
+  //   Î»=2.5  â†’  ~5 ppm      (very lean)
+  //   Î»=1.8  â†’  ~10 ppm     (lean light-off zone)
+  //   Î»=1.4  â†’  ~20 ppm     (normal low-fire)
+  //   Î»=1.15 â†’  ~30 ppm     (tight trim, safe)
+  //   Î»=1.08 â†’  ~50 ppm     (approaching the wall)
+  //   Î»=1.06 â†’  ~320 ppm    (THE KNEE â€” cliff starts here)
+  //   Î»=1.03 â†’  ~700 ppm    (over the edge)
+  //   Î»=1.00 â†’  ~1800 ppm   (stoichiometric â€” deep trouble)
   const coBase = 4 + 14 * Math.exp(-2.6 * (lambda - 1.0)) * coSensitivity;
 
-  // Rich spike — near-vertical wall below λ≈1.06 (O2 ≈ 1.2%)
+  // Rich spike â€” near-vertical wall below Î»â‰ˆ1.06 (O2 â‰ˆ 1.2%)
   // Transition zone 1.06-1.12: CO rises as you approach the cliff
   // Below 1.06: exponential explosion (the wall)
   let coRich = 0;
@@ -628,11 +626,11 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
     coRich = 35 * coSensitivity * Math.pow((1.12 - lambda) / 0.06, 2.0);
   }
 
-  // Lean tail — flame cooling, quenching at extreme excess air
+  // Lean tail â€” flame cooling, quenching at extreme excess air
   const coLean = lambda > 2.8
     ? 18 * Math.pow(lambda - 2.8, 2.0) : 0;
 
-  // Firing-rate effect — higher firing rate shortens residence time slightly
+  // Firing-rate effect â€” higher firing rate shortens residence time slightly
   // v11: uses flowFrac (actual gas flow) instead of valve position
   const coFiring = 4 * Math.pow(flowFrac, 1.4);
 
@@ -644,28 +642,28 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   else if (fgrFrac > 0.10) coFgrHigh = 8   * (fgrFrac - 0.10) * 10;
 
   // FGR at light-off is particularly bad (cold furnace, weak flame)
-  // v11: uses flowFrac — light-off region extends to ~10% gas (flowFrac≈0.25)
+  // v11: uses flowFrac â€” light-off region extends to ~10% gas (flowFracâ‰ˆ0.25)
   const coFgrLightOff = (flowFrac < 0.25 && fgrFrac > 0.05)
     ? 120 * fgrFrac * (0.25 - flowFrac) * 16 : 0;
 
-  // ── Combustion CO (before instability effects) ───────────────────────────
+  // â”€â”€ Combustion CO (before instability effects) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Sum of all chemistry-driven CO sources. This is what the analyzer would
-  // read from the combustion alone — before flame degradation adds more.
+  // read from the combustion alone â€” before flame degradation adds more.
   // Used as input to stability determination.
   const coCombustion = coBase + coRich + coLean + coFiring + coFgrHigh + coFgrLightOff;
 
-  // ── Stability (v10 — CO and O2 now inform flame state) ───────────────────
+  // â”€â”€ Stability (v10 â€” CO and O2 now inform flame state) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // On a real CB boiler, the BMS flame scanner (UV or flame rod) detects:
-  //   • Rich flame: weak UV signal, orange/luminous, scanner loses confidence
-  //   • Lean blow-off: flame lifts off burner tile, UV drops to zero
-  //   • FGR quench: reduced flame temp → weak UV → scanner trips
-  //   • High CO: incomplete combustion = partial flame = weak/intermittent UV
-  //   • Very low O2: starved combustion, flame degrades before full flameout
+  //   â€¢ Rich flame: weak UV signal, orange/luminous, scanner loses confidence
+  //   â€¢ Lean blow-off: flame lifts off burner tile, UV drops to zero
+  //   â€¢ FGR quench: reduced flame temp â†’ weak UV â†’ scanner trips
+  //   â€¢ High CO: incomplete combustion = partial flame = weak/intermittent UV
+  //   â€¢ Very low O2: starved combustion, flame degrades before full flameout
   //
   // Real thresholds (typical CB Hawk ICS with Honeywell flame scanner):
-  //   λ < 0.90:  flame is orange/lazy, UV signal marginal → trips in seconds
-  //   λ > 5.5:   flame lifts off, lean blow-off
-  //   CO > 350:  combustion is failing — catches the critical gap at λ=0.90-1.06
+  //   Î» < 0.90:  flame is orange/lazy, UV signal marginal â†’ trips in seconds
+  //   Î» > 5.5:   flame lifts off, lean blow-off
+  //   CO > 350:  combustion is failing â€” catches the critical gap at Î»=0.90-1.06
   //              where O2 is near zero and CO is spiking but old model said "stable"
   //   O2 < 0.5% at meaningful fire (gas>8%): starved, flame integrity failing
   //   FGR > 28%: flame temperature too low, quench
@@ -679,7 +677,7 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   const stable        = !tooRich && !tooLean && !fgrQuench && !fgrAtLightOff
                       && !highCO && !lowO2;
 
-  // ── Instability CO — flame degradation adds unburned fuel to exhaust ─────
+  // â”€â”€ Instability CO â€” flame degradation adds unburned fuel to exhaust â”€â”€â”€â”€â”€
   let coInstability = 0;
   if (!stable) {
     let factor = 0;
@@ -693,48 +691,48 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   }
   const co = Math.min(9999, Math.max(3, coCombustion + coInstability));
 
-  // ── NOx (v10 — LNE base + prompt NOx floor) ─────────────────────────────
+  // â”€â”€ NOx (v10 â€” LNE base + prompt NOx floor) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // CB LNE burner: staged air mixing inherently reduces thermal NOx base
   // to ~90 ppm (vs 120-130 for standard E-series).
   // Prompt NOx (Fenimore mechanism): ~8 ppm from CH radical reactions in
-  // the flame front. NOT suppressed by FGR — sets a hard floor.
+  // the flame front. NOT suppressed by FGR â€” sets a hard floor.
   //
   // Calibration:
-  //   • Light-off (gas≈3, FGR=0, λ≈1.7): NOx ≈ 55-65 ppm
-  //   • Full fire FGR=0 (λ≈1.2): NOx ≈ 98 ppm (uncontrolled thermal + prompt)
-  //   • Full fire FGR=19% (λ≈1.2): NOx ≈ 28-30 ppm (CB 30ppm target)
-  //   • Maximum FGR: NOx floors at ~10-12 ppm (can't eliminate prompt NOx)
+  //   â€¢ Light-off (gasâ‰ˆ3, FGR=0, Î»â‰ˆ1.7): NOx â‰ˆ 55-65 ppm
+  //   â€¢ Full fire FGR=0 (Î»â‰ˆ1.2): NOx â‰ˆ 98 ppm (uncontrolled thermal + prompt)
+  //   â€¢ Full fire FGR=19% (Î»â‰ˆ1.2): NOx â‰ˆ 28-30 ppm (CB 30ppm target)
+  //   â€¢ Maximum FGR: NOx floors at ~10-12 ppm (can't eliminate prompt NOx)
   let tempFactor;
   if      (lambda < 1.05)  tempFactor = lambda * 0.86;
   else if (lambda <= 1.15) tempFactor = 1.0;
   else                     tempFactor = 1.0 / (1 + 0.7 * Math.pow(lambda - 1.15, 1.6));
   const fgrSuppression = Math.exp(-7.5 * fgrFrac);
-  // Firing factor: small flames ≈ 0.80, full fire ≈ 1.0 (flame volume/thermal mass)
+  // Firing factor: small flames â‰ˆ 0.80, full fire â‰ˆ 1.0 (flame volume/thermal mass)
   // v11: uses flowFrac (actual heat release) instead of valve position
   const firingFactor   = 0.55 + 0.45 * Math.pow(flowFrac, 0.30);
-  // furnaceTempK: hot refractory increases radiant heat → higher flame temp → more NOx
+  // furnaceTempK: hot refractory increases radiant heat â†’ higher flame temp â†’ more NOx
   const thermalNOx = 90 * tempFactor * firingFactor * fgrSuppression * furnaceTempK;
-  const promptNOx  = 8;   // Fenimore — not affected by FGR
+  const promptNOx  = 8;   // Fenimore â€” not affected by FGR
   let nox = thermalNOx + promptNOx;
   if (!stable) nox *= 0.70;
   nox = Math.max(0, Math.round(nox));
 
-  // ── Efficiency (v11 — realistic stack temp & radiation) ──────────────────
+  // â”€â”€ Efficiency (v11 â€” realistic stack temp & radiation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Stack temp model: firing rate is the dominant driver.
   // Higher fire = more gas velocity through tubes = less heat transfer = hotter stack.
-  // Nonlinear — rises steeply at higher firing rates (turbulent flow regime).
-  // Excess air has a minor secondary effect (~2°F per 1% O₂).
+  // Nonlinear â€” rises steeply at higher firing rates (turbulent flow regime).
+  // Excess air has a minor secondary effect (~2Â°F per 1% Oâ‚‚).
   // FGR recirculates hot gas, adds modest stack temp increase above ~10%.
   //
   // Real CB firetube targets:
-  //   Low fire  (flowFrac≈0.14):  ~320-340°F
-  //   Mid fire  (flowFrac≈0.50):  ~370-390°F
-  //   High fire (flowFrac≈1.00):  ~440-460°F
+  //   Low fire  (flowFracâ‰ˆ0.14):  ~320-340Â°F
+  //   Mid fire  (flowFracâ‰ˆ0.50):  ~370-390Â°F
+  //   High fire (flowFracâ‰ˆ1.00):  ~440-460Â°F
   const stackTemp = 260 + 180 * Math.pow(flowFrac, 0.55) + o2 * 2
     + (fgrFrac > 0.10 ? (fgrFrac - 0.10) * 80 : 0);
   // Dry flue gas loss: scales with excess air and stack temp
   const dryFlueLoss = (0.38 + ea * 0.0034) * (stackTemp - 60) / 100 * 4.2;
-  // Moisture loss: H2O from hydrogen in CH4 — ~10.5% on HHV basis
+  // Moisture loss: H2O from hydrogen in CH4 â€” ~10.5% on HHV basis
   const moistureLoss = 10.5;
   // Radiation/convection loss: fixed ~40,000 BTU/hr shell radiation.
   // As a percentage of input: high at low fire (~2.5%), low at high fire (~0.3%).
@@ -745,25 +743,25 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
     100 - dryFlueLoss - moistureLoss - radiationLoss
     - Math.min(co, 600) * 0.003));
 
-  // ── CO₂ (v11 — standard analyzer output) ──────────────────────────────────
-  // Max CO₂ for natural gas (CH₄) at stoichiometric = 11.7%
-  // CO₂ = 11.7 × (20.9 - O₂) / 20.9
-  // At O₂=3.5% → CO₂=9.7%, at O₂=8.5% → CO₂=6.9%, at stoichiometric → CO₂=11.7%
+  // â”€â”€ COâ‚‚ (v11 â€” standard analyzer output) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Max COâ‚‚ for natural gas (CHâ‚„) at stoichiometric = 11.7%
+  // COâ‚‚ = 11.7 Ã— (20.9 - Oâ‚‚) / 20.9
+  // At Oâ‚‚=3.5% â†’ COâ‚‚=9.7%, at Oâ‚‚=8.5% â†’ COâ‚‚=6.9%, at stoichiometric â†’ COâ‚‚=11.7%
   const co2 = Math.max(0, Math.round(11.7 * (20.9 - o2) / 20.9 * 10) / 10);
 
-  // ── Diagnostic ───────────────────────────────────────────────────────────
+  // â”€â”€ Diagnostic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let coReason = '';
   if (!stable) {
-    if (tooRich)            coReason = 'Rich — increase air damper or VFD speed';
-    else if (highCO)        coReason = 'CO breakpoint — combustion failing, add air or reduce gas';
-    else if (lowO2)         coReason = 'O₂ critically low — increase air damper or VFD';
-    else if (tooLean)       coReason = 'Lean blow-off — reduce air or decrease VFD';
-    else if (fgrQuench)     coReason = 'FGR quench — cut FGR below 28%';
-    else if (fgrAtLightOff) coReason = 'FGR too early — close FGR until flame is established';
+    if (tooRich)            coReason = 'Rich â€” increase air damper or VFD speed';
+    else if (highCO)        coReason = 'CO breakpoint â€” combustion failing, add air or reduce gas';
+    else if (lowO2)         coReason = 'Oâ‚‚ critically low â€” increase air damper or VFD';
+    else if (tooLean)       coReason = 'Lean blow-off â€” reduce air or decrease VFD';
+    else if (fgrQuench)     coReason = 'FGR quench â€” cut FGR below 28%';
+    else if (fgrAtLightOff) coReason = 'FGR too early â€” close FGR until flame is established';
   } else if (co > 150) {
-    if (fgrFrac > 0.22)    coReason = 'FGR too high — incomplete combustion';
-    else if (lambda > 3.8) coReason = 'Excess air — lean quench, reduce air or VFD';
-    else if (lambda < 1.06)coReason = 'Rich — approaching CO breakpoint, add air or reduce gas';
+    if (fgrFrac > 0.22)    coReason = 'FGR too high â€” incomplete combustion';
+    else if (lambda > 3.8) coReason = 'Excess air â€” lean quench, reduce air or VFD';
+    else if (lambda < 1.06)coReason = 'Rich â€” approaching CO breakpoint, add air or reduce gas';
   }
 
   return {
@@ -787,10 +785,10 @@ function calcCombustion(gas, air, vfd_hz, fgr, mode) {
   };
 }
 
-// ─── VALIDATION ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ VALIDATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Fine-tune O2 targets per firing range (tight high-fire, relaxed light-off)
 const FINE_O2_TARGETS = [
-  { max: 10.0, ideal: 8.5 },  // Pt0  Light-Off — lean for safe ignition
+  { max: 10.0, ideal: 8.5 },  // Pt0  Light-Off â€” lean for safe ignition
   { max: 8.0,  ideal: 6.5 },  // Pt1  10%
   { max: 7.0,  ideal: 5.5 },  // Pt2  20%
   { max: 6.0,  ideal: 4.8 },  // Pt3  30%
@@ -800,7 +798,7 @@ const FINE_O2_TARGETS = [
   { max: 4.2,  ideal: 3.3 },  // Pt7  70%
   { max: 4.0,  ideal: 3.0 },  // Pt8  80%
   { max: 3.8,  ideal: 2.8 },  // Pt9  90%
-  { max: 3.5,  ideal: 2.5 },  // Pt10 100% — tight trim
+  { max: 3.5,  ideal: 2.5 },  // Pt10 100% â€” tight trim
 ];
 
 function getValidation(pt, idx) {
@@ -808,12 +806,12 @@ function getValidation(pt, idx) {
   const prev = savedPoints[idx - 1];
   if (!prev) return null;
 
-  // In fine-tune descending, we go from high to low, so gas/air must be ≤ previous
-  // In rough-tune ascending, gas/air must be ≥ previous
+  // In fine-tune descending, we go from high to low, so gas/air must be â‰¤ previous
+  // In rough-tune ascending, gas/air must be â‰¥ previous
   if (tuneMode === 'rough') {
-    if (pt.gas < prev.gas) return `Gas must be ≥ Point ${idx} (${prev.gas.toFixed(1)}%)`;
-    if (pt.air < prev.air) return `Air damper must be ≥ Point ${idx} (${prev.air.toFixed(1)}%)`;
-    if (pt.vfd < prev.vfd) return `VFD must be ≥ Point ${idx} (${prev.vfd.toFixed(1)} Hz)`;
+    if (pt.gas < prev.gas) return `Gas must be â‰¥ Point ${idx} (${prev.gas.toFixed(1)}%)`;
+    if (pt.air < prev.air) return `Air damper must be â‰¥ Point ${idx} (${prev.air.toFixed(1)}%)`;
+    if (pt.vfd < prev.vfd) return `VFD must be â‰¥ Point ${idx} (${prev.vfd.toFixed(1)} Hz)`;
   }
 
   // Hint-level validation: shown always in Beginner, after flameout in Advanced
@@ -824,7 +822,7 @@ function getValidation(pt, idx) {
     if (tuneMode === 'rough') {
       const prevSim = calcCombustion(prev.gas, prev.air, prev.vfd, prev.fgr, tuneMode);
       if (curSim.o2 > prevSim.o2 + 0.5) {
-        return `O₂ should not rise (prev ${prevSim.o2}% → now ${curSim.o2}%) — increase gas or reduce air/VFD`;
+        return `Oâ‚‚ should not rise (prev ${prevSim.o2}% â†’ now ${curSim.o2}%) â€” increase gas or reduce air/VFD`;
       }
     }
 
@@ -832,10 +830,10 @@ function getValidation(pt, idx) {
     if (tuneMode === 'fine') {
       const target = FINE_O2_TARGETS[idx];
       if (curSim.o2 > target.max) {
-        return `Fine tune: O₂ too high (${curSim.o2}% > ${target.max}% max) — reduce air or increase gas`;
+        return `Fine tune: Oâ‚‚ too high (${curSim.o2}% > ${target.max}% max) â€” reduce air or increase gas`;
       }
       if (curSim.co > 100) {
-        return `Fine tune: CO too high (${curSim.co} ppm > 100 ppm limit) — add air or reduce FGR`;
+        return `Fine tune: CO too high (${curSim.co} ppm > 100 ppm limit) â€” add air or reduce FGR`;
       }
     }
   }
@@ -843,7 +841,7 @@ function getValidation(pt, idx) {
   return null;
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setSliderGradient(el, val, min, max, color) {
   const pct = ((val - min) / (max - min)) * 100;
   el.style.background =
@@ -868,7 +866,7 @@ function updateGauge(id, value, min, max, unit) {
   document.getElementById(id + 'Bar').style.background = color;
 }
 
-// ─── PROGRESS DOTS ───────────────────────────────────────────────────────────
+// â”€â”€â”€ PROGRESS DOTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderDots() {
   const container = document.getElementById('progressDots');
   container.innerHTML = '';
@@ -906,7 +904,7 @@ function renderDots() {
   }
 }
 
-// ─── CURVE TABLE ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ CURVE TABLE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTable() {
   const tbody = document.getElementById('curveTable');
   tbody.innerHTML = '';
@@ -933,20 +931,20 @@ function renderTable() {
       tr.innerHTML = `
         <td style="color:${isCur?'#38bdf8':'#64748b'}">${ptLabel}</td>
         <td colspan="9" style="text-align:center;color:#94a3b8;font-size:10px">
-          ${isCur ? '— editing —' : '· · ·'}</td>`;
+          ${isCur ? 'â€” editing â€”' : 'Â· Â· Â·'}</td>`;
     }
     tbody.appendChild(tr);
   });
 }
 
-// ─── FULL RENDER ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ FULL RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function render() {
   const pt         = POINTS[currentIdx];
   const sim        = calcCombustion(currentPt.gas, currentPt.air, currentPt.vfd, currentPt.fgr, tuneMode);
   const validation = getValidation(currentPt, currentIdx);
   const savedCount = savedPoints.filter(Boolean).length;
 
-  // ── Tune Mode Toggle UI ──────────────────────────────────────────────────
+  // â”€â”€ Tune Mode Toggle UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const btnRough = document.getElementById('btnRoughMode');
   const btnFine  = document.getElementById('btnFineMode');
   const tuneToggleEl = document.getElementById('tuneModeToggle');
@@ -958,22 +956,22 @@ function render() {
     btnFine.classList.add('active');   btnRough.classList.remove('active');
   }
 
-  // Fine-tune hint — only visible after first flameout
+  // Fine-tune hint â€” only visible after first flameout
   const fineHint = document.getElementById('fineHint');
   if (hintsOn() && tuneMode === 'fine' && skillMode === 'advanced') {
     const tgt = FINE_O2_TARGETS[currentIdx];
     fineHint.style.display = '';
-    fineHint.innerHTML = `⬇ FINE TUNE — Hot boiler, tightening O₂. Target: <b>${tgt.ideal}%</b> (max ${tgt.max}%) &nbsp;·&nbsp; CO limit: <b>100 ppm</b>`;
+    fineHint.innerHTML = `â¬‡ FINE TUNE â€” Hot boiler, tightening Oâ‚‚. Target: <b>${tgt.ideal}%</b> (max ${tgt.max}%) &nbsp;Â·&nbsp; CO limit: <b>100 ppm</b>`;
   } else {
     fineHint.style.display = 'none';
   }
 
-  // Analyzer lag display — faster in fine-tune mode
+  // Analyzer lag display â€” faster in fine-tune mode
   const lagEl = document.getElementById('lagDisplay');
   if (tuneMode === 'fine') {
-    lagEl.innerHTML = 'O₂/CO₂ lag <span style="color:#fb923c">4s</span> &nbsp;·&nbsp;CO lag <span style="color:#fb923c">6s</span> &nbsp;·&nbsp;NOₓ lag <span style="color:#fb923c">8s</span> &nbsp;<span style="color:#fb923c">HOT</span>';
+    lagEl.innerHTML = 'Oâ‚‚/COâ‚‚ lag <span style="color:#fb923c">4s</span> &nbsp;Â·&nbsp;CO lag <span style="color:#fb923c">6s</span> &nbsp;Â·&nbsp;NOâ‚“ lag <span style="color:#fb923c">8s</span> &nbsp;<span style="color:#fb923c">HOT</span>';
   } else {
-    lagEl.innerHTML = 'O₂/CO₂ lag <span style="color:#475569">8s</span> &nbsp;·&nbsp;CO lag <span style="color:#475569">12s</span> &nbsp;·&nbsp;NOₓ lag <span style="color:#475569">15s</span>';
+    lagEl.innerHTML = 'Oâ‚‚/COâ‚‚ lag <span style="color:#475569">8s</span> &nbsp;Â·&nbsp;CO lag <span style="color:#475569">12s</span> &nbsp;Â·&nbsp;NOâ‚“ lag <span style="color:#475569">15s</span>';
   }
 
   // Header
@@ -996,6 +994,7 @@ function render() {
 
   document.getElementById('gasVal').childNodes[0].textContent = currentPt.gas.toFixed(1);
   document.getElementById('airVal').childNodes[0].textContent = currentPt.air.toFixed(1);
+  document.getElementById('vfdVal').childNodes[0].textContent = currentPt.vfd.toFixed(1);
   document.getElementById('fgrVal').childNodes[0].textContent = currentPt.fgr.toFixed(1);
 
   setSliderGradient(document.getElementById('gasSlider'), currentPt.gas, 0, 100, '#fb923c');
@@ -1003,8 +1002,8 @@ function render() {
   setSliderGradient(document.getElementById('vfdSlider'), currentPt.vfd, 0, 60,  '#22d3ee');
   setSliderGradient(document.getElementById('fgrSlider'), currentPt.fgr, 0, 100, '#a78bfa');
 
-  // VFD sub-display — Hz in sub-label, % as main value (use commanded value, not actuator-noisy sim.vfdSpd)
-  const vfdPctDisplay = (currentPt.vfd / VFD_MAX_HZ * 100).toFixed(1);
+  // VFD sub-display â€” Hz in sub-label, % as main value
+  const vfdPctDisplay = sim.vfdSpd.toFixed(1);
   const vfdHzDisplay  = currentPt.vfd.toFixed(1);
   document.getElementById('vfdVal').childNodes[0].textContent = vfdPctDisplay;
   document.getElementById('vfdHz').textContent = vfdHzDisplay;
@@ -1012,11 +1011,11 @@ function render() {
   // AirEff live display
   document.getElementById('airEffDisplay').textContent = sim.airEff.toFixed(1) + '%';
 
-  // Gas Flow Meter updates — simulate real flow meter fluctuation around the mean.
+  // Gas Flow Meter updates â€” simulate real flow meter fluctuation around the mean.
   // Smooth drift via random walk (bounded) so the reading visibly jitters like a turbine/orifice meter.
   // NOTE: this ONLY affects the displayed reading; underlying combustion physics (sim.btuInput) is untouched.
   if (typeof window._flowNoise !== 'number') window._flowNoise = 0;
-  // Random walk step, pulled toward zero so it stays bounded around ~±1.5%
+  // Random walk step, pulled toward zero so it stays bounded around ~Â±1.5%
   window._flowNoise += (Math.random() - 0.5) * 0.006;
   window._flowNoise *= 0.90; // mean-reversion
   if (window._flowNoise >  0.02) window._flowNoise =  0.02;
@@ -1043,7 +1042,7 @@ function render() {
   document.getElementById('btuOutEffDisplay').innerHTML =
     sim.btuInput > 0
       ? `<span style="font-size:14px;">${sim.eff}%</span>`
-      : '—';
+      : 'â€”';
 
   // Validation
   // Beginner: show hint LIVE whenever a constraint is not met (no save press needed)
@@ -1056,30 +1055,30 @@ function render() {
     if (saveTried && !validation) saveTried = false; // auto-clear when valid
     showVal = saveTried && !!validation;
   }
-  if (showVal) { valBox.style.display = ''; valBox.textContent = '⚠ ' + validation; }
+  if (showVal) { valBox.style.display = ''; valBox.textContent = 'âš  ' + validation; }
   else { valBox.style.display = 'none'; }
 
   // Save button
   const btnSave = document.getElementById('btnSave');
   btnSave.disabled = false;
-  btnSave.textContent = isSaved ? '✓ SAVED' : 'SAVE POINT';
+  btnSave.textContent = isSaved ? 'âœ“ SAVED' : 'SAVE POINT';
   if (isSaved) btnSave.classList.add('saved'); else btnSave.classList.remove('saved');
 
-  // Next button — direction depends on tune mode
+  // Next button â€” direction depends on tune mode
   let canNext, nextLabel;
   if (tuneMode === 'rough') {
     canNext = isSaved && currentIdx < 10;
-    nextLabel = currentIdx === 10 ? 'ROUGH COMPLETE ✓' : 'NEXT ⬆';
+    nextLabel = currentIdx === 10 ? 'ROUGH COMPLETE âœ“' : 'NEXT â¬†';
   } else {
     canNext = isSaved && currentIdx > 0;
-    nextLabel = currentIdx === 0 ? 'FINE TUNE COMPLETE ✓' : 'NEXT ⬇';
+    nextLabel = currentIdx === 0 ? 'FINE TUNE COMPLETE âœ“' : 'NEXT â¬‡';
   }
   const btnNext = document.getElementById('btnNext');
   btnNext.disabled = !canNext;
   btnNext.textContent = nextLabel;
   if (canNext) btnNext.classList.add('active'); else btnNext.classList.remove('active');
 
-  // Back / Export — direction-aware
+  // Back / Export â€” direction-aware
   let showBack;
   if (tuneMode === 'rough') {
     showBack = currentIdx > 0;
@@ -1087,7 +1086,7 @@ function render() {
     showBack = currentIdx < 10;
   }
   document.getElementById('btnBack').style.display   = showBack ? '' : 'none';
-  document.getElementById('btnBack').textContent      = tuneMode === 'rough' ? '← BACK' : 'BACK →';
+  document.getElementById('btnBack').textContent      = tuneMode === 'rough' ? 'â† BACK' : 'BACK â†’';
   document.getElementById('btnExport').style.display = savedCount === 11 ? '' : 'none';
 
   // Sim card
@@ -1098,19 +1097,19 @@ function render() {
   if (!sim.stable) {
     instabilityTicks++;
     if (instabilityTicks >= FLAMEOUT_TICKS) {
-      triggerFlameout(sim.coReason || 'Sustained instability — flame extinguished');
+      triggerFlameout(sim.coReason || 'Sustained instability â€” flame extinguished');
       return;
     }
-    badge.textContent = instabilityTicks >= 4 ? '⚠ FLAMEOUT IMMINENT' : '⚠ UNSTABLE';
+    badge.textContent = instabilityTicks >= 4 ? 'âš  FLAMEOUT IMMINENT' : 'âš  UNSTABLE';
     badge.className   = 'flame-badge flame-unstable';
   } else {
     instabilityTicks = 0;
-    badge.textContent = '● FLAME STABLE';
+    badge.textContent = 'â— FLAME STABLE';
     badge.className   = 'flame-badge flame-stable';
   }
 
-  // ── Analyzer lag — first-order filter on O2, CO₂, CO, NOx ────────────────
-  // Fine-tune mode: warm analyzer, established sample flow → 2x faster response
+  // â”€â”€ Analyzer lag â€” first-order filter on O2, COâ‚‚, CO, NOx â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Fine-tune mode: warm analyzer, established sample flow â†’ 2x faster response
   const lagMult = tuneMode === 'fine' ? 2.0 : 1.0;
   // When gas is off, snap lag states to zero immediately (no phantom readings)
   if (currentPt.gas < 0.5) {
@@ -1133,31 +1132,31 @@ function render() {
   updateGauge('eff', sim.eff, 70, 100,  '%');
   document.getElementById('eaVal').textContent       = sim.ea + '%';
   document.getElementById('lambdaVal').textContent   = sim.lambda;
-  // Stack temp thermocouple jitter — real K-type readings bounce ±3-5°F
+  // Stack temp thermocouple jitter â€” real K-type readings bounce Â±3-5Â°F
   if (typeof window._stackNoise !== 'number') window._stackNoise = 0;
   window._stackNoise += (Math.random() - 0.5) * 2.5;
   window._stackNoise *= 0.82;  // mean-reversion
   if (window._stackNoise >  5) window._stackNoise =  5;
   if (window._stackNoise < -5) window._stackNoise = -5;
   const dispStackTemp = sim.stackTemp > 0 ? sim.stackTemp + Math.round(window._stackNoise) : 0;
-  document.getElementById('stackTempVal').textContent = dispStackTemp + '°F';
+  document.getElementById('stackTempVal').textContent = dispStackTemp + 'Â°F';
 
-  // CO hint — only visible after first flameout
+  // CO hint â€” only visible after first flameout
   const coHint = document.getElementById('coHint');
-  if (hintsOn() && sim.coReason) { coHint.textContent = '⚠ ' + sim.coReason; coHint.style.display = ''; }
+  if (hintsOn() && sim.coReason) { coHint.textContent = 'âš  ' + sim.coReason; coHint.style.display = ''; }
   else { coHint.style.display = 'none'; }
 
-  // NOx 30ppm target — only visible after first flameout
+  // NOx 30ppm target â€” only visible after first flameout
   const noxTarget = document.getElementById('noxTarget');
   if (hintsOn() && currentIdx >= 2) {
     const met = dispNOx <= 30;
     const close = dispNOx <= 40 && !met;
     noxTarget.style.display    = '';
     noxTarget.textContent      = met
-      ? '✓ 30 ppm NOx target met — CB LNE standard'
+      ? 'âœ“ 30 ppm NOx target met â€” CB LNE standard'
       : close
-        ? `≈ ${dispNOx} ppm — close, add ~2% more FGR`
-        : `✗ 30 ppm NOx target — increase FGR (currently ${dispNOx} ppm)`;
+        ? `â‰ˆ ${dispNOx} ppm â€” close, add ~2% more FGR`
+        : `âœ— 30 ppm NOx target â€” increase FGR (currently ${dispNOx} ppm)`;
     noxTarget.style.color       = met ? '#4ade80' : close ? '#fbbf24' : '#f87171';
     noxTarget.style.background  = met ? '#052e16' : close ? '#292100' : '#2d0a0a';
     noxTarget.style.borderColor = met ? '#166534' : close ? '#854d0e' : '#7f1d1d';
@@ -1169,11 +1168,11 @@ function render() {
   renderTable();
 }
 
-// ─── EVENTS ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ EVENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function onSlider(field, val) {
   currentPt[field] = parseFloat(val);
   isSaved = false;
-  // Advanced: keep saveTried true while invalid — render() auto-clears it once valid
+  // Advanced: keep saveTried true while invalid â€” render() auto-clears it once valid
   // Beginner: validation is live, saveTried is not used for display
   if (skillMode === 'beginner') saveTried = false;
 }
@@ -1206,7 +1205,7 @@ document.getElementById('fgrSlider').addEventListener('input', e => {
   render();
 });
 
-// ── Skill Mode Toggle (Beginner / Advanced) ────────────────────────────────
+// â”€â”€ Skill Mode Toggle (Beginner / Advanced) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setSkillMode(mode) {
   if (mode === skillMode) return;
   skillMode = mode;
@@ -1233,7 +1232,7 @@ function setSkillMode(mode) {
 document.getElementById('btnBeginner').addEventListener('click', () => setSkillMode('beginner'));
 document.getElementById('btnAdvanced').addEventListener('click', () => setSkillMode('advanced'));
 
-// ── Tune Mode Toggle ────────────────────────────────────────────────────────
+// â”€â”€ Tune Mode Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.getElementById('btnRoughMode').addEventListener('click', () => {
   if (tuneMode === 'rough') return;
   tuneMode = 'rough';
@@ -1280,7 +1279,7 @@ document.getElementById('btnNext').addEventListener('click', () => {
   if (tuneMode === 'rough') {
     // Ascending: go to next higher point.
     // Carry ALL values (gas, air, VFD, FGR) from the just-saved point as
-    // the starting baseline — operator manually adjusts each slider from there.
+    // the starting baseline â€” operator manually adjusts each slider from there.
     if (currentIdx >= 10) return;
     currentIdx++;
     currentPt = { ...currentPt };
@@ -1320,11 +1319,11 @@ document.getElementById('btnExport').addEventListener('click', () => {
   a.href = url; a.download = 'BoilerTuningTable.L5X'; a.click();
   URL.revokeObjectURL(url);
   const btn = document.getElementById('btnExport');
-  btn.textContent = 'EXPORTED ✓'; btn.classList.add('flash');
+  btn.textContent = 'EXPORTED âœ“'; btn.classList.add('flash');
   setTimeout(() => { btn.textContent = 'EXPORT L5X'; btn.classList.remove('flash'); }, 1000);
 });
 
-// ─── L5X EXPORT ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ L5X EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function generateL5X(savedPoints) {
   const now = new Date().toDateString();
   const pts = savedPoints.map((pt, i) => {
@@ -1411,7 +1410,7 @@ ${pts}
 </RSLogix5000Content>`;
 }
 
-// ─── FLAMEOUT / RELIGHT ──────────────────────────────────────────────────────
+// â”€â”€â”€ FLAMEOUT / RELIGHT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function triggerFlameout(reason) {
   instabilityTicks = 0;
   hintsUnlocked = true;   // Unlock all hints after first flameout
@@ -1425,7 +1424,7 @@ function triggerFlameout(reason) {
   isSaved     = false;
   saveTried   = false;
   // After flameout, seed lag states to light-off physics values so gauges
-  // show correct readings immediately when operator relights — not zero.
+  // show correct readings immediately when operator relights â€” not zero.
   const loSim = calcCombustion(LIGHTOFF.gas, LIGHTOFF.air, LIGHTOFF.vfd, LIGHTOFF.fgr);
   lagO2 = loSim.o2; lagCO2 = loSim.co2; lagCO = loSim.co; lagNOx = loSim.nox;
 
@@ -1434,7 +1433,7 @@ function triggerFlameout(reason) {
     'Cause: ' + reason + '<br/><br/>' +
     'Last readings before lockout:<br/>' +
     'CO &gt; 500 ppm &nbsp;|&nbsp; Flame unstable<br/>' +
-    'Reset required — begin relight from low fire.';
+    'Reset required â€” begin relight from low fire.';
   document.getElementById('flameoutOverlay').style.display = 'flex';
 }
 
@@ -1460,9 +1459,9 @@ lagNOx = _initSim.nox;
 
 render();
 
-// ─── CONTINUOUS ANALYZER TICK ───────────────────────────────────────────────
+// â”€â”€â”€ CONTINUOUS ANALYZER TICK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Without this, the first-order lag filter only advances on slider/button
-// events — so readings freeze whenever the user stops touching the UI.
+// events â€” so readings freeze whenever the user stops touching the UI.
 // Real analyzers keep climbing/falling toward the new steady state for
 // 8-15 s after any setpoint change. Re-render every LAG_DT seconds so the
 // filter advances one tick per call regardless of user activity.
@@ -1484,9 +1483,9 @@ setInterval(() => {
     border-radius:16px;padding:40px 48px;text-align:center;
     max-width:440px;width:90%;
     box-shadow:0 0 60px #dc262640,0 0 120px #dc262620;">
-    <div style="font-size:48px;margin-bottom:12px;">🔥</div>
+    <div style="font-size:48px;margin-bottom:12px;">ðŸ”¥</div>
     <div style="font-family:'Exo 2',sans-serif;font-size:28px;font-weight:900;color:#f87171;letter-spacing:0.05em;margin-bottom:8px;">FLAMEOUT</div>
-    <div style="font-size:11px;color:#f87171;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;">CB NOx 30 ppm — Burner Lockout</div>
+    <div style="font-size:11px;color:#f87171;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;">CB NOx 30 ppm â€” Burner Lockout</div>
     <div id="flameoutReason" style="
       font-size:12px;color:#94a3b8;line-height:1.7;
       background:#1e293b;border-radius:8px;padding:12px 16px;
@@ -1501,7 +1500,7 @@ setInterval(() => {
       cursor:pointer;transition:all 0.2s;width:100%;"
       onmouseover="this.style.background='#991b1b';this.style.boxShadow='0 4px 24px #dc262660'"
       onmouseout="this.style.background='#7f1d1d';this.style.boxShadow='none'">
-      🔆 RELIGHT
+      ðŸ”† RELIGHT
     </button>
   </div>
 </div>
