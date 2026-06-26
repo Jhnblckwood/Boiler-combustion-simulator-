@@ -3,457 +3,1036 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PID Tuning Trainer</title>
+  <title>PID Tuner — 90° Valve</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --bg: #020617;
-      --panel: #0f172a;
-      --panel-2: #111827;
-      --line: #1f2937;
-      --text: #e5e7eb;
-      --subtle: #94a3b8;
-      --accent: #38bdf8;
-      --good: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
+      --bg: #0a0d12;
+      --bg-grid: #111821;
+      --panel: #141b24;
+      --panel-raised: #1a222d;
+      --line: #26303d;
+      --line-bright: #3a4655;
+      --text: #e8eef5;
+      --text-dim: #8b95a3;
+      --text-muted: #5a6472;
+      --amber: #f7a531;
+      --amber-glow: #ffb84d;
+      --cyan: #00d4e0;
+      --green: #3dd68c;
+      --red: #ff5a5a;
+      --purple: #b48cff;
+      --label: #7a8594;
     }
-
     * { box-sizing: border-box; }
-
+    html, body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: 'JetBrains Mono', monospace; min-height: 100vh; font-size: 14px;
+    }
     body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(circle at top, #0b1225, var(--bg));
-      color: var(--text);
-      min-height: 100vh;
+      background-image:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+      background-size: 32px 32px; background-position: -1px -1px;
     }
-
+    .header {
+      border-bottom: 1px solid var(--line); padding: 14px 24px;
+      background: rgba(10,13,18,0.88); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; position: sticky; top: 0; z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 34px; height: 34px; border: 1.5px solid var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Oswald', sans-serif; font-weight: 700;
+      color: var(--amber); letter-spacing: 0.05em; position: relative;
+    }
+    .logo::before, .logo::after {
+      content: ''; position: absolute; width: 6px; height: 6px; border: 1.5px solid var(--amber);
+    }
+    .logo::before { top:-3px; left:-3px; border-right:none; border-bottom:none; }
+    .logo::after  { bottom:-3px; right:-3px; border-left:none; border-top:none; }
+    .title-block h1 {
+      font-family: 'Oswald', sans-serif; margin: 0;
+      font-size: 1.15rem; letter-spacing: 0.12em; font-weight: 600;
+    }
+    .title-block .sub {
+      margin: 2px 0 0; font-size: 0.7rem; color: var(--text-muted);
+      letter-spacing: 0.2em; text-transform: uppercase;
+    }
+    .status-bar {
+      display: flex; align-items: center; gap: 20px;
+      font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px; background: var(--green);
+      border-radius: 50%; margin-right: 6px;
+      box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 18px;
+      max-width: 1400px; margin: 0 auto; padding: 20px 24px 40px;
+      display: grid; grid-template-columns: 440px 1fr; gap: 20px;
     }
-
-    .card {
-      background: linear-gradient(180deg, #0b1220, var(--panel));
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    .panel {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 4px; position: relative;
     }
-
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      letter-spacing: 0.04em;
+    .panel::before {
+      content: ''; position: absolute; top:-1px; left:-1px; right:-1px; height:1px;
+      background: linear-gradient(90deg,transparent,var(--amber),transparent); opacity:.4;
     }
-
-    .subtitle {
-      margin: 8px 0 0;
-      color: var(--subtle);
-      font-size: 0.9rem;
+    .panel-header {
+      padding: 10px 14px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--panel-raised);
     }
-
+    .panel-header .h-title {
+      font-family: 'Oswald', sans-serif; font-size: .82rem;
+      letter-spacing: .15em; text-transform: uppercase; font-weight: 500;
+    }
+    .panel-header .h-tag {
+      font-size: .65rem; letter-spacing: .18em; color: var(--amber);
+      text-transform: uppercase; padding: 2px 8px;
+      border: 1px solid var(--amber); border-radius: 2px;
+    }
+    .panel-body { padding: 16px; }
     .section-title {
-      margin: 14px 0 10px;
-      color: #bfdbfe;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.75rem;
-      font-weight: 700;
+      font-family: 'Oswald', sans-serif; font-size: .72rem; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--amber); font-weight: 500;
+      margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px dashed var(--line);
+      display: flex; align-items: center; gap: 8px;
     }
-
-    .control {
-      margin-bottom: 10px;
+    .section-title::before { content:''; width:3px; height:12px; background:var(--amber); }
+    .gains-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+    .gain-input {
+      background: var(--bg); border: 1px solid var(--line);
+      border-radius: 3px; padding: 10px; transition: border-color .15s;
     }
-
-    .control label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-      color: #cbd5e1;
-      font-size: 0.82rem;
+    .gain-input:focus-within { border-color:var(--amber); box-shadow:0 0 0 1px var(--amber); }
+    .gain-input .lbl {
+      font-family:'Oswald',sans-serif; font-size:.7rem; letter-spacing:.2em;
+      color:var(--label); text-transform:uppercase; margin-bottom:4px;
     }
-
-    input[type="range"] { width: 100%; }
-
-    input[type="number"] {
-      width: 100%;
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 8px 10px;
+    .gain-input input {
+      width:100%; background:transparent; border:none; color:var(--text);
+      font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700; padding:0; outline:none;
     }
-
-    .inline {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+    .gain-input input::-webkit-outer-spin-button,
+    .gain-input input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    .gain-sub { font-size:.6rem; color:var(--text-muted); letter-spacing:.08em; margin-top:4px; }
+    .gain-sub span { color:var(--amber); font-weight:700; }
+    .health-strip { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+    .health-chip {
+      font-size:.61rem; letter-spacing:.1em; padding:3px 8px; border-radius:2px;
+      border:1px solid; font-family:'Oswald',sans-serif; text-transform:uppercase;
     }
-
-    .btn-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 8px;
+    .health-chip.ok   { color:var(--green);  border-color:rgba(61,214,140,.35); background:rgba(61,214,140,.06); }
+    .health-chip.warn { color:var(--amber);  border-color:rgba(247,165,49,.4);  background:rgba(247,165,49,.06); }
+    .health-chip.bad  { color:var(--red);    border-color:rgba(255,90,90,.4);   background:rgba(255,90,90,.06); }
+    .valve-meta { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+    .meta-field label {
+      display:block; font-size:.68rem; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--label); margin-bottom:4px;
     }
-
-    button {
-      border: 1px solid #334155;
-      background: #0b1220;
-      color: var(--text);
-      border-radius: 10px;
-      padding: 9px;
-      cursor: pointer;
-      font-weight: 600;
+    .meta-field select, .meta-field input {
+      width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text);
+      padding:8px 10px; border-radius:3px; font-family:'JetBrains Mono',monospace;
+      font-size:.85rem; outline:none; transition:border-color .15s;
     }
-
-    button:hover { border-color: var(--accent); }
-    .primary { background: #082f49; border-color: #0ea5e9; }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 14px;
+    .meta-field select:focus, .meta-field input:focus { border-color:var(--amber); }
+    .symptom-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    @media (min-width:500px) { .symptom-grid { grid-template-columns:repeat(3,1fr); } }
+    .symptom {
+      background:var(--bg); border:1px solid var(--line); padding:9px 10px;
+      cursor:pointer; transition:all .15s; text-align:left; color:var(--text);
+      font-family:'JetBrains Mono',monospace; border-radius:3px; position:relative; overflow:hidden;
     }
-
-    .metric {
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 8px;
-      background: #0a1020;
+    .symptom::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+      background:var(--line-bright); transition:background .15s;
     }
-
-    .metric .name { color: var(--subtle); font-size: 0.74rem; text-transform: uppercase; }
-    .metric .value { margin-top: 2px; font-size: 1.1rem; font-weight: 700; }
-
-    .plot {
-      height: 430px;
-      border-radius: 12px;
-      border: 1px solid #1e293b;
-      background: #020617;
-      width: 100%;
-      display: block;
+    .symptom:hover { border-color:var(--line-bright); background:var(--panel-raised); }
+    .symptom:hover::before { background:var(--amber); }
+    .symptom.active { border-color:var(--amber); background:rgba(247,165,49,.08); }
+    .symptom.active::before { background:var(--amber); box-shadow:0 0 8px var(--amber); }
+    .symptom .s-title {
+      font-family:'Oswald',sans-serif; font-size:.78rem;
+      letter-spacing:.06em; font-weight:600; margin-bottom:2px;
     }
-
+    .symptom .s-desc { font-size:.65rem; color:var(--text-muted); line-height:1.4; }
+    .btn-row { display:grid; grid-template-columns:2fr 1fr; gap:8px; margin-top:16px; }
+    .btn {
+      font-family:'Oswald',sans-serif; letter-spacing:.15em; text-transform:uppercase;
+      font-size:.8rem; font-weight:600; padding:11px; border-radius:3px; cursor:pointer;
+      border:1px solid var(--line-bright); background:var(--panel-raised);
+      color:var(--text); transition:all .15s;
+    }
+    .btn:hover { border-color:var(--amber); color:var(--amber); }
+    .btn.primary { background:var(--amber); border-color:var(--amber); color:#1a1206; }
+    .btn.primary:hover { background:var(--amber-glow); color:#1a1206; box-shadow:0 0 14px rgba(247,165,49,.4); }
+    .btn.danger  { border-color:rgba(255,90,90,.5); color:var(--red); }
+    .btn.danger:hover  { border-color:var(--red); background:rgba(255,90,90,.1); color:var(--red); }
+    .btn.compare-on { border-color:var(--purple); color:var(--purple); background:rgba(180,140,255,.08); }
+    .rec-card { min-height:240px; }
+    .empty-state { padding:40px 24px; text-align:center; color:var(--text-muted); }
+    .empty-state .icon {
+      font-family:'Oswald',sans-serif; font-size:2rem;
+      color:var(--line-bright); margin-bottom:10px; letter-spacing:.1em;
+    }
+    .empty-state p { margin:0; font-size:.78rem; letter-spacing:.1em; line-height:1.6; }
+    .rec-output { padding:16px; }
+    .rec-symptom {
+      font-family:'Oswald',sans-serif; font-size:.72rem;
+      letter-spacing:.2em; text-transform:uppercase; color:var(--amber); margin-bottom:4px;
+    }
+    .rec-headline {
+      font-family:'Oswald',sans-serif; font-size:1.2rem;
+      letter-spacing:.04em; margin:0 0 16px; color:var(--text); line-height:1.3;
+    }
+    .gain-change-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+    .gain-change {
+      background:var(--bg); border:1px solid var(--line);
+      border-radius:3px; padding:12px; text-align:center; position:relative;
+    }
+    .gain-change .ch-lbl {
+      font-family:'Oswald',sans-serif; font-size:.7rem;
+      color:var(--label); letter-spacing:.2em; margin-bottom:4px;
+    }
+    .gain-change .ch-from { font-size:.72rem; color:var(--text-muted); margin-bottom:2px; }
+    .gain-change .ch-arrow { color:var(--text-muted); font-size:.8rem; margin:2px 0; }
+    .gain-change .ch-to   { font-size:1.15rem; font-weight:700; }
+    .gain-change .ch-sub  { font-size:.6rem; color:var(--text-muted); margin-top:2px; }
+    .gain-change.up   { border-color:rgba(61,214,140,.4); } .gain-change.up   .ch-to { color:var(--green); }
+    .gain-change.down { border-color:rgba(255,90,90,.4);  } .gain-change.down .ch-to { color:var(--red); }
+    .gain-change.same .ch-to { color:var(--text-dim); }
+    .gain-change .delta { position:absolute; top:6px; right:8px; font-size:.64rem; color:var(--text-muted); }
+    .gain-change.up   .delta { color:var(--green); }
+    .gain-change.down .delta { color:var(--red); }
+    .reasoning {
+      background:var(--bg); border-left:2px solid var(--amber);
+      padding:12px 14px; margin-bottom:14px;
+      font-size:.81rem; line-height:1.65; color:var(--text-dim); border-radius:0 3px 3px 0;
+    }
+    .reasoning strong { color:var(--text); }
+    .field-notes {
+      background:var(--panel-raised); border:1px solid var(--line);
+      border-radius:3px; padding:12px 14px;
+    }
+    .field-notes .fn-header {
+      font-family:'Oswald',sans-serif; font-size:.72rem; letter-spacing:.2em;
+      color:var(--cyan); text-transform:uppercase; margin-bottom:8px;
+    }
+    .field-notes .fn-header::before { content:'[!]  '; }
+    .field-notes ul { margin:0; padding-left:18px; font-size:.77rem; line-height:1.6; color:var(--text-dim); }
+    .field-notes li + li { margin-top:4px; }
+    .field-notes strong { color:var(--text); }
+    .warn-banner {
+      background:rgba(255,90,90,.08); border:1px solid rgba(255,90,90,.4);
+      border-radius:3px; padding:10px 12px; margin-bottom:14px;
+      font-size:.78rem; color:#ffb4b4; line-height:1.5;
+    }
+    .warn-banner::before {
+      content:'WARNING  ';
+      font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.15em; color:var(--red);
+    }
+    .sim-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+    .plot-wrap { position:relative; background:#050709; border:1px solid var(--line); border-radius:3px; }
+    canvas.plot { display:block; width:100%; height:280px; }
+    .sim-controls   { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+    .sim-controls-2 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+    .sim-controls   .btn,
+    .sim-controls-2 .btn { padding:8px; font-size:.72rem; }
     .legend {
-      display: flex;
-      gap: 14px;
-      color: var(--subtle);
-      font-size: 0.82rem;
-      margin-top: 10px;
+      display:flex; gap:16px; padding:8px 14px;
+      font-size:.72rem; color:var(--text-dim); letter-spacing:.08em;
+      border-top:1px solid var(--line); flex-wrap:wrap;
     }
-
-    .dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 999px;
-      display: inline-block;
-      margin-right: 6px;
-      vertical-align: middle;
+    .dot { display:inline-block; width:10px; height:2px; margin-right:6px; vertical-align:middle; }
+    .dot.sp  { background:var(--cyan); }
+    .dot.pv  { background:var(--green); }
+    .dot.out { background:var(--amber); }
+    .dot.bl  { background:var(--purple); }
+    .metrics-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    .metric { background:var(--bg); border:1px solid var(--line); padding:9px 10px; border-radius:3px; }
+    .metric .m-lbl {
+      font-family:'Oswald',sans-serif; font-size:.62rem; color:var(--label);
+      letter-spacing:.2em; text-transform:uppercase; margin-bottom:4px;
     }
-
-    .dot.sp { background: #60a5fa; }
-    .dot.pv { background: #34d399; }
-    .dot.out { background: #f59e0b; }
-
-    @media (max-width: 980px) {
-      .container { grid-template-columns: 1fr; }
+    .metric .m-val  { font-size:1rem; font-weight:700; color:var(--text); }
+    .metric .m-unit { font-size:.68rem; color:var(--text-muted); margin-left:3px; font-weight:400; }
+    .advanced-toggle {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-top:14px; padding:8px 12px; background:var(--bg);
+      border:1px solid var(--line); border-radius:3px; cursor:pointer;
+      font-family:'Oswald',sans-serif; font-size:.74rem; letter-spacing:.15em;
+      color:var(--text-dim); text-transform:uppercase; user-select:none;
     }
+    .advanced-toggle:hover { color:var(--amber); border-color:var(--amber); }
+    .advanced-toggle .chevron { transition:transform .2s; }
+    .advanced-toggle.open .chevron { transform:rotate(90deg); }
+    .advanced-body { display:none; padding-top:14px; border-top:1px dashed var(--line); margin-top:14px; }
+    .advanced-body.open { display:block; }
+    .slider-row { margin-bottom:10px; }
+    .slider-row label {
+      display:flex; justify-content:space-between; font-size:.72rem;
+      color:var(--label); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;
+    }
+    .slider-row label span { color:var(--amber); font-weight:700; }
+    input[type="range"] {
+      width:100%; -webkit-appearance:none; appearance:none;
+      height:3px; background:var(--line); border-radius:2px; outline:none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none; appearance:none; width:14px; height:14px;
+      background:var(--amber); border-radius:50%; cursor:pointer;
+      box-shadow:0 0 6px rgba(247,165,49,.5);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width:14px; height:14px; background:var(--amber);
+      border-radius:50%; cursor:pointer; border:none;
+    }
+    .footer {
+      padding:20px 24px; color:var(--text-muted); font-size:.7rem;
+      letter-spacing:.12em; text-align:center; text-transform:uppercase;
+      border-top:1px solid var(--line); margin-top:20px;
+    }
+    @media (max-width:1000px) {
+      .container { grid-template-columns:1fr; }
+      .header { flex-wrap:wrap; }
+      .status-bar { font-size:.65rem; gap:12px; }
+      .metrics-row { grid-template-columns:repeat(3,1fr); }
+      .sim-controls, .sim-controls-2 { grid-template-columns:1fr 1fr; }
+      .symptom-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width:600px) { .metrics-row { grid-template-columns:1fr 1fr; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>PID Tuning Trainer</h1>
-      <p class="subtitle">Interactive HTML simulator for learning proportional, integral, and derivative tuning.</p>
 
-      <div class="section-title">Controller</div>
-      <div class="control">
-        <label>Kp <span id="kpVal">2.00</span></label>
-        <input id="kp" type="range" min="0" max="10" step="0.05" value="2" />
+<div class="header">
+  <div class="brand">
+    <div class="logo">P</div>
+    <div class="title-block">
+      <h1>PID TUNER // 90&deg; ACTUATED VALVE</h1>
+      <p class="sub">Field Tuning Advisor &amp; Response Simulator</p>
+    </div>
+  </div>
+  <div class="status-bar">
+    <span><span class="status-dot"></span>ONLINE</span>
+    <span id="headerMode">STANDBY</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LEFT: INPUTS -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="h-title">Tuning Inputs</span>
+      <span class="h-tag">Step 1 &ndash; 3</span>
+    </div>
+    <div class="panel-body">
+
+      <p class="section-title">Current Gains</p>
+      <div class="gains-grid">
+        <div class="gain-input">
+          <div class="lbl">Kp</div>
+          <input type="number" id="kp" value="2.00" step="0.1" />
+          <div class="gain-sub">&nbsp;</div>
+        </div>
+        <div class="gain-input">
+          <div class="lbl">Ki</div>
+          <input type="number" id="ki" value="0.60" step="0.05" />
+          <div class="gain-sub">Ti = <span id="tiVal">3.33 s</span></div>
+        </div>
+        <div class="gain-input">
+          <div class="lbl">Kd</div>
+          <input type="number" id="kd" value="0.20" step="0.05" />
+          <div class="gain-sub">Td = <span id="tdVal">0.100 s</span></div>
+        </div>
       </div>
-      <div class="control">
-        <label>Ki <span id="kiVal">0.60</span></label>
-        <input id="ki" type="range" min="0" max="5" step="0.02" value="0.6" />
-      </div>
-      <div class="control">
-        <label>Kd <span id="kdVal">0.20</span></label>
-        <input id="kd" type="range" min="0" max="3" step="0.02" value="0.2" />
-      </div>
-      <div class="inline">
-        <div class="control">
+
+      <div class="health-strip" id="healthStrip"></div>
+
+      <p class="section-title">Valve / Loop Context</p>
+      <div class="valve-meta">
+        <div class="meta-field">
+          <label>Loop Type</label>
+          <select id="loopType">
+            <option value="flow">Flow</option>
+            <option value="pressure">Pressure</option>
+            <option value="level">Level</option>
+            <option value="temperature">Temperature</option>
+            <option value="fuel" selected>Fuel (Boiler)</option>
+            <option value="air">Combustion Air</option>
+            <option value="fgr">FGR</option>
+          </select>
+        </div>
+        <div class="meta-field">
+          <label>Actuator Speed</label>
+          <select id="actSpeed">
+            <option value="fast">Fast (&lt;15 s 0&ndash;90&deg;)</option>
+            <option value="medium" selected>Medium (15&ndash;30 s)</option>
+            <option value="slow">Slow (30&ndash;60 s)</option>
+            <option value="veryslow">Very Slow (&gt;60 s)</option>
+          </select>
+        </div>
+        <div class="meta-field">
+          <label>Valve Char.</label>
+          <select id="valveChar">
+            <option value="linear">Linear</option>
+            <option value="eqpct" selected>Equal %</option>
+            <option value="quick">Quick-Open</option>
+            <option value="butterfly">Butterfly</option>
+          </select>
+        </div>
+        <div class="meta-field">
           <label>Setpoint</label>
-          <input id="setpoint" type="number" value="60" step="1" />
-        </div>
-        <div class="control">
-          <label>Output Clamp (0-100)</label>
-          <input id="maxOut" type="number" value="100" step="1" min="10" max="100" />
+          <input type="number" id="setpoint" value="60" step="1" />
         </div>
       </div>
 
-      <div class="section-title">Process (FOPDT)</div>
-      <div class="control">
-        <label>Process Gain K <span id="gainVal">1.00</span></label>
-        <input id="gain" type="range" min="0.3" max="3" step="0.05" value="1" />
-      </div>
-      <div class="control">
-        <label>Time Constant τ (s) <span id="tauVal">18</span></label>
-        <input id="tau" type="range" min="4" max="60" step="1" value="18" />
-      </div>
-      <div class="control">
-        <label>Dead Time L (s) <span id="deadVal">2</span></label>
-        <input id="dead" type="range" min="0" max="20" step="0.5" value="2" />
-      </div>
-      <div class="control">
-        <label>Noise <span id="noiseVal">0.3</span></label>
-        <input id="noise" type="range" min="0" max="2" step="0.1" value="0.3" />
-      </div>
+      <p class="section-title">Select Symptom</p>
+      <div class="symptom-grid" id="symptomGrid"></div>
 
       <div class="btn-row">
-        <button id="start" class="primary">Start</button>
-        <button id="pause">Pause</button>
-        <button id="reset">Reset</button>
+        <button class="btn primary" id="analyze">Analyze &amp; Recommend</button>
+        <button class="btn" id="loadToSim">Load &rarr; Sim</button>
       </div>
 
-      <div class="metrics">
-        <div class="metric"><div class="name">Error</div><div class="value" id="errMetric">0.00</div></div>
-        <div class="metric"><div class="name">Overshoot</div><div class="value" id="ovMetric">0.0%</div></div>
-        <div class="metric"><div class="name">Settling Time</div><div class="value" id="stMetric">—</div></div>
-        <div class="metric"><div class="name">Controller Output</div><div class="value" id="outMetric">0.0%</div></div>
+      <div class="advanced-toggle" id="advToggle">
+        <span>Advanced // Process Model</span>
+        <span class="chevron">&#8250;</span>
       </div>
-    </div>
+      <div class="advanced-body" id="advBody">
+        <div class="slider-row">
+          <label>Process Gain (K) <span id="gainVal">1.00</span></label>
+          <input id="gain" type="range" min="0.3" max="3" step="0.05" value="1" />
+        </div>
+        <div class="slider-row">
+          <label>Time Const &tau; (s) <span id="tauVal">18</span></label>
+          <input id="tau" type="range" min="4" max="80" step="1" value="18" />
+        </div>
+        <div class="slider-row">
+          <label>Dead Time L (s) <span id="deadVal">2.0</span></label>
+          <input id="dead" type="range" min="0" max="25" step="0.5" value="2" />
+        </div>
+        <div class="slider-row">
+          <label>Noise <span id="noiseVal">0.3</span></label>
+          <input id="noise" type="range" min="0" max="2" step="0.1" value="0.3" />
+        </div>
+        <div class="slider-row">
+          <label>Output Clamp <span id="maxOutVal">100</span>%</label>
+          <input id="maxOut" type="range" min="20" max="100" step="5" value="100" />
+        </div>
+      </div>
 
-    <div class="card">
-      <canvas id="plot" class="plot" width="820" height="430"></canvas>
-      <div class="legend">
-        <span><span class="dot sp"></span>Setpoint</span>
-        <span><span class="dot pv"></span>Process Variable</span>
-        <span><span class="dot out"></span>Controller Output</span>
-      </div>
     </div>
   </div>
 
-  <script>
-    const state = {
-      dt: 0.1,
-      t: 0,
-      running: false,
-      integral: 0,
-      prevError: 0,
-      pv: 20,
-      output: 0,
-      pvHistory: [],
-      spHistory: [],
-      outHistory: [],
-      tHistory: [],
-      outDelay: [],
-      maxPoints: 1200,
-      peakPv: 20,
-      settledAt: null
-    };
+  <!-- RIGHT: REC + SIM -->
+  <div class="sim-grid">
 
-    const $ = id => document.getElementById(id);
+    <div class="panel rec-card">
+      <div class="panel-header">
+        <span class="h-title">Recommendation</span>
+        <span class="h-tag" id="recTag">Awaiting Input</span>
+      </div>
+      <div id="recBody">
+        <div class="empty-state">
+          <div class="icon">&mdash; &mdash; &mdash;</div>
+          <p>Enter current gains, select a symptom,<br>then hit <strong style="color:var(--amber)">ANALYZE</strong> for a targeted adjustment.</p>
+        </div>
+      </div>
+    </div>
 
-    const ui = {
-      kp: $("kp"), ki: $("ki"), kd: $("kd"), setpoint: $("setpoint"), maxOut: $("maxOut"),
-      gain: $("gain"), tau: $("tau"), dead: $("dead"), noise: $("noise"),
-      kpVal: $("kpVal"), kiVal: $("kiVal"), kdVal: $("kdVal"),
-      gainVal: $("gainVal"), tauVal: $("tauVal"), deadVal: $("deadVal"), noiseVal: $("noiseVal"),
-      errMetric: $("errMetric"), ovMetric: $("ovMetric"), stMetric: $("stMetric"), outMetric: $("outMetric"),
-      start: $("start"), pause: $("pause"), reset: $("reset"), plot: $("plot")
-    };
+    <div class="panel">
+      <div class="panel-header">
+        <span class="h-title">Step Response Simulator</span>
+        <span class="h-tag" id="simTag">Idle</span>
+      </div>
+      <div class="panel-body">
+        <div class="plot-wrap">
+          <canvas id="plot" class="plot"></canvas>
+        </div>
+        <div class="legend">
+          <span><span class="dot sp"></span>SETPOINT</span>
+          <span><span class="dot pv"></span>PROCESS VAR</span>
+          <span><span class="dot out"></span>VALVE OUTPUT</span>
+          <span id="blLegend" style="display:none"><span class="dot bl"></span>BASELINE PV</span>
+        </div>
+        <div class="sim-controls">
+          <button class="btn primary" id="simStart">&#9654; Start</button>
+          <button class="btn" id="simPause">&#10074;&#10074; Pause</button>
+          <button class="btn" id="simReset">&#8635; Reset</button>
+        </div>
+        <div class="sim-controls-2">
+          <button class="btn danger" id="simDisturb">&#9889; Disturb</button>
+          <button class="btn" id="simBaseline">&#8853; Save Baseline</button>
+          <button class="btn" id="simCompare">&#8857; Compare</button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="metrics-row">
+            <div class="metric"><div class="m-lbl">Error</div><div class="m-val" id="errMetric">0.00</div></div>
+            <div class="metric"><div class="m-lbl">Overshoot</div><div class="m-val" id="ovMetric">0.0<span class="m-unit">%</span></div></div>
+            <div class="metric"><div class="m-lbl">Settle Time</div><div class="m-val" id="stMetric">&mdash;</div></div>
+            <div class="metric"><div class="m-lbl">IAE</div><div class="m-val" id="iaeMetric">0.0</div></div>
+            <div class="metric"><div class="m-lbl">Valve Angle</div><div class="m-val" id="angMetric">0.0<span class="m-unit">&deg;</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function syncLabels() {
-      ui.kpVal.textContent = Number(ui.kp.value).toFixed(2);
-      ui.kiVal.textContent = Number(ui.ki.value).toFixed(2);
-      ui.kdVal.textContent = Number(ui.kd.value).toFixed(2);
-      ui.gainVal.textContent = Number(ui.gain.value).toFixed(2);
-      ui.tauVal.textContent = Number(ui.tau.value).toFixed(0);
-      ui.deadVal.textContent = Number(ui.dead.value).toFixed(1);
-      ui.noiseVal.textContent = Number(ui.noise.value).toFixed(1);
-    }
+  </div>
+</div>
 
-    function gaussianNoise(strength) {
-      const u1 = Math.random() || 1e-8;
-      const u2 = Math.random();
-      return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * strength;
-    }
+<div class="footer">
+  FIELD TUNING TOOL &nbsp;//&nbsp; PARALLEL PID &middot; DERIVATIVE-ON-PV &middot; BACK-CALC AWU &nbsp;//&nbsp; 90&deg; VALVE NONLINEARITY MODELED IN SIMULATOR
+</div>
 
-    function clamp(v, low, high) { return Math.min(high, Math.max(low, v)); }
+<script>
+/* =======================================================================
+ * PID TUNER — Symptom Engine + Step-Response Simulator
+ * ======================================================================= */
 
-    function resetModel() {
-      state.t = 0;
-      state.integral = 0;
-      state.prevError = 0;
-      state.pv = 20;
-      state.output = 0;
-      state.pvHistory = [];
-      state.spHistory = [];
-      state.outHistory = [];
-      state.tHistory = [];
-      state.peakPv = state.pv;
-      state.settledAt = null;
+const SYMPTOMS = [
+  { id:'slow',       title:'Too Slow / Sluggish',    desc:'PV takes forever to reach setpoint.' },
+  { id:'overshoot',  title:'Overshooting',           desc:'PV blows past SP then recovers.' },
+  { id:'oscillate',  title:'Oscillating / Hunting',  desc:'Continuous cycling around setpoint.' },
+  { id:'offset',     title:'Steady-State Offset',    desc:'Settles above/below SP, gap won\'t close.' },
+  { id:'aggressive', title:'Need More Aggressive',   desc:'Valve barely moves on large errors.' },
+  { id:'slow_open',  title:'Slow to Open',           desc:'Valve creeps open on demand.' },
+  { id:'slow_close', title:'Slow to Close',          desc:'Valve hangs high, won\'t pull back fast.' },
+  { id:'noisy',      title:'Noisy / Jittery Output', desc:'Valve hunting small amounts constantly.' },
+  { id:'windup',     title:'Integral Windup',        desc:'Big overshoot after saturation/recovery.' },
+  { id:'spiky',      title:'Derivative Kick',        desc:'Valve slams hard on every SP change.' },
+  { id:'lowfire',    title:'Low-Fire Instability',   desc:'Stable at high fire, hunts near minimum.' },
+  { id:'distrej',    title:'Poor Load Rejection',    desc:'PV wanders badly when load changes.' }
+];
 
-      const deadSec = Number(ui.dead.value);
-      const delaySamples = Math.max(1, Math.round(deadSec / state.dt));
-      state.outDelay = Array(delaySamples).fill(0);
+const symptomGrid = document.getElementById('symptomGrid');
+let selectedSymptom = null;
+SYMPTOMS.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'symptom';
+  b.dataset.id = s.id;
+  b.innerHTML = '<div class="s-title">' + s.title + '</div><div class="s-desc">' + s.desc + '</div>';
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.symptom').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    selectedSymptom = s.id;
+  });
+  symptomGrid.appendChild(b);
+});
 
-      ui.stMetric.textContent = "—";
-      drawPlot();
-      updateMetrics();
-    }
+/* Ti / Td standard-form sub-labels */
+function updateStandardForm() {
+  const kp = +document.getElementById('kp').value;
+  const ki = +document.getElementById('ki').value;
+  const kd = +document.getElementById('kd').value;
+  document.getElementById('tiVal').textContent = ki > 0 ? (kp / ki).toFixed(2) + ' s' : '∞';
+  document.getElementById('tdVal').textContent = kp > 0 ? (kd / kp).toFixed(3) + ' s' : '0';
+  updateGainHealth(kp, ki, kd);
+}
 
-    function stepModel() {
-      const kp = Number(ui.kp.value);
-      const ki = Number(ui.ki.value);
-      const kd = Number(ui.kd.value);
-      const sp = Number(ui.setpoint.value);
-      const maxOut = Number(ui.maxOut.value);
-      const gain = Number(ui.gain.value);
-      const tau = Number(ui.tau.value);
-      const noise = Number(ui.noise.value);
+function updateGainHealth(kp, ki, kd) {
+  const strip = document.getElementById('healthStrip');
+  const chips = [];
+  if      (kp <= 0)                chips.push({ cls:'bad',  txt:'Kp ≤ 0 — no P action' });
+  else if (kp > 15)                chips.push({ cls:'warn', txt:'Kp very high — oscillation risk' });
+  else                             chips.push({ cls:'ok',   txt:'Kp range ok' });
+  if      (ki === 0)               chips.push({ cls:'warn', txt:'Ki = 0 — offset will not clear' });
+  else if (kp > 0 && ki/kp > 1.5) chips.push({ cls:'warn', txt:'Ki/Kp > 1.5 — windup risk' });
+  else                             chips.push({ cls:'ok',   txt:'Ki ratio ok' });
+  if (kp > 0 && kd/kp > 0.5)      chips.push({ cls:'warn', txt:'Kd/Kp > 0.5 — noise sensitive' });
+  else                             chips.push({ cls:'ok',   txt:'Kd ratio ok' });
+  strip.innerHTML = chips.map(c => '<span class="health-chip ' + c.cls + '">' + c.txt + '</span>').join('');
+}
 
-      const err = sp - state.pv;
-      state.integral += err * state.dt;
-      const derivative = (err - state.prevError) / state.dt;
-      let rawOut = kp * err + ki * state.integral + kd * derivative;
-      state.output = clamp(rawOut, 0, maxOut);
+['kp','ki','kd'].forEach(id => document.getElementById(id).addEventListener('input', updateStandardForm));
+updateStandardForm();
 
-      if (state.output !== rawOut && ki > 0) {
-        state.integral -= err * state.dt * 0.4;
-      }
+/* Recommendation engine */
+function recommend(symptom, gains, meta) {
+  const { kp, ki, kd } = gains;
+  const { loopType, actSpeed, valveChar } = meta;
+  const loopFactor  = { flow:1.0, pressure:1.0, fuel:0.85, air:0.9, fgr:0.85, level:0.6, temperature:0.5 }[loopType] || 1.0;
+  const speedFactor = { fast:1.1, medium:1.0, slow:0.75, veryslow:0.55 }[actSpeed] || 1.0;
+  const charFactor  = { linear:1.0, eqpct:0.95, quick:0.8, butterfly:0.85 }[valveChar] || 1.0;
+  const f = loopFactor * speedFactor * charFactor;
+  const pct = (x, p) => +(x * (1 + p)).toFixed(3);
+  const mul = (x, m) => +(x * m).toFixed(3);
+  const rec = { headline:'', newKp:kp, newKi:ki, newKd:kd, reasoning:'', notes:[], warn:null };
 
-      state.outDelay.push(state.output);
-      const delayedOut = state.outDelay.shift();
+  switch (symptom) {
+    case 'slow':
+      rec.headline = 'Increase proportional action, then trim integral.';
+      rec.newKp = pct(kp, 0.35 * f);
+      rec.newKi = pct(ki, 0.20 * f);
+      rec.reasoning = 'Sluggish response almost always means <strong>Kp is too low</strong>. Raise Kp ~35% first — that alone should visibly speed the loop. Nudge Ki up modestly; too much Ki on a slow loop creates delayed overshoot. Leave Kd unchanged unless lag persists after the Kp bump.';
+      rec.notes = [
+        'Watch 2–3 step changes after the bump. If PV still lags, repeat in 20% increments until you see overshoot, then back off 15%.',
+        loopType === 'temperature' ? 'Temperature loops have large τ — allow a full time constant before judging the new tune.' : 'Allow at least one full settling cycle before judging.',
+        'If output saturates at 100% during ramps, the problem is flow capacity — not tuning.'
+      ];
+      break;
+    case 'overshoot':
+      rec.headline = 'Reduce Kp and add derivative braking.';
+      rec.newKp = pct(kp, -0.20 * f);
+      rec.newKd = pct(kd === 0 ? 0.05 : kd, 0.35 * f);
+      rec.reasoning = 'Overshoot = too much energy at the approach. Cut Kp ~20% so the loop decelerates earlier, and raise Kd to provide predictive damping on the rising edge. Integral is usually fine — only trim Ki 10–15% if you see slow post-overshoot oscillation.';
+      rec.notes = [
+        'If overshoot exceeds 25% of SP, use SP ramping in the controller rather than pushing Kd harder.',
+        'Noisy PV + high Kd = valve wear. Filter the PV (0.5–2 s) before increasing Kd.',
+        (actSpeed === 'slow' || actSpeed === 'veryslow') ? 'Slow actuators often overshoot due to integral accumulation, not Kp. Check Ki first.' : null
+      ].filter(Boolean);
+      if (loopType === 'temperature') rec.notes.push('Thermal overshoot is often from mass, not gains. SP ramping is more effective than more Kd.');
+      break;
+    case 'oscillate':
+      rec.headline = 'Cut Kp and Ki — loop is at or above ultimate gain.';
+      rec.newKp = mul(kp, 0.60);
+      rec.newKi = mul(ki, 0.60);
+      rec.reasoning = 'Sustained oscillation means you\'re at <strong>Ku (ultimate gain)</strong>. Cut both Kp and Ki ~40%, preserving their ratio. If you can measure the period Pu, Ziegler–Nichols PI gives Kp ≈ 0.45·Ku and Ti ≈ 0.83·Pu.';
+      rec.notes = [
+        'Measure the oscillation period — it\'s your Pu reference for all future tuning on this loop.',
+        'Rule out mechanical causes first: tight packing, scored stem, positioner dither too high, air hammer.',
+        'Oscillation only at certain SPs = valve nonlinearity issue, not a PID gain problem.'
+      ];
+      rec.warn = 'Large reversing valve cycles cause actuator fatigue. Cut gains and observe before leaving the loop in AUTO.';
+      break;
+    case 'offset':
+      rec.headline = 'Add integral action — proportional alone cannot eliminate offset.';
+      rec.newKi = ki === 0 ? +(kp * 0.10).toFixed(3) : pct(ki, 0.40 * f);
+      rec.reasoning = 'Steady-state offset is <strong>diagnostic for insufficient Ki</strong>. Proportional control is self-limiting. Raise Ki ~40% (or set it to Kp×0.1 if it was zero). Don\'t touch Kp unless the loop is also sluggish.';
+      rec.notes = [
+        'Integral acts slowly by design. Wait 2–3 time constants before judging the new tune.',
+        'Offset only after saturation = integral windup, not lack of Ki. Enable anti-windup first.',
+        'Mechanical deadband (stem slop, positioner hysteresis) mimics offset — verify mechanicals before touching gains.'
+      ];
+      break;
+    case 'aggressive':
+      rec.headline = 'Boost Kp substantially; raise Ki moderately.';
+      rec.newKp = pct(kp, 0.60 * f);
+      rec.newKi = pct(ki, 0.25 * f);
+      rec.reasoning = 'If the valve barely responds to real errors, Kp is too small to matter. Push Kp up 50–60% and nudge Ki so residual error actually drives the valve. Don\'t raise Kd — that blunts the aggressive response you\'re trying to create.';
+      rec.notes = [
+        'After the increase, make a deliberate SP step and watch the shape. Ideal: fast rise, minimal overshoot.',
+        'Output moving but process dead? That\'s low process gain (K), not a PID issue. Scale Kp further or check the process gain setting.',
+        valveChar === 'eqpct' ? 'Equal-% trim: effective gain varies strongly with position. May feel fine at high openings but weak near closed.' : null
+      ].filter(Boolean);
+      break;
+    case 'slow_open':
+      rec.headline = 'Raise Kp for lift-off; trim Kd if it\'s damping the leading edge.';
+      rec.newKp = pct(kp, 0.40 * f);
+      rec.newKd = kd > 0.1 ? pct(kd, -0.25) : kd;
+      rec.reasoning = 'Slow opening means the controller isn\'t swinging its output enough at step-in. Raise Kp for a sharper initial push. If Kd is significant it fights the rising edge — trim it 20–25% to let the valve accelerate.';
+      rec.notes = [
+        'Verify positioner zero/span and any minimum-position interlock. A 4 mA floor at 10% opening looks exactly like a tuning problem.',
+        (actSpeed === 'slow' || actSpeed === 'veryslow') ? 'A slow actuator limits opening rate regardless of output — mechanical stroke time is the hard constraint.' : null,
+        'Boiler fuel valves: check cross-limiting or lead/lag logic that may be holding the valve back upstream of PID.'
+      ].filter(Boolean);
+      break;
+    case 'slow_close':
+      rec.headline = 'Raise Kp for pull-down; trim Ki to stop it holding output up.';
+      rec.newKp = pct(kp, 0.35 * f);
+      rec.newKi = mul(ki, 0.80);
+      rec.reasoning = 'Slow closing is the mirror of slow opening. Raise Kp so the controller has more authority on the falling edge. Trim Ki slightly — a large integral term can sustain a positive output bias that fights valve closure even when SP drops.';
+      rec.notes = [
+        'Check mechanicals first: spring-return working? Actuator air supply adequate for fail-close stroke?',
+        'High Ki with SP near zero can hold a large positive integrator bias — trim Ki or verify anti-windup is working.',
+        loopType === 'fuel' ? 'Fuel valve closing lag is a safety issue. Confirm mechanical close time is within spec by independent actuator test.' : null
+      ].filter(Boolean);
+      rec.warn = loopType === 'fuel' ? 'On a fuel valve, slow closure is a burner safety issue. Verify the actuator closes within spec mechanically before adjusting PID.' : null;
+      break;
+    case 'noisy':
+      rec.headline = 'Drop Kd sharply; trim Kp slightly; add PV filter upstream.';
+      rec.newKd = mul(kd, 0.35);
+      rec.newKp = pct(kp, -0.10);
+      rec.reasoning = 'Jittery valve output is almost always <strong>Kd amplifying measurement noise</strong>. Cut Kd to ~35% of current. If jitter persists, trim Kp 10%. The durable fix is a 0.5–2 s first-order filter on the PV input — that lets you restore Kd without noise amplification.';
+      rec.notes = [
+        'Check signal wiring: shielded twisted pair, single-point ground, 4–20 mA loop integrity.',
+        'Pulsating flow (reciprocating pump, slug flow) is genuine process noise — PV filtering is the answer, not reducing gains.',
+        'High Kd on a noisy PV accelerates packing and actuator wear. Not worth the marginal derivative benefit.'
+      ];
+      break;
+    case 'windup':
+      rec.headline = 'Enable anti-windup in the controller; reduce Ki as interim fix.';
+      rec.newKi = mul(ki, 0.70);
+      rec.reasoning = 'Post-saturation overshoot is classic integral windup. While the valve was pinned at 100% (or 0%), the integrator kept accumulating. When error reversed, all that stored action had to unwind. Reduce Ki ~30% as a band-aid — the real fix is <strong>back-calculation or conditional integration</strong> in the controller.';
+      rec.notes = [
+        'Logix PIDE: built-in AWU — verify OUT_MAX/OUT_MIN are set and AWU mode is enabled.',
+        'Siemens LMV5: load controller handles this internally. Check Pb/Tn rather than adding logic band-aids.',
+        'If AWU isn\'t configurable, keep Ki low enough that saturation doesn\'t build excessive stored action.'
+      ];
+      break;
+    case 'spiky':
+      rec.headline = 'Switch derivative to act on PV, not error.';
+      rec.newKd = mul(kd, 0.70);
+      rec.reasoning = 'Derivative kick happens because Kd is acting on error, which spikes instantly when SP steps. <strong>Derivative-on-PV</strong> fixes this: the term only sees PV changes (smooth), not SP jumps (instantaneous). Switch that mode in the controller. Reducing Kd 30% is the fallback if the mode isn\'t configurable.';
+      rec.notes = [
+        'Logix PIDE: enable the DOPV bit (Derivative of PV) instead of DOE (Derivative of Error).',
+        'Frequent operator SP steps? Add a ramp/rate-limit on the SP input upstream of the PID block.',
+        'Derivative-on-PV is best practice for virtually all real industrial processes.'
+      ];
+      break;
+    case 'lowfire':
+      rec.headline = 'Reduce Kp at low fire; consider gain scheduling for the full range.';
+      rec.newKp = pct(kp, -0.30 * f);
+      rec.newKi = pct(ki, -0.15 * f);
+      rec.reasoning = 'Instability near minimum with stability at high fire is a <strong>valve nonlinearity problem</strong>. An equal-% or butterfly valve has much higher incremental gain near the closed position — the same Kp that\'s stable at 60° causes oscillation at 10°. Reducing Kp 25–30% makes the whole range stable but sacrifices high-fire responsiveness. Gain scheduling is the proper fix.';
+      rec.notes = [
+        'Equal-% valves at 50:1 rangeability: effective gain at 10% open is ~7× higher than at 70% open.',
+        'Many combustion controllers (LMV, 7800 series, Fireye) have built-in gain scheduling — use it instead of compromising one set of gains.',
+        'Check minimum fire rate: if the burner runs below the valve\'s control range, hunting is an application issue, not PID.',
+        'Consider a valve with better low-flow authority (characterized ball, segmented butterfly) if this is recurring.'
+      ];
+      break;
+    case 'distrej':
+      rec.headline = 'Raise Ki for faster load recovery; give Kp a modest boost.';
+      rec.newKi = pct(ki, 0.35 * f);
+      rec.newKp = pct(kp, 0.15 * f);
+      rec.reasoning = 'Poor disturbance rejection means the loop is slow to return PV to SP after a load change. Unlike SP tracking (where Kp leads), <strong>load disturbance rejection is primarily an integral function</strong>. Raise Ki ~35% and give Kp a nudge. If dead time is significant, more aggressive Ki may cause oscillation — use the Disturb button in the sim to find the sweet spot.';
+      rec.notes = [
+        'Load disturbances in boilers: firing rate demand change, flue damper shift, feed water temperature swing.',
+        'Large initial spike = Kp too low. Slow recovery but small peak = Ki too low. Address accordingly.',
+        'For large, fast disturbances, feedforward (measuring the disturbance and adding directly to output) outperforms tighter PID.',
+        loopType === 'fgr' ? 'FGR loops: combustion air fan speed changes are major disturbances — check the fan-load curve before tightening gains.' : null
+      ].filter(Boolean);
+      break;
+  }
 
-      const targetPv = gain * delayedOut;
-      state.pv += ((targetPv - state.pv) / tau) * state.dt;
-      state.pv += gaussianNoise(noise) * 0.05;
+  if (rec.newKp <= 0) rec.newKp = 0.05;
+  if (rec.newKi < 0)  rec.newKi = 0;
+  if (rec.newKd < 0)  rec.newKd = 0;
+  return rec;
+}
 
-      state.t += state.dt;
-      state.prevError = err;
-      state.peakPv = Math.max(state.peakPv, state.pv);
+function renderRec(symptom, gains, meta) {
+  const r    = recommend(symptom, gains, meta);
+  const sObj = SYMPTOMS.find(s => s.id === symptom);
+  document.getElementById('recTag').textContent = 'Active';
 
-      state.tHistory.push(state.t);
-      state.pvHistory.push(state.pv);
-      state.spHistory.push(sp);
-      state.outHistory.push(state.output);
+  const newTi = r.newKi > 0 ? (r.newKp / r.newKi).toFixed(2) + ' s' : '∞';
+  const newTd = r.newKp > 0 ? (r.newKd / r.newKp).toFixed(3) + ' s' : '0';
 
-      if (state.tHistory.length > state.maxPoints) {
-        state.tHistory.shift();
-        state.pvHistory.shift();
-        state.spHistory.shift();
-        state.outHistory.shift();
-      }
+  function changeRow(label, from, to, subTo) {
+    const dir   = to > from ? 'up' : (to < from ? 'down' : 'same');
+    const arrow = to > from ? '↑'  : (to < from ? '↓' : '=');
+    const delta = from === 0 ? (to > 0 ? '+∞%' : '—') : (((to - from) / from * 100).toFixed(0) + '%');
+    const dStr  = dir === 'same' ? 'no change' : (to > from ? '+' + delta : delta);
+    return '<div class="gain-change ' + dir + '">' +
+      '<span class="delta">' + dStr + '</span>' +
+      '<div class="ch-lbl">' + label + '</div>' +
+      '<div class="ch-from">' + from.toFixed(3) + '</div>' +
+      '<div class="ch-arrow">' + arrow + '</div>' +
+      '<div class="ch-to">' + to.toFixed(3) + '</div>' +
+      (subTo ? '<div class="ch-sub">' + subTo + '</div>' : '') +
+      '</div>';
+  }
 
-      const band = Math.max(1, sp * 0.02);
-      if (Math.abs(err) <= band) {
-        if (!state.settledAt) {
-          state.settledAt = state.t;
-        }
-      } else {
-        state.settledAt = null;
-      }
-    }
+  document.getElementById('recBody').innerHTML =
+    '<div class="rec-output">' +
+    '<div class="rec-symptom">Symptom: ' + sObj.title + '</div>' +
+    '<h2 class="rec-headline">' + r.headline + '</h2>' +
+    (r.warn ? '<div class="warn-banner">' + r.warn + '</div>' : '') +
+    '<div class="gain-change-row">' +
+      changeRow('Kp', gains.kp, r.newKp) +
+      changeRow('Ki', gains.ki, r.newKi, 'Ti = ' + newTi) +
+      changeRow('Kd', gains.kd, r.newKd, 'Td = ' + newTd) +
+    '</div>' +
+    '<div class="reasoning">' + r.reasoning + '</div>' +
+    (r.notes.length ? '<div class="field-notes"><div class="fn-header">Field Notes</div><ul>' +
+      r.notes.map(n => '<li>' + n + '</li>').join('') + '</ul></div>' : '') +
+    '</div>';
 
-    function updateMetrics() {
-      const sp = Number(ui.setpoint.value);
-      const err = sp - state.pv;
-      const overshoot = sp > 0 ? Math.max(0, (state.peakPv - sp) / sp * 100) : 0;
+  window._lastRec = r;
+}
 
-      ui.errMetric.textContent = err.toFixed(2);
-      ui.ovMetric.textContent = overshoot.toFixed(1) + "%";
-      ui.outMetric.textContent = state.output.toFixed(1) + "%";
+document.getElementById('analyze').addEventListener('click', () => {
+  if (!selectedSymptom) { alert('Select a symptom first.'); return; }
+  const gains = {
+    kp: +document.getElementById('kp').value,
+    ki: +document.getElementById('ki').value,
+    kd: +document.getElementById('kd').value
+  };
+  const meta = {
+    loopType:  document.getElementById('loopType').value,
+    actSpeed:  document.getElementById('actSpeed').value,
+    valveChar: document.getElementById('valveChar').value
+  };
+  renderRec(selectedSymptom, gains, meta);
+  document.getElementById('headerMode').textContent = 'RECOMMENDATION READY';
+});
 
-      if (state.settledAt && state.t - state.settledAt > 2.5) {
-        ui.stMetric.textContent = state.settledAt.toFixed(1) + " s";
-      }
-    }
+document.getElementById('loadToSim').addEventListener('click', () => {
+  if (!window._lastRec) { alert('Run Analyze first, then load the recommendation into the simulator.'); return; }
+  document.getElementById('kp').value = window._lastRec.newKp;
+  document.getElementById('ki').value = window._lastRec.newKi;
+  document.getElementById('kd').value = window._lastRec.newKd;
+  updateStandardForm();
+  resetModel();
+  document.getElementById('headerMode').textContent = 'SIM LOADED — NEW GAINS';
+});
 
-    function drawAxes(ctx, w, h, pad) {
-      ctx.strokeStyle = "#334155";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(pad, pad, w - 2 * pad, h - 2 * pad);
+/* =======================================================================
+ * SIMULATOR
+ * ======================================================================= */
+const state = {
+  dt: 0.1, t: 0, running: false,
+  integral: 0, prevPv: 20, pv: 20, output: 0,
+  pvHistory: [], spHistory: [], outHistory: [], tHistory: [],
+  outDelay: [], maxPoints: 1500,
+  peakPv: 20, settledAt: null, iae: 0,
+  loadDist: 0, baseline: null, compareMode: false
+};
 
-      ctx.strokeStyle = "#1f2937";
-      for (let i = 1; i < 6; i++) {
-        const y = pad + i * ((h - 2 * pad) / 6);
-        ctx.beginPath();
-        ctx.moveTo(pad, y);
-        ctx.lineTo(w - pad, y);
-        ctx.stroke();
-      }
-    }
+const ui = {
+  kp: document.getElementById('kp'), ki: document.getElementById('ki'), kd: document.getElementById('kd'),
+  setpoint: document.getElementById('setpoint'), maxOut: document.getElementById('maxOut'),
+  gain: document.getElementById('gain'), tau: document.getElementById('tau'),
+  dead: document.getElementById('dead'), noise: document.getElementById('noise'),
+  valveChar: document.getElementById('valveChar'),
+  gainVal: document.getElementById('gainVal'), tauVal: document.getElementById('tauVal'),
+  deadVal: document.getElementById('deadVal'), noiseVal: document.getElementById('noiseVal'),
+  maxOutVal: document.getElementById('maxOutVal'),
+  err: document.getElementById('errMetric'), ov: document.getElementById('ovMetric'),
+  st: document.getElementById('stMetric'), iae: document.getElementById('iaeMetric'),
+  ang: document.getElementById('angMetric'),
+  plot: document.getElementById('plot'), simTag: document.getElementById('simTag')
+};
 
-    function plotSeries(ctx, arrX, arrY, minX, maxX, minY, maxY, color, w, h, pad) {
-      if (arrX.length < 2) return;
-      ctx.beginPath();
-      for (let i = 0; i < arrX.length; i++) {
-        const x = pad + ((arrX[i] - minX) / (maxX - minX || 1)) * (w - 2 * pad);
-        const y = h - pad - ((arrY[i] - minY) / (maxY - minY || 1)) * (h - 2 * pad);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+function syncLabels() {
+  ui.gainVal.textContent   = (+ui.gain.value).toFixed(2);
+  ui.tauVal.textContent    = (+ui.tau.value).toFixed(0);
+  ui.deadVal.textContent   = (+ui.dead.value).toFixed(1);
+  ui.noiseVal.textContent  = (+ui.noise.value).toFixed(1);
+  ui.maxOutVal.textContent = (+ui.maxOut.value).toFixed(0);
+}
 
-    function drawPlot() {
-      const canvas = ui.plot;
-      const ctx = canvas.getContext("2d");
-      const w = canvas.width;
-      const h = canvas.height;
-      const pad = 36;
+function gaussian(s) {
+  const u1 = Math.random() || 1e-8, u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * s;
+}
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 
-      ctx.clearRect(0, 0, w, h);
-      drawAxes(ctx, w, h, pad);
+function applyValveChar(pct, char) {
+  const x = clamp(pct / 100, 0, 1);
+  switch (char) {
+    case 'eqpct':     return 100 * (x < 1e-4 ? 0 : Math.pow(50, x - 1));
+    case 'quick':     return 100 * Math.sqrt(x);
+    case 'butterfly': return 100 * Math.sin(x * Math.PI / 2);
+    default:          return pct;
+  }
+}
 
-      if (state.tHistory.length < 2) return;
+function resetModel() {
+  state.t = state.integral = state.iae = state.loadDist = 0;
+  state.prevPv = state.pv = 20;
+  state.output = 0;
+  state.pvHistory = []; state.spHistory = []; state.outHistory = []; state.tHistory = [];
+  state.peakPv = 20; state.settledAt = null;
+  const d = Math.max(1, Math.round((+ui.dead.value) / state.dt));
+  state.outDelay = Array(d).fill(0);
+  ui.st.textContent = '—';
+  drawPlot(); updateMetrics();
+}
 
-      const minX = state.tHistory[0];
-      const maxX = state.tHistory[state.tHistory.length - 1];
-      const minY = 0;
-      const maxY = Math.max(100, ...state.spHistory, ...state.pvHistory, ...state.outHistory) * 1.1;
+function stepModel() {
+  const kp = +ui.kp.value, ki = +ui.ki.value, kd = +ui.kd.value;
+  const sp = +ui.setpoint.value, maxOut = +ui.maxOut.value;
+  const K  = +ui.gain.value, tau = +ui.tau.value, noise = +ui.noise.value;
+  const char = ui.valveChar.value;
 
-      plotSeries(ctx, state.tHistory, state.spHistory, minX, maxX, minY, maxY, "#60a5fa", w, h, pad);
-      plotSeries(ctx, state.tHistory, state.pvHistory, minX, maxX, minY, maxY, "#34d399", w, h, pad);
-      plotSeries(ctx, state.tHistory, state.outHistory, minX, maxX, minY, maxY, "#f59e0b", w, h, pad);
-    }
+  const err = sp - state.pv;
+  state.integral += err * state.dt;
+  const dPv = -((state.pv - state.prevPv) / state.dt);
+  let rawOut = kp * err + ki * state.integral + kd * dPv;
+  const clamped = clamp(rawOut, 0, maxOut);
+  if (clamped !== rawOut && ki > 0) state.integral -= err * state.dt * 0.5;
+  state.output = clamped;
 
-    function tick() {
-      if (state.running) {
-        for (let i = 0; i < 3; i++) stepModel();
-        updateMetrics();
-        drawPlot();
-      }
-      requestAnimationFrame(tick);
-    }
+  state.outDelay.push(state.output);
+  const delayed = state.outDelay.shift();
+  const effectiveFlow = applyValveChar(delayed, char);
 
-    [ui.kp, ui.ki, ui.kd, ui.gain, ui.tau, ui.dead, ui.noise].forEach(el => {
-      el.addEventListener("input", () => {
-        syncLabels();
-        if (el === ui.dead) {
-          const delaySamples = Math.max(1, Math.round(Number(ui.dead.value) / state.dt));
-          state.outDelay = Array(delaySamples).fill(state.output);
-        }
-      });
-    });
+  state.prevPv = state.pv;
+  state.pv += ((K * effectiveFlow - state.pv) / tau) * state.dt;
+  state.pv += gaussian(noise) * 0.05;
 
-    ui.start.addEventListener("click", () => { state.running = true; });
-    ui.pause.addEventListener("click", () => { state.running = false; });
-    ui.reset.addEventListener("click", () => { state.running = false; resetModel(); });
+  if (state.loadDist !== 0) {
+    state.pv += state.loadDist * state.dt;
+    state.loadDist *= 0.90;
+    if (Math.abs(state.loadDist) < 0.01) state.loadDist = 0;
+  }
 
+  state.t   += state.dt;
+  state.iae += Math.abs(err) * state.dt;
+  state.peakPv = Math.max(state.peakPv, state.pv);
+
+  state.tHistory.push(state.t);
+  state.pvHistory.push(state.pv);
+  state.spHistory.push(sp);
+  state.outHistory.push(state.output);
+
+  if (state.tHistory.length > state.maxPoints) {
+    state.tHistory.shift(); state.pvHistory.shift();
+    state.spHistory.shift(); state.outHistory.shift();
+  }
+
+  const band = Math.max(1, sp * 0.02);
+  if (Math.abs(err) <= band) { if (!state.settledAt) state.settledAt = state.t; }
+  else                        { state.settledAt = null; }
+}
+
+function updateMetrics() {
+  const sp  = +ui.setpoint.value;
+  const err = sp - state.pv;
+  const ov  = sp > 0 ? Math.max(0, (state.peakPv - sp) / sp * 100) : 0;
+  ui.err.textContent = err.toFixed(2);
+  ui.ov.textContent  = ov.toFixed(1) + '%';
+  ui.iae.textContent = state.iae.toFixed(1);
+  ui.ang.textContent = (state.output / 100 * 90).toFixed(1) + '°';
+  if (state.settledAt && state.t - state.settledAt > 2.5)
+    ui.st.textContent = state.settledAt.toFixed(1) + ' s';
+}
+
+function resizeCanvas() {
+  const c = ui.plot, r = window.devicePixelRatio || 1;
+  const pw = c.parentElement.clientWidth;
+  c.width = pw * r; c.height = 280 * r;
+  c.style.width = pw + 'px'; c.style.height = '280px';
+  c.getContext('2d').setTransform(r, 0, 0, r, 0, 0);
+}
+
+function drawAxes(ctx, w, h, pad) {
+  ctx.strokeStyle = '#1a222d'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+  for (let i = 1; i < 6; i++) {
+    const y = pad + i * ((h - 2 * pad) / 6);
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w - pad, y); ctx.stroke();
+  }
+  for (let i = 1; i < 8; i++) {
+    const x = pad + i * ((w - 2 * pad) / 8);
+    ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, h - pad); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.strokeStyle = '#26303d';
+  ctx.strokeRect(pad, pad, w - 2 * pad, h - 2 * pad);
+  ctx.fillStyle = '#5a6472'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 6; i++) {
+    const v = 100 - i * 100 / 6;
+    ctx.fillText(v.toFixed(0), pad - 6, pad + i * ((h - 2 * pad) / 6) + 3);
+  }
+}
+
+function plotSeries(ctx, xs, ys, minX, maxX, minY, maxY, color, w, h, pad, lw, dash) {
+  if (xs.length < 2) return;
+  ctx.beginPath(); ctx.setLineDash(dash || []);
+  for (let i = 0; i < xs.length; i++) {
+    const x = pad + ((xs[i] - minX) / (maxX - minX || 1)) * (w - 2 * pad);
+    const y = h - pad - ((ys[i] - minY) / (maxY - minY || 1)) * (h - 2 * pad);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = color; ctx.lineWidth = lw || 2; ctx.stroke(); ctx.setLineDash([]);
+}
+
+function drawValveWidget(ctx, w, h, pad, outputPct) {
+  const cx = w - pad - 38, cy = h - pad - 38, r = 26;
+  const angle = (outputPct / 100) * (Math.PI / 2);
+  ctx.save();
+  ctx.fillStyle = '#0d1520';
+  ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#26303d'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = '#1a222d'; ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+  const cosA = Math.cos(Math.PI / 2 - angle), sinA = Math.sin(Math.PI / 2 - angle), len = r - 4;
+  ctx.strokeStyle = '#f7a531'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - cosA * len, cy + sinA * len);
+  ctx.lineTo(cx + cosA * len, cy - sinA * len);
+  ctx.stroke(); ctx.lineCap = 'butt';
+  ctx.fillStyle = '#f7a531';
+  ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#5a6472'; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText((outputPct / 100 * 90).toFixed(0) + '°', cx, cy + r + 14);
+  ctx.restore();
+}
+
+function drawPlot() {
+  const c = ui.plot, ctx = c.getContext('2d');
+  const w = c.clientWidth, h = 280, pad = 34;
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, w, h, pad);
+  const minY = 0, maxY = 100;
+  if (state.compareMode && state.baseline && state.baseline.tHistory.length > 1) {
+    const bl = state.baseline;
+    const bMinX = bl.tHistory[0], bMaxX = bl.tHistory[bl.tHistory.length - 1];
+    plotSeries(ctx, bl.tHistory, bl.pvHistory, bMinX, bMaxX, minY, maxY, 'rgba(180,140,255,0.55)', w, h, pad, 1.5, [4, 3]);
+  }
+  if (state.tHistory.length < 2) return;
+  const minX = state.tHistory[0], maxX = state.tHistory[state.tHistory.length - 1];
+  plotSeries(ctx, state.tHistory, state.spHistory,  minX, maxX, minY, maxY, '#00d4e0', w, h, pad, 1.5);
+  plotSeries(ctx, state.tHistory, state.pvHistory,  minX, maxX, minY, maxY, '#3dd68c', w, h, pad, 2.0);
+  plotSeries(ctx, state.tHistory, state.outHistory, minX, maxX, minY, maxY, '#f7a531', w, h, pad, 1.5);
+  drawValveWidget(ctx, w, h, pad, state.output);
+}
+
+function tick() {
+  if (state.running) {
+    for (let i = 0; i < 3; i++) stepModel();
+    updateMetrics(); drawPlot();
+  }
+  requestAnimationFrame(tick);
+}
+
+[ui.gain, ui.tau, ui.dead, ui.noise, ui.maxOut].forEach(el => {
+  el.addEventListener('input', () => {
     syncLabels();
-    resetModel();
-    requestAnimationFrame(tick);
-  </script>
+    if (el === ui.dead) {
+      const d = Math.max(1, Math.round((+ui.dead.value) / state.dt));
+      state.outDelay = Array(d).fill(state.output);
+    }
+  });
+});
+
+document.getElementById('simStart').addEventListener('click', () => { state.running = true;  ui.simTag.textContent = 'Running'; });
+document.getElementById('simPause').addEventListener('click', () => { state.running = false; ui.simTag.textContent = 'Paused'; });
+document.getElementById('simReset').addEventListener('click', () => { state.running = false; ui.simTag.textContent = 'Idle'; resetModel(); });
+
+document.getElementById('simDisturb').addEventListener('click', () => { state.loadDist = 7; });
+
+document.getElementById('simBaseline').addEventListener('click', () => {
+  state.baseline = { tHistory:[...state.tHistory], pvHistory:[...state.pvHistory], spHistory:[...state.spHistory] };
+  const btn = document.getElementById('simBaseline');
+  btn.textContent = 'Saved!';
+  setTimeout(() => { btn.textContent = '⊛ Save Baseline'; }, 1400);
+});
+
+document.getElementById('simCompare').addEventListener('click', () => {
+  if (!state.baseline) { alert('Save a baseline run first.'); return; }
+  state.compareMode = !state.compareMode;
+  const btn = document.getElementById('simCompare');
+  btn.classList.toggle('compare-on', state.compareMode);
+  btn.textContent = state.compareMode ? '⊙ Compare ON' : '⊙ Compare';
+  document.getElementById('blLegend').style.display = state.compareMode ? '' : 'none';
+});
+
+document.getElementById('advToggle').addEventListener('click', () => {
+  document.getElementById('advToggle').classList.toggle('open');
+  document.getElementById('advBody').classList.toggle('open');
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); drawPlot(); });
+
+syncLabels();
+resizeCanvas();
+resetModel();
+requestAnimationFrame(tick);
+</script>
 </body>
 </html>
