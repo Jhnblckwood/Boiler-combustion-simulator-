@@ -72,10 +72,58 @@ For a hard A/B, add a second DataLogger and a Trend pen pair, or just pause and
 screenshot between runs. The `IAE` metric gives the numeric comparison either
 way — lower is better for the same test sequence.
 
-## Styling to match the web tool
+## Color specification (assigned)
 
-- Panel background `#141B24`, borders `#26303D`, text `#E8EEF5`.
-- Accent amber `#F7A531` for section titles, buttons, and the output pen.
-- PV pen `#3DD68C`, setpoint pen `#00D4E0`, warning red `#FF5A5A`.
-- Fonts: Oswald for headers, JetBrains Mono for values (embed via
-  Project → Fonts, or substitute any condensed + monospace pair).
+Dark industrial palette carried over from the web trainer — high contrast for
+control-room viewing, amber accent that doesn't clash with alarm-red. Apply
+these to the widget properties named below; anything not listed inherits from
+its parent panel.
+
+### Base surfaces
+
+| Element | Property | Color |
+|---|---|---|
+| MainWindow | FillColor | `#0A0D12` |
+| Header rectangle | FillColor | `#141B24` |
+| All Panels (left, recommendation, simulator) | FillColor | `#141B24` |
+| Panel BorderColor (all) | BorderColor, thickness 1 | `#26303D` |
+| Metric cards / gain value cards | FillColor | `#0A0D12` |
+| Trend widget background | FillColor | `#050709` |
+| Expander header | FillColor | `#0A0D12` |
+
+### Text
+
+| Element | Property | Color |
+|---|---|---|
+| Primary text (values, headline, metric numbers) | TextColor | `#E8EEF5` |
+| Secondary text (reasoning, field notes) | TextColor | `#8B95A3` |
+| Field labels / captions ("KP", "LOOP TYPE") | TextColor | `#7A8594` |
+| Section titles ("CURRENT GAINS", "SYMPTOM") | TextColor | `#F7A531` |
+| Ti/Td sub-labels, HealthSummary when OK | TextColor | `#3DD68C` |
+| HealthSummary when flagging a risk | TextColor | `#F7A531` |
+| Warning banner text | TextColor | `#FFB4B4` on FillColor `#2A1215`, BorderColor `#FF5A5A` |
+
+### Buttons
+
+| Button | FillColor | TextColor | BorderColor |
+|---|---|---|---|
+| ANALYZE & RECOMMEND (primary) | `#F7A531` | `#1A1206` | `#F7A531` |
+| LOAD → SIM, START, PAUSE, RESET | `#1A222D` | `#E8EEF5` | `#3A4655` |
+| DISTURB | `#1A222D` | `#FF5A5A` | `#FF5A5A` |
+
+### Trend pens & valve widget
+
+| Item | Color | Width |
+|---|---|---|
+| PV pen | `#3DD68C` | 2 px |
+| Setpoint pen | `#00D4E0` | 1 px |
+| Output pen | `#F7A531` | 1 px |
+| Trend grid lines | `#1A222D` | 1 px |
+| Valve gauge arc / disc image tint | `#F7A531` on `#0D1520` face | — |
+
+### Fonts
+
+Oswald for headers/section titles, JetBrains Mono for numeric values (embed
+via Project → Fonts). If embedding is more trouble than it's worth, the
+built-in fallbacks that keep the look are **Segoe UI Semibold** for headers
+and **Consolas** for values — both ship on Windows targets.
