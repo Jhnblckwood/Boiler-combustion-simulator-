@@ -1317,6 +1317,51 @@ Children:
       Type: BaseDataVariableType
       DataType: Boolean
       Value: false
+  - Name: PilotFlame
+    Type: PolyLine
+    Children:
+    - Name: LineThickness
+      Type: BaseDataVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1.0
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1170.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 230.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 38.0
+    - Name: Path
+      Type: BaseDataVariableType
+      DataType: String
+      ModellingRule: Optional
+      Value: "M 12 0 C 19 11 24 17 24 25 C 24 33 19 38 12 38 C 5 38 0 33 0 25 C 0 17 5 11 12 0 Z"
+    - Name: FillColor
+      Type: BaseDataVariableType
+      DataType: Color
+      Value: "#ff8c00"
+    - Name: LineColor
+      Type: BaseDataVariableType
+      DataType: Color
+      Value: "#ffb84d"
+    - Name: Visible
+      Type: BaseDataVariableType
+      DataType: Boolean
+      Value: false
   - Name: SupplyLabel
     Type: Label
     Children:

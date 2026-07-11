@@ -45,8 +45,10 @@ START BURNER
   3. FILL      (5 s)  V1 opens; test volume charges to supply pressure
   4. TEST V2   (10 s) both valves closed; pressure must STAY HIGH
                       -> a decay means V2 leaks -> VPS = TRUE -> LOCKOUT
-  5. PROVEN            prepurge (10 s), then pilot trial for ignition (4 s)
-  6. RUN               VP1 + VP2 open, flame on
+  5. PROVEN            prepurge (10 s), then pilot trial for ignition (4 s);
+                       a small pilot flame burns (fed from a pilot line not
+                       shown) while VP1 + VP2 stay closed for the whole trial
+  6. RUN               VP1 + VP2 open, main flame on
 ```
 
 The VPS pressure switch is evaluated at **50 % of supply pressure** (27.7 in. w.c.
@@ -62,6 +64,9 @@ mirroring 7800 SERIES lockout behavior. Timings are constants at the top of
   when gas passes to the burner.
 - Valve wedges: **green = open, red = closed**; the circular gauge shows test-volume
   pressure from the tap between the valves; the VPS switch LED goes red on a trip.
+- During the **ignition trial** a smaller flickering **pilot flame** shows at the
+  burner (pilot gas comes from a line not drawn on the train); the main flame only
+  appears at RUN, after the trial countdown ends and VP1/VP2 open.
 - A six-step checklist mirrors the sequence (yellow = active, green = passed,
   red = failed step), with a banner and countdown timer on top.
 

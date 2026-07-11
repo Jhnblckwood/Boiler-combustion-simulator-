@@ -27,8 +27,10 @@ using FTOptix.UI;
 ///   3. FILL      - V1 opens, test volume charges to supply pressure
 ///   4. TEST V2   - both valves closed; pressure must stay HIGH.
 ///                  A decay means V2 (or the downstream train) is leaking.
-///   5. PROVEN    - prepurge, then pilot trial for ignition
-///   6. RUN       - both valves open, flame established
+///   5. PROVEN    - prepurge, then pilot trial for ignition. The pilot
+///                  (fed from a separate line not shown on the train)
+///                  burns while VP1/VP2 stay closed for the whole trial.
+///   6. RUN       - both valves open, main flame established
 /// Any VPS = TRUE during a test period drives a safety LOCKOUT that is
 /// cleared only by STOP/RESET (mirrors 7800 SERIES lockout behavior).
 /// </summary>
@@ -67,7 +69,7 @@ public class ValveProvingLogic : BaseNetLogic
 
     // Widgets
     private Rectangle bannerRect, pipeSupply, pipeChamber, pipeDownstream;
-    private PolyLine valveBody1, valveBody2, flameShape;
+    private PolyLine valveBody1, valveBody2, flameShape, pilotFlame;
     private Ellipse vpsLed, ledVp1, ledVp2, ledVps;
     private Ellipse[] stepLeds;
     private Label[] stepLabels;
@@ -121,6 +123,7 @@ public class ValveProvingLogic : BaseNetLogic
         valveBody1 = Owner.Get<PolyLine>("ValveBody1");
         valveBody2 = Owner.Get<PolyLine>("ValveBody2");
         flameShape = Owner.Get<PolyLine>("FlameShape");
+        pilotFlame = Owner.Get<PolyLine>("PilotFlame");
         vpsLed = Owner.Get<Ellipse>("VpsLed");
         ledVp1 = Owner.Get<Ellipse>("LedVP1");
         ledVp2 = Owner.Get<Ellipse>("LedVP2");
@@ -434,12 +437,20 @@ public class ValveProvingLogic : BaseNetLogic
         valveBody1.FillColor = v1 ? ValveOpen : ValveClosed;
         valveBody2.FillColor = v2 ? ValveOpen : ValveClosed;
 
-        // Flame with a small flicker.
+        // Flames with a small flicker. During the ignition trial only the
+        // pilot burns (fed from a pilot line not shown on the train); the
+        // main valves stay closed until the trial countdown completes.
+        bool pilotLit = auto && step == Step.Ignition;
         flameShape.Visible = running;
-        if (running)
+        pilotFlame.Visible = pilotLit;
+        if (running || pilotLit)
         {
             flickerCounter++;
-            flameShape.FillColor = (flickerCounter / 3) % 2 == 0 ? FlameA : FlameB;
+            Color flicker = (flickerCounter / 3) % 2 == 0 ? FlameA : FlameB;
+            if (running)
+                flameShape.FillColor = flicker;
+            if (pilotLit)
+                pilotFlame.FillColor = flicker;
         }
 
         // VPS switch and tag LEDs.
@@ -507,7 +518,7 @@ public class ValveProvingLogic : BaseNetLogic
                 break;
             case Step.Ignition:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVES PROVEN - PILOT TRIAL FOR IGNITION (PTFI)";
+                stateLabel.Text = "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED";
                 PaintSteps(4, false);
                 break;
             case Step.Run:
