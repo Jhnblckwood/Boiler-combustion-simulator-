@@ -74,17 +74,28 @@ mirroring 7800 SERIES lockout behavior. Timings are constants at the top of
 
 ## Modes (both included)
 
+Both modes run the **same sequence, steps, lights and timers** — the difference is
+who operates the valves.
+
 - **AUTO (BMS SEQUENCE)** — `START BURNER` runs the full proving sequence; the logic
   drives VP1/VP2/Pilot and evaluates VPS. Under **SIMULATION**, use
   **SIM V1 LEAK / SIM V2 LEAK** to make the corresponding test fail naturally (watch
-  the gauge drift), **SIM PILOT FAIL** to keep the pilot from lighting so the
-  ignition trial ends in a lockout instead of RUN, or **VPS FAIL** to force the
-  switch input directly.
-- **MANUAL (FORCE TAGS)** — under **MANUAL CONTROL** you toggle VP1, VP2, VPS and
-  PILOT by hand and the train just follows: open V1 and watch gas charge the test
-  volume, open V2 and watch it flow to the burner. The pilot stays supervised —
-  since manual mode has no ignition trial, switching PILOT on trips an immediate
-  safety lockout.
+  the gauge drift), or **SIM PILOT FAIL** to keep the pilot from lighting so the
+  ignition trial ends in a lockout instead of RUN.
+- **MANUAL (OPERATOR DRILL)** — press `START BURNER` and *you* are the BMS: perform
+  each step with the VP1 / VP2 / PILOT buttons before its countdown runs out.
+  - Step 1: open VP2 to evacuate - Step 2: close VP2 for the V1 hold - Step 3: open
+    VP1 to fill - Step 4: close VP1 for the V2 hold - Step 5: light the PILOT during
+    the ignition trial - Step 6: open VP1 + VP2, then PILOT off (light-off window).
+  - Pressing a control the current step does not call for **fails the VPS
+    immediately**; a countdown elapsing without the required action **also fails the
+    VPS**. Either way: safety lockout, cleared by STOP / RESET.
+  - In standby (before START) VP1/VP2 are free play so you can just watch the gas
+    move; the pilot is always supervised and locks out outside the ignition trial.
+
+The dedicated VPS FAIL button was removed — in manual mode the VPS fails from real
+causes (wrong control, missed countdown, leaks), and in auto the leak/pilot
+simulations exercise it.
 
 ## Binding to a real PLC
 

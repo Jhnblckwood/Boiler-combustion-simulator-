@@ -33,8 +33,15 @@ using FTOptix.UI;
 ///                  (fed from a separate line not shown on the train)
 ///                  burns while VP1/VP2 stay closed for the whole trial.
 ///   6. RUN       - both valves open, main flame established
-/// Any VPS = TRUE during a test period drives a safety LOCKOUT that is
-/// cleared only by STOP/RESET (mirrors 7800 SERIES lockout behavior).
+///
+/// Both modes run the SAME sequence, steps, lights, and timers:
+///   AUTO   - the logic drives VP1/VP2/Pilot itself.
+///   MANUAL - a training drill: the operator performs each step with the
+///            VP1/VP2/PILOT buttons. Pressing a control that is wrong for
+///            the current step fails the VPS immediately, and a step
+///            timer elapsing without the required action also fails the
+///            VPS. Either way the result is a safety lockout that only
+///            STOP/RESET clears (mirrors 7800 SERIES lockout behavior).
 /// </summary>
 public class ValveProvingLogic : BaseNetLogic
 {
@@ -45,6 +52,7 @@ public class ValveProvingLogic : BaseNetLogic
     private const float TestV2Time = 10.0f;
     private const float PurgeTime = 10.0f;
     private const float IgnitionTime = 4.0f;
+    private const float LightOffTime = 10.0f; // manual RUN establishment window
 
     // --- Pressure model, inches w.c. ----------------------------------
     private const float LeakRate = 2.2f;       // simulated seat leak, "w.c. per second
@@ -83,8 +91,9 @@ public class ValveProvingLogic : BaseNetLogic
     private Step step = Step.Standby;
     private float stepElapsed;
     private float chamberPressure;
-    private bool vpsForced;
+    private bool runEstablished;
     private string lockoutReason = "";
+    private int failedStepIndex = -1;
     private int flickerCounter;
 
     // Palette
@@ -155,7 +164,7 @@ public class ValveProvingLogic : BaseNetLogic
         chamberPressure = ReadFloat(chamberPressureVar);
         step = Step.Standby;
         stepElapsed = 0f;
-        vpsForced = false;
+        runEstablished = false;
 
         periodicTask = new PeriodicTask(Tick, 100, LogicObject);
         periodicTask.Start();
@@ -168,21 +177,48 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     // ------------------------------------------------------------------
+    // Step targets: which controls must be ON during each step
+    // ------------------------------------------------------------------
+
+    private static bool TargetV1(Step s) => s == Step.Fill || s == Step.Run;
+    private static bool TargetV2(Step s) => s == Step.Evacuate || s == Step.Run;
+    private static bool TargetPilot(Step s) => s == Step.Ignition;
+
+    private static bool InSequence(Step s) => s != Step.Standby && s != Step.Lockout;
+
+    private static int ChecklistIndex(Step s)
+    {
+        switch (s)
+        {
+            case Step.Evacuate: return 0;
+            case Step.TestV1: return 1;
+            case Step.Fill: return 2;
+            case Step.TestV2: return 3;
+            case Step.Purge: return 4;
+            case Step.Ignition: return 4;
+            case Step.Run: return 5;
+            default: return -1;
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Operator commands (wired to screen buttons)
     // ------------------------------------------------------------------
 
     [ExportMethod]
     public void StartSequence()
     {
-        if (!ReadBool(autoModeVar))
-            return;
-        // Start only from standby; a lockout must be reset first,
-        // like a 7800 SERIES relay module.
+        // Works in BOTH modes. Proving always starts from a closed train;
+        // a lockout must be reset first, like a 7800 SERIES relay module.
         if (step != Step.Standby)
+            return;
+        if (ReadBool(vp1Var) || ReadBool(vp2Var) || ReadBool(pilotVar))
             return;
 
         lockoutReason = "";
-        vpsForced = false;
+        failedStepIndex = -1;
+        runEstablished = false;
+        vpsVar.Value = false;
         EnterStep(Step.Evacuate);
     }
 
@@ -192,9 +228,10 @@ public class ValveProvingLogic : BaseNetLogic
         vp1Var.Value = false;
         vp2Var.Value = false;
         pilotVar.Value = false;
-        vpsForced = false;
         vpsVar.Value = false;
         lockoutReason = "";
+        failedStepIndex = -1;
+        runEstablished = false;
         EnterStep(Step.Standby);
     }
 
@@ -207,8 +244,10 @@ public class ValveProvingLogic : BaseNetLogic
         vp1Var.Value = false;
         vp2Var.Value = false;
         pilotVar.Value = false;
-        vpsForced = false;
+        vpsVar.Value = false;
         lockoutReason = "";
+        failedStepIndex = -1;
+        runEstablished = false;
         EnterStep(Step.Standby);
     }
 
@@ -217,7 +256,7 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (ReadBool(autoModeVar) || step == Step.Lockout)
             return; // sequence owns the valves in AUTO
-        vp1Var.Value = !ReadBool(vp1Var);
+        HandleManualValveToggle(vp1Var, TargetV1(step));
     }
 
     [ExportMethod]
@@ -225,7 +264,7 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (ReadBool(autoModeVar) || step == Step.Lockout)
             return;
-        vp2Var.Value = !ReadBool(vp2Var);
+        HandleManualValveToggle(vp2Var, TargetV2(step));
     }
 
     [ExportMethod]
@@ -233,29 +272,26 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (ReadBool(autoModeVar) || step == Step.Lockout)
             return; // in AUTO only the ignition trial may light the pilot
-        // Enabling the pilot outside an ignition trial trips a lockout
-        // (handled by the scan); manual mode has no trial, so ON = lockout.
-        pilotVar.Value = !ReadBool(pilotVar);
-    }
 
-    [ExportMethod]
-    public void TogglePilotFail()
-    {
-        pilotFailVar.Value = !ReadBool(pilotFailVar);
-    }
-
-    [ExportMethod]
-    public void ToggleVPS()
-    {
-        if (ReadBool(autoModeVar))
+        bool turningOn = !ReadBool(pilotVar);
+        if (!turningOn)
         {
-            // In AUTO the VPS input is evaluated by the sequence; forcing it
-            // injects a failure exactly as a real switch trip would.
-            vpsForced = !vpsForced;
+            pilotVar.Value = false; // shutting the pilot is always safe
+            return;
+        }
+
+        if (step == Step.Ignition)
+        {
+            // Lights unless the pilot is simulated (or really) failed.
+            pilotVar.Value = !ReadBool(pilotFailVar);
+        }
+        else if (step == Step.Standby)
+        {
+            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false);
         }
         else
         {
-            vpsVar.Value = !ReadBool(vpsVar);
+            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP (PILOT)");
         }
     }
 
@@ -271,6 +307,35 @@ public class ValveProvingLogic : BaseNetLogic
         leakV2Var.Value = !ReadBool(leakV2Var);
     }
 
+    [ExportMethod]
+    public void TogglePilotFail()
+    {
+        pilotFailVar.Value = !ReadBool(pilotFailVar);
+    }
+
+    /// <summary>
+    /// Manual VP1/VP2 press. Standby is free play (watch the gas move);
+    /// once running established, any valve change is invalid; during the
+    /// sequence, opening a valve the step does not call for fails the VPS.
+    /// </summary>
+    private void HandleManualValveToggle(IUAVariable valveVar, bool targetOn)
+    {
+        if (step == Step.Run && runEstablished)
+        {
+            VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN");
+            return;
+        }
+
+        bool turningOn = !ReadBool(valveVar);
+        if (turningOn && InSequence(step) && !targetOn)
+        {
+            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP");
+            return;
+        }
+
+        valveVar.Value = turningOn;
+    }
+
     // ------------------------------------------------------------------
     // 100 ms scan
     // ------------------------------------------------------------------
@@ -282,12 +347,7 @@ public class ValveProvingLogic : BaseNetLogic
             bool auto = ReadBool(autoModeVar);
 
             SimulatePressure();
-
-            if (auto)
-                RunSequence();
-            else
-                RunManual();
-
+            RunSequence(auto);
             UpdateGraphics(auto);
         }
         catch (Exception ex)
@@ -298,9 +358,7 @@ public class ValveProvingLogic : BaseNetLogic
 
     private void SimulatePressure()
     {
-        float supply = ReadFloat(supplyPressureVar);
-        if (supply <= 0f)
-            supply = 27.7f;
+        float supply = SupplyPressure();
 
         bool v1 = ReadBool(vp1Var);
         bool v2 = ReadBool(vp2Var);
@@ -332,123 +390,10 @@ public class ValveProvingLogic : BaseNetLogic
         chamberPressureVar.Value = chamberPressure;
     }
 
-    private void RunSequence()
+    private void RunSequence(bool auto)
     {
-        float supply = ReadFloat(supplyPressureVar);
-        if (supply <= 0f)
-            supply = 27.7f;
-        float halfTrip = supply * 0.5f; // VPS pressure switch setpoint
+        float halfTrip = SupplyPressure() * 0.5f; // VPS pressure switch setpoint
 
-        // Pilot supervision: the pilot may only be on during the ignition
-        // trial. Anything else (operator force, stuck pilot valve on real
-        // I/O) is an immediate safety lockout.
-        if (ReadBool(pilotVar) && step != Step.Ignition && step != Step.Lockout)
-        {
-            lockoutReason = "PILOT ENABLED OUTSIDE IGNITION TRIAL";
-            pilotVar.Value = false;
-            EnterStep(Step.Lockout);
-        }
-
-        stepElapsed += TickSeconds;
-
-        switch (step)
-        {
-            case Step.Standby:
-            case Step.Lockout:
-                vp1Var.Value = false;
-                vp2Var.Value = false;
-                if (step == Step.Lockout)
-                    pilotVar.Value = false;
-                break;
-
-            case Step.Evacuate:
-                vp1Var.Value = false;
-                vp2Var.Value = true;
-                if (stepElapsed >= EvacuateTime)
-                    EnterStep(Step.TestV1);
-                break;
-
-            case Step.TestV1:
-                vp1Var.Value = false;
-                vp2Var.Value = false;
-                SetVps(chamberPressure > halfTrip);
-                if (ReadBool(vpsVar))
-                {
-                    lockoutReason = "V1 LEAK DETECTED (PRESSURE ROSE DURING TEST)";
-                    EnterStep(Step.Lockout);
-                }
-                else if (stepElapsed >= TestV1Time)
-                {
-                    EnterStep(Step.Fill);
-                }
-                break;
-
-            case Step.Fill:
-                vp1Var.Value = true;
-                vp2Var.Value = false;
-                if (stepElapsed >= FillTime)
-                    EnterStep(Step.TestV2);
-                break;
-
-            case Step.TestV2:
-                vp1Var.Value = false;
-                vp2Var.Value = false;
-                SetVps(chamberPressure < halfTrip);
-                if (ReadBool(vpsVar))
-                {
-                    lockoutReason = "V2 / DOWNSTREAM LEAK (PRESSURE DECAYED DURING TEST)";
-                    EnterStep(Step.Lockout);
-                }
-                else if (stepElapsed >= TestV2Time)
-                {
-                    SetVps(false);
-                    EnterStep(Step.Purge);
-                }
-                break;
-
-            case Step.Purge:
-                vp1Var.Value = false;
-                vp2Var.Value = false;
-                if (stepElapsed >= PurgeTime)
-                    EnterStep(Step.Ignition);
-                break;
-
-            case Step.Ignition:
-                // Main valves stay closed for the whole trial; the pilot is
-                // fed from its own line and lights unless it is simulated
-                // (or really) failed.
-                vp1Var.Value = false;
-                vp2Var.Value = false;
-                pilotVar.Value = !ReadBool(pilotFailVar);
-                if (stepElapsed >= IgnitionTime)
-                {
-                    if (ReadBool(pilotVar))
-                    {
-                        pilotVar.Value = false; // interrupted pilot: off at RUN
-                        EnterStep(Step.Run);
-                    }
-                    else
-                    {
-                        lockoutReason = "PILOT FAILED TO LIGHT DURING IGNITION TRIAL";
-                        EnterStep(Step.Lockout);
-                    }
-                }
-                break;
-
-            case Step.Run:
-                vp1Var.Value = true;
-                vp2Var.Value = true;
-                break;
-        }
-
-        stateVar.Value = (int)step;
-    }
-
-    private void RunManual()
-    {
-        // Operator owns VP1/VP2/VPS/Pilot, but the pilot is still
-        // supervised: manual mode has no ignition trial, so enabling it
-        // trips a lockout and drives the train to a safe state.
         if (step == Step.Lockout)
         {
             vp1Var.Value = false;
@@ -458,30 +403,181 @@ public class ValveProvingLogic : BaseNetLogic
             return;
         }
 
-        if (ReadBool(pilotVar))
+        if (step == Step.Standby)
         {
-            lockoutReason = "PILOT ENABLED OUTSIDE IGNITION TRIAL";
-            vp1Var.Value = false;
-            vp2Var.Value = false;
-            pilotVar.Value = false;
-            EnterStep(Step.Lockout);
+            if (auto)
+            {
+                vp1Var.Value = false;
+                vp2Var.Value = false;
+            }
+            // Pilot supervision applies in standby too (stuck pilot valve
+            // on real I/O, or an operator forcing it in manual mode).
+            if (ReadBool(pilotVar))
+                Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false);
+            stateVar.Value = (int)step;
             return;
         }
 
-        step = Step.Standby;
+        stepElapsed += TickSeconds;
+
+        if (auto)
+        {
+            // The logic is the BMS: drive the step's target state.
+            vp1Var.Value = TargetV1(step);
+            vp2Var.Value = TargetV2(step);
+            pilotVar.Value = step == Step.Ignition && !ReadBool(pilotFailVar);
+        }
+
+        bool v1 = ReadBool(vp1Var);
+        bool v2 = ReadBool(vp2Var);
+        bool pilot = ReadBool(pilotVar);
+
+        // Pilot supervision during the sequence (both modes; in manual the
+        // pilot button already blocks this, but real I/O could force it).
+        if (pilot && !TargetPilot(step) && !(step == Step.Run && !runEstablished))
+        {
+            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: !auto);
+            return;
+        }
+
+        // VPS pressure switch evaluation during the hold tests (both modes).
+        if (step == Step.TestV1)
+        {
+            vpsVar.Value = chamberPressure > halfTrip;
+            if (ReadBool(vpsVar))
+            {
+                VpsFailLockout("V1 LEAK DETECTED (PRESSURE ROSE DURING TEST)");
+                return;
+            }
+        }
+        else if (step == Step.TestV2)
+        {
+            vpsVar.Value = chamberPressure < halfTrip;
+            if (ReadBool(vpsVar))
+            {
+                VpsFailLockout("V2 / DOWNSTREAM LEAK (PRESSURE DECAYED DURING TEST)");
+                return;
+            }
+        }
+
+        // RUN: no timer in AUTO; in MANUAL the operator has a light-off
+        // window to open both valves and shut the pilot.
+        if (step == Step.Run)
+        {
+            if (!auto && !runEstablished && stepElapsed >= LightOffTime)
+            {
+                if (v1 && v2 && !pilot)
+                    runEstablished = true;
+                else
+                {
+                    VpsFailLockout("VPS FAIL - LIGHT-OFF NOT COMPLETED IN TIME");
+                    return;
+                }
+            }
+            if (!auto && runEstablished && !(v1 && v2))
+            {
+                VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN");
+                return;
+            }
+            stateVar.Value = (int)step;
+            return;
+        }
+
+        // Step completion on timer elapse.
+        if (stepElapsed >= StepDuration(step))
+        {
+            if (step == Step.Ignition)
+            {
+                if (pilot)
+                {
+                    pilotVar.Value = false; // interrupted pilot: off at RUN
+                    EnterStep(Step.Run);
+                }
+                else if (auto)
+                {
+                    Lockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL", assertVps: false);
+                }
+                else
+                {
+                    VpsFailLockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL");
+                }
+            }
+            else if (auto || StateMatchesTarget(v1, v2, pilot))
+            {
+                EnterStep(NextStep(step));
+            }
+            else
+            {
+                VpsFailLockout("VPS FAIL - REQUIRED ACTION NOT COMPLETED IN TIME");
+            }
+        }
+
         stateVar.Value = (int)step;
     }
 
-    private void SetVps(bool simulatedTrip)
+    private bool StateMatchesTarget(bool v1, bool v2, bool pilot)
     {
-        vpsVar.Value = simulatedTrip || vpsForced;
+        return v1 == TargetV1(step) && v2 == TargetV2(step) && pilot == TargetPilot(step);
+    }
+
+    private static Step NextStep(Step s)
+    {
+        switch (s)
+        {
+            case Step.Evacuate: return Step.TestV1;
+            case Step.TestV1: return Step.Fill;
+            case Step.Fill: return Step.TestV2;
+            case Step.TestV2: return Step.Purge;
+            case Step.Purge: return Step.Ignition;
+            case Step.Ignition: return Step.Run;
+            default: return Step.Standby;
+        }
+    }
+
+    private static float StepDuration(Step s)
+    {
+        switch (s)
+        {
+            case Step.Evacuate: return EvacuateTime;
+            case Step.TestV1: return TestV1Time;
+            case Step.Fill: return FillTime;
+            case Step.TestV2: return TestV2Time;
+            case Step.Purge: return PurgeTime;
+            case Step.Ignition: return IgnitionTime;
+            default: return float.MaxValue;
+        }
+    }
+
+    private void Lockout(string reason, bool assertVps)
+    {
+        lockoutReason = reason;
+        failedStepIndex = ChecklistIndex(step);
+        vp1Var.Value = false;
+        vp2Var.Value = false;
+        pilotVar.Value = false;
+        if (assertVps)
+            vpsVar.Value = true;
+        EnterStep(Step.Lockout);
+    }
+
+    private void VpsFailLockout(string reason)
+    {
+        Lockout(reason, assertVps: true);
     }
 
     private void EnterStep(Step next)
     {
         step = next;
         stepElapsed = 0f;
+        if (next == Step.Run)
+            runEstablished = false;
         stateVar.Value = (int)step;
+    }
+
+    private float SupplyPressure()
+    {
+        float supply = ReadFloat(supplyPressureVar);
+        return supply > 0f ? supply : 27.7f;
     }
 
     // ------------------------------------------------------------------
@@ -490,15 +586,13 @@ public class ValveProvingLogic : BaseNetLogic
 
     private void UpdateGraphics(bool auto)
     {
-        float supply = ReadFloat(supplyPressureVar);
-        if (supply <= 0f)
-            supply = 27.7f;
+        float supply = SupplyPressure();
 
         bool v1 = ReadBool(vp1Var);
         bool v2 = ReadBool(vp2Var);
-        bool vps = ReadBool(vpsVar) || (auto && vpsForced);
+        bool vps = ReadBool(vpsVar);
         bool chamberHasGas = chamberPressure > supply * 0.1f;
-        bool running = auto ? step == Step.Run : (v1 && v2 && chamberHasGas);
+        bool running = step == Step.Run && v1 && v2;
 
         // Piping: yellow wherever gas is present.
         pipeSupply.FillColor = GasYellow; // always live up to V1 inlet
@@ -536,8 +630,8 @@ public class ValveProvingLogic : BaseNetLogic
         pressureLabel.Text = chamberPressure.ToString("0.0");
 
         // Buttons.
-        modeButton.Text = auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (FORCE TAGS)";
-        startButton.Enabled = auto && step == Step.Standby;
+        modeButton.Text = auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (OPERATOR DRILL)";
+        startButton.Enabled = step == Step.Standby && !v1 && !v2 && !pilotLit;
         vp1Button.Enabled = !auto;
         vp2Button.Enabled = !auto;
         pilotButton.Enabled = !auto;
@@ -545,58 +639,43 @@ public class ValveProvingLogic : BaseNetLogic
         leak2Button.Text = ReadBool(leakV2Var) ? "SIM V2 LEAK: ON" : "SIM V2 LEAK: OFF";
         pilotFailButton.Text = ReadBool(pilotFailVar) ? "SIM PILOT FAIL: ON" : "SIM PILOT FAIL: OFF";
 
-        // Banner, timer, step list.
-        if (!auto)
-        {
-            if (step == Step.Lockout)
-            {
-                bannerRect.FillColor = BannerAlarm;
-                stateLabel.Text = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
-            }
-            else
-            {
-                bannerRect.FillColor = BannerIdle;
-                stateLabel.Text = "MANUAL MODE - OPERATOR CONTROLS VP1 / VP2 / VPS / PILOT";
-            }
-            timerLabel.Text = "T- --";
-            PaintSteps(-1, false);
-            stateTextVar.Value = stateLabel.Text;
-            return;
-        }
-
-        float remaining = RemainingSeconds();
+        // Banner, timer, and step list are the same in both modes; only
+        // standby and run texts differ so the operator knows what to do.
+        float remaining = RemainingSeconds(auto);
         timerLabel.Text = remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") + " S" : "T- --";
 
         switch (step)
         {
             case Step.Standby:
                 bannerRect.FillColor = BannerIdle;
-                stateLabel.Text = "STANDBY - VALVES CLOSED - READY TO START";
+                stateLabel.Text = auto
+                    ? "STANDBY - VALVES CLOSED - READY TO START"
+                    : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 1: EVACUATING TEST VOLUME (V2 OPEN)";
+                stateLabel.Text = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
                 PaintSteps(0, false);
                 break;
             case Step.TestV1:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 2: TESTING V1 - PRESSURE MUST STAY LOW";
+                stateLabel.Text = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
                 PaintSteps(1, false);
                 break;
             case Step.Fill:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 3: FILLING TEST VOLUME (V1 OPEN)";
+                stateLabel.Text = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
                 PaintSteps(2, false);
                 break;
             case Step.TestV2:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 4: TESTING V2 - PRESSURE MUST STAY HIGH";
+                stateLabel.Text = "VALVE PROVING - STEP 4: TESTING V2 (ALL VALVES CLOSED) - PRESSURE MUST STAY HIGH";
                 PaintSteps(3, false);
                 break;
             case Step.Purge:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVES PROVEN - PREPURGE IN PROGRESS";
+                stateLabel.Text = "VALVES PROVEN - PREPURGE IN PROGRESS (ALL VALVES CLOSED)";
                 PaintSteps(4, false);
                 break;
             case Step.Ignition:
@@ -607,21 +686,29 @@ public class ValveProvingLogic : BaseNetLogic
                 PaintSteps(4, false);
                 break;
             case Step.Run:
-                bannerRect.FillColor = BannerRun;
-                stateLabel.Text = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
+                if (!auto && !runEstablished)
+                {
+                    bannerRect.FillColor = BannerTest;
+                    stateLabel.Text = "LIGHT-OFF - OPEN VP1 + VP2, THEN PILOT OFF";
+                }
+                else
+                {
+                    bannerRect.FillColor = BannerRun;
+                    stateLabel.Text = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
+                }
                 PaintSteps(5, false);
                 break;
             case Step.Lockout:
                 bannerRect.FillColor = BannerAlarm;
                 stateLabel.Text = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
-                PaintSteps(FailedStepIndex(), true);
+                PaintSteps(failedStepIndex, true);
                 break;
         }
 
         stateTextVar.Value = stateLabel.Text;
     }
 
-    private float RemainingSeconds()
+    private float RemainingSeconds(bool auto)
     {
         switch (step)
         {
@@ -631,19 +718,12 @@ public class ValveProvingLogic : BaseNetLogic
             case Step.TestV2: return TestV2Time - stepElapsed;
             case Step.Purge: return PurgeTime - stepElapsed;
             case Step.Ignition: return IgnitionTime - stepElapsed;
+            case Step.Run:
+                if (!auto && !runEstablished)
+                    return LightOffTime - stepElapsed;
+                return -1f;
             default: return -1f;
         }
-    }
-
-    private int FailedStepIndex()
-    {
-        if (lockoutReason.StartsWith("V1"))
-            return 1;
-        if (lockoutReason.StartsWith("V2"))
-            return 3;
-        if (lockoutReason.StartsWith("PILOT FAILED"))
-            return 4;
-        return -1;
     }
 
     /// <summary>
