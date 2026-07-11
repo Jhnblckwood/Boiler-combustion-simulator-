@@ -1,0 +1,36 @@
+Name: Model
+Type: ModelCategoryFolder
+Children:
+- Name: VP1
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: VP2
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: VPS
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: AutoMode
+  Type: BaseDataVariableType
+  DataType: Boolean
+  Value: true
+- Name: LeakV1
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: LeakV2
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: ChamberPressure
+  Type: BaseDataVariableType
+  DataType: Float
+- Name: SupplyPressure
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 27.7
+- Name: State
+  Type: BaseDataVariableType
+  DataType: Int32
+- Name: StateText
+  Type: BaseDataVariableType
+  DataType: String
+  Value: "STANDBY"

@@ -6,3 +6,7 @@ natural gas 1.43 btu/hr min 14.29 btu/hr max input.
 Gross output 11,716,000 btu/hr
 
 **index.html will auto direct to phone/pc version**
+
+**optix/** — FactoryTalk Optix Studio project: valve proving system screen
+(Honeywell 7800 SERIES sequence, Siemens SKP gas train) running off tags
+VP1, VP2, VPS. See optix/README.md.
