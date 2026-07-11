@@ -16,9 +16,10 @@ The gas train is drawn Siemens-style: **SKP15** actuator on SSOV V1 and an
 | `VP1` | Boolean | Safety shutoff valve **V1** (upstream) open |
 | `VP2` | Boolean | Safety shutoff valve **V2** (downstream) open |
 | `VPS` | Boolean | Valve proving switch input — **TRUE = test failed** |
+| `Pilot` | Boolean | Pilot valve/flame. Only legal during the ignition trial — TRUE at **any other time** (auto or manual, including from real I/O) trips a safety lockout |
 
 Supporting simulation variables also live in `Model`: `AutoMode`, `LeakV1`, `LeakV2`,
-`ChamberPressure`, `SupplyPressure`, `State`, `StateText`.
+`PilotFail`, `ChamberPressure`, `SupplyPressure`, `State`, `StateText`.
 
 ## Opening the project
 
@@ -47,7 +48,8 @@ START BURNER
                       -> a decay means V2 leaks -> VPS = TRUE -> LOCKOUT
   5. PROVEN            prepurge (10 s), then pilot trial for ignition (4 s);
                        a small pilot flame burns (fed from a pilot line not
-                       shown) while VP1 + VP2 stay closed for the whole trial
+                       shown) while VP1 + VP2 stay closed for the whole trial.
+                       No pilot by the end of the countdown -> LOCKOUT
   6. RUN               VP1 + VP2 open, main flame on
 ```
 
@@ -73,12 +75,16 @@ mirroring 7800 SERIES lockout behavior. Timings are constants at the top of
 ## Modes (both included)
 
 - **AUTO (BMS SEQUENCE)** — `START BURNER` runs the full proving sequence; the logic
-  drives VP1/VP2 and evaluates VPS. Use **SIM V1 LEAK / SIM V2 LEAK** to make the
-  corresponding test fail naturally (watch the gauge drift), or **VPS FAIL** to force
-  the switch input directly.
-- **MANUAL (FORCE TAGS)** — you toggle VP1, VP2 and VPS by hand and the train just
-  follows: open V1 and watch gas charge the test volume, open V2 and watch it flow
-  to the burner.
+  drives VP1/VP2/Pilot and evaluates VPS. Under **SIMULATION**, use
+  **SIM V1 LEAK / SIM V2 LEAK** to make the corresponding test fail naturally (watch
+  the gauge drift), **SIM PILOT FAIL** to keep the pilot from lighting so the
+  ignition trial ends in a lockout instead of RUN, or **VPS FAIL** to force the
+  switch input directly.
+- **MANUAL (FORCE TAGS)** — under **MANUAL CONTROL** you toggle VP1, VP2, VPS and
+  PILOT by hand and the train just follows: open V1 and watch gas charge the test
+  volume, open V2 and watch it flow to the burner. The pilot stays supervised —
+  since manual mode has no ignition trial, switching PILOT on trips an immediate
+  safety lockout.
 
 ## Binding to a real PLC
 

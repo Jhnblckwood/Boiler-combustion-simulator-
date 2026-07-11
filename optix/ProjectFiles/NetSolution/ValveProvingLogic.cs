@@ -19,6 +19,8 @@ using FTOptix.UI;
 ///   VP1 - Boolean, upstream safety shutoff valve V1 open
 ///   VP2 - Boolean, downstream safety shutoff valve V2 open
 ///   VPS - Boolean, valve proving switch input; TRUE = test failed
+///   Pilot - Boolean, pilot valve/flame. Only legal during the ignition
+///           trial; TRUE at any other time trips a safety lockout.
 ///
 /// Proving sequence (before light-off):
 ///   1. EVACUATE  - V2 opens, test volume vents to the burner/stack
@@ -62,8 +64,8 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     // Model variables
-    private IUAVariable vp1Var, vp2Var, vpsVar;
-    private IUAVariable autoModeVar, leakV1Var, leakV2Var;
+    private IUAVariable vp1Var, vp2Var, vpsVar, pilotVar;
+    private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
     private IUAVariable chamberPressureVar, supplyPressureVar;
     private IUAVariable stateVar, stateTextVar;
 
@@ -74,7 +76,7 @@ public class ValveProvingLogic : BaseNetLogic
     private Ellipse[] stepLeds;
     private Label[] stepLabels;
     private Label stateLabel, timerLabel, pressureLabel;
-    private Button modeButton, startButton, vp1Button, vp2Button, leak1Button, leak2Button;
+    private Button modeButton, startButton, vp1Button, vp2Button, pilotButton, leak1Button, leak2Button, pilotFailButton;
 
     private PeriodicTask periodicTask;
 
@@ -108,6 +110,8 @@ public class ValveProvingLogic : BaseNetLogic
         vp1Var = Project.Current.GetVariable("Model/VP1");
         vp2Var = Project.Current.GetVariable("Model/VP2");
         vpsVar = Project.Current.GetVariable("Model/VPS");
+        pilotVar = Project.Current.GetVariable("Model/Pilot");
+        pilotFailVar = Project.Current.GetVariable("Model/PilotFail");
         autoModeVar = Project.Current.GetVariable("Model/AutoMode");
         leakV1Var = Project.Current.GetVariable("Model/LeakV1");
         leakV2Var = Project.Current.GetVariable("Model/LeakV2");
@@ -135,8 +139,10 @@ public class ValveProvingLogic : BaseNetLogic
         startButton = Owner.Get<Button>("StartButton");
         vp1Button = Owner.Get<Button>("Vp1Button");
         vp2Button = Owner.Get<Button>("Vp2Button");
+        pilotButton = Owner.Get<Button>("PilotButton");
         leak1Button = Owner.Get<Button>("Leak1Button");
         leak2Button = Owner.Get<Button>("Leak2Button");
+        pilotFailButton = Owner.Get<Button>("PilotFailButton");
 
         stepLeds = new Ellipse[6];
         stepLabels = new Label[6];
@@ -185,6 +191,7 @@ public class ValveProvingLogic : BaseNetLogic
     {
         vp1Var.Value = false;
         vp2Var.Value = false;
+        pilotVar.Value = false;
         vpsForced = false;
         vpsVar.Value = false;
         lockoutReason = "";
@@ -199,6 +206,7 @@ public class ValveProvingLogic : BaseNetLogic
         // Changing mode always brings the train to a safe state.
         vp1Var.Value = false;
         vp2Var.Value = false;
+        pilotVar.Value = false;
         vpsForced = false;
         lockoutReason = "";
         EnterStep(Step.Standby);
@@ -207,7 +215,7 @@ public class ValveProvingLogic : BaseNetLogic
     [ExportMethod]
     public void ToggleVP1()
     {
-        if (ReadBool(autoModeVar))
+        if (ReadBool(autoModeVar) || step == Step.Lockout)
             return; // sequence owns the valves in AUTO
         vp1Var.Value = !ReadBool(vp1Var);
     }
@@ -215,9 +223,25 @@ public class ValveProvingLogic : BaseNetLogic
     [ExportMethod]
     public void ToggleVP2()
     {
-        if (ReadBool(autoModeVar))
+        if (ReadBool(autoModeVar) || step == Step.Lockout)
             return;
         vp2Var.Value = !ReadBool(vp2Var);
+    }
+
+    [ExportMethod]
+    public void TogglePilot()
+    {
+        if (ReadBool(autoModeVar) || step == Step.Lockout)
+            return; // in AUTO only the ignition trial may light the pilot
+        // Enabling the pilot outside an ignition trial trips a lockout
+        // (handled by the scan); manual mode has no trial, so ON = lockout.
+        pilotVar.Value = !ReadBool(pilotVar);
+    }
+
+    [ExportMethod]
+    public void TogglePilotFail()
+    {
+        pilotFailVar.Value = !ReadBool(pilotFailVar);
     }
 
     [ExportMethod]
@@ -315,6 +339,16 @@ public class ValveProvingLogic : BaseNetLogic
             supply = 27.7f;
         float halfTrip = supply * 0.5f; // VPS pressure switch setpoint
 
+        // Pilot supervision: the pilot may only be on during the ignition
+        // trial. Anything else (operator force, stuck pilot valve on real
+        // I/O) is an immediate safety lockout.
+        if (ReadBool(pilotVar) && step != Step.Ignition && step != Step.Lockout)
+        {
+            lockoutReason = "PILOT ENABLED OUTSIDE IGNITION TRIAL";
+            pilotVar.Value = false;
+            EnterStep(Step.Lockout);
+        }
+
         stepElapsed += TickSeconds;
 
         switch (step)
@@ -323,6 +357,8 @@ public class ValveProvingLogic : BaseNetLogic
             case Step.Lockout:
                 vp1Var.Value = false;
                 vp2Var.Value = false;
+                if (step == Step.Lockout)
+                    pilotVar.Value = false;
                 break;
 
             case Step.Evacuate:
@@ -378,10 +414,25 @@ public class ValveProvingLogic : BaseNetLogic
                 break;
 
             case Step.Ignition:
+                // Main valves stay closed for the whole trial; the pilot is
+                // fed from its own line and lights unless it is simulated
+                // (or really) failed.
                 vp1Var.Value = false;
                 vp2Var.Value = false;
+                pilotVar.Value = !ReadBool(pilotFailVar);
                 if (stepElapsed >= IgnitionTime)
-                    EnterStep(Step.Run);
+                {
+                    if (ReadBool(pilotVar))
+                    {
+                        pilotVar.Value = false; // interrupted pilot: off at RUN
+                        EnterStep(Step.Run);
+                    }
+                    else
+                    {
+                        lockoutReason = "PILOT FAILED TO LIGHT DURING IGNITION TRIAL";
+                        EnterStep(Step.Lockout);
+                    }
+                }
                 break;
 
             case Step.Run:
@@ -395,7 +446,28 @@ public class ValveProvingLogic : BaseNetLogic
 
     private void RunManual()
     {
-        // Operator owns VP1/VP2/VPS; just report.
+        // Operator owns VP1/VP2/VPS/Pilot, but the pilot is still
+        // supervised: manual mode has no ignition trial, so enabling it
+        // trips a lockout and drives the train to a safe state.
+        if (step == Step.Lockout)
+        {
+            vp1Var.Value = false;
+            vp2Var.Value = false;
+            pilotVar.Value = false;
+            stateVar.Value = (int)step;
+            return;
+        }
+
+        if (ReadBool(pilotVar))
+        {
+            lockoutReason = "PILOT ENABLED OUTSIDE IGNITION TRIAL";
+            vp1Var.Value = false;
+            vp2Var.Value = false;
+            pilotVar.Value = false;
+            EnterStep(Step.Lockout);
+            return;
+        }
+
         step = Step.Standby;
         stateVar.Value = (int)step;
     }
@@ -437,10 +509,11 @@ public class ValveProvingLogic : BaseNetLogic
         valveBody1.FillColor = v1 ? ValveOpen : ValveClosed;
         valveBody2.FillColor = v2 ? ValveOpen : ValveClosed;
 
-        // Flames with a small flicker. During the ignition trial only the
-        // pilot burns (fed from a pilot line not shown on the train); the
-        // main valves stay closed until the trial countdown completes.
-        bool pilotLit = auto && step == Step.Ignition;
+        // Flames with a small flicker. The pilot flame follows the Pilot
+        // tag directly (so real I/O drives it too); it is fed from a pilot
+        // line not shown on the train, and the main valves stay closed
+        // until the ignition trial countdown completes.
+        bool pilotLit = ReadBool(pilotVar);
         flameShape.Visible = running;
         pilotFlame.Visible = pilotLit;
         if (running || pilotLit)
@@ -467,14 +540,24 @@ public class ValveProvingLogic : BaseNetLogic
         startButton.Enabled = auto && step == Step.Standby;
         vp1Button.Enabled = !auto;
         vp2Button.Enabled = !auto;
+        pilotButton.Enabled = !auto;
         leak1Button.Text = ReadBool(leakV1Var) ? "SIM V1 LEAK: ON" : "SIM V1 LEAK: OFF";
         leak2Button.Text = ReadBool(leakV2Var) ? "SIM V2 LEAK: ON" : "SIM V2 LEAK: OFF";
+        pilotFailButton.Text = ReadBool(pilotFailVar) ? "SIM PILOT FAIL: ON" : "SIM PILOT FAIL: OFF";
 
         // Banner, timer, step list.
         if (!auto)
         {
-            bannerRect.FillColor = BannerIdle;
-            stateLabel.Text = "MANUAL MODE - OPERATOR CONTROLS VP1 / VP2 / VPS";
+            if (step == Step.Lockout)
+            {
+                bannerRect.FillColor = BannerAlarm;
+                stateLabel.Text = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
+            }
+            else
+            {
+                bannerRect.FillColor = BannerIdle;
+                stateLabel.Text = "MANUAL MODE - OPERATOR CONTROLS VP1 / VP2 / VPS / PILOT";
+            }
             timerLabel.Text = "T- --";
             PaintSteps(-1, false);
             stateTextVar.Value = stateLabel.Text;
@@ -518,7 +601,9 @@ public class ValveProvingLogic : BaseNetLogic
                 break;
             case Step.Ignition:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED";
+                stateLabel.Text = pilotLit
+                    ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
+                    : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
                 PaintSteps(4, false);
                 break;
             case Step.Run:
@@ -556,6 +641,8 @@ public class ValveProvingLogic : BaseNetLogic
             return 1;
         if (lockoutReason.StartsWith("V2"))
             return 3;
+        if (lockoutReason.StartsWith("PILOT FAILED"))
+            return 4;
         return -1;
     }
 

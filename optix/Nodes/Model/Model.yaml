@@ -10,6 +10,12 @@ Children:
 - Name: VPS
   Type: BaseDataVariableType
   DataType: Boolean
+- Name: Pilot
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: PilotFail
+  Type: BaseDataVariableType
+  DataType: Boolean
 - Name: AutoMode
   Type: BaseDataVariableType
   DataType: Boolean
