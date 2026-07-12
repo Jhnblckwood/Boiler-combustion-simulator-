@@ -45,17 +45,22 @@ Optix Studio. All pressures are in **inches of water column (in. H2O)**.
 | `VPS` | Boolean | Valve proving switch input — TRUE = test failed |
 | `Pilot` | Boolean | Pilot valve/flame (legal only during the ignition trial) |
 | `Lockout` | Boolean | Output — high on any safety lockout |
-| `LGP` | Boolean | Low gas pressure switch (inlet line, before V1) — TRUE = made (≥ 4 in. H2O) |
-| `HGP` | Boolean | High gas pressure switch (downstream of V2) — TRUE = tripped (> 70 in. H2O); must not break |
+| `LGP` | Boolean | Low gas pressure switch (inlet line, before V1) — TRUE = made (at/above its setpoint, default 4 in. H2O) |
+| `HGP` | Boolean | High gas pressure switch (downstream of V2) — TRUE = tripped (above its setpoint, default 70 in. H2O); must not break |
 | `SupplyPressure` | Float | Inlet gas pressure, in. H2O (drives the inlet and LGP gauges) |
 | `DownstreamPressure` | Float | Pressure after the SKP25/V2, in. H2O (drives the HGP gauge) |
+| `LGPSetpoint` | Float | LGP trip point, set with its spin box (0–70 in. H2O, default 4) |
+| `HGPSetpoint` | Float | HGP trip point, set with its spin box (0–70 in. H2O, default 70) |
+| `VPSSetpoint` | Float | VPS allowed differential per hold test, set with its spin box (0–70 in. H2O, default 14) |
 
-In simulation the logic computes `LGP`/`HGP` from `SupplyPressure`; for a real
-train, bind the two switch tags (and `SupplyPressure` from a transmitter) to your
-controller and the screen behaves the same.
+In simulation the logic computes `LGP` from `SupplyPressure` and `HGP` from
+`DownstreamPressure` against the spin-box settings; for a real train, bind the two
+switch tags (and `SupplyPressure` from a transmitter) to your controller and the
+screen behaves the same.
 
-Setpoints are constants at the top of `ProjectFiles/NetSolution/ValveProvingLogic.cs`
-(`LgpSetpoint = 4`, `HgpSetpoint = 70`).
+The old fixed C# setpoint constants are gone — the trip settings live in the
+spin boxes on the screen (clamped to 0–70 in. H2O by the logic) and are published
+to the three `*Setpoint` Model tags every scan.
 
 Everything else — the Honeywell 7800 SERIES proving sequence, AUTO and MANUAL drill
 modes, pilot handling, leak simulation — is identical to the base project; see
