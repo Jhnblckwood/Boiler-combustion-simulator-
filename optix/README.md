@@ -6,6 +6,10 @@ double-block gas train, following the startup proving sequence used by a
 Honeywell BMS family is the 7800 SERIES, e.g. RM7800/RM7840, which is what
 Cleaver-Brooks uses, so that sequence is modeled here).
 
+> A second project, [`valve proving with low and high gas pressure switch/`](valve%20proving%20with%20low%20and%20high%20gas%20pressure%20switch/),
+> extends this one with an inlet pressure gauge and supervised LGP / HGP gas
+> pressure switches (4-70 in. H2O operating window).
+
 The gas train is drawn Siemens-style: **SKP15** actuator on SSOV V1 and an
 **SKP25 regulator/actuator** (with spring dome and downstream impulse line) on SSOV V2.
 
