@@ -702,13 +702,13 @@ Children:
       DataType: Color
       ModellingRule: Optional
       Value: "#ffffff"
-  - Name: HGPGaugeLabel
+  - Name: LGPGaugeLabel
     Type: Label
     Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"HGP (TRIP 70)"}
+      Value: {"LocaleId":"en-US","Text":"LGP (MAKES AT 4)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -739,7 +739,7 @@ Children:
       DataType: Color
       ModellingRule: Optional
       Value: "#c8d3de"
-  - Name: HGPGauge
+  - Name: LGPGauge
     Type: CircularGauge
     Children:
     - Name: Value
@@ -777,6 +777,108 @@ Children:
       DataType: Size
       ModellingRule: Optional
       Value: 110.0
+  - Name: HGPGaugeLabel
+    Type: Label
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"HGP (TRIPS OVER 70)"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1000.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 128.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 160.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 14.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 11.0
+    - Name: TextColor
+      Type: BaseDataVariableType
+      DataType: Color
+      ModellingRule: Optional
+      Value: "#c8d3de"
+  - Name: HGPGauge
+    Type: CircularGauge
+    Children:
+    - Name: Value
+      Type: BaseDataVariableType
+      DataType: Float
+      Children:
+      - Name: DynamicLink
+        Type: DynamicLink
+        DataType: NodePath
+        Value: "/Objects/ValveProvingGasPressure/Model/DownstreamPressure"
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Float
+      Value: 80.0
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1000.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 150.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 110.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 110.0
+  - Name: HGPTap
+    Type: Rectangle
+    Children:
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1050.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 260.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 4.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 32.0
+    - Name: FillColor
+      Type: BaseDataVariableType
+      DataType: Color
+      Value: "#55606c"
   - Name: PipeSupply
     Type: Rectangle
     Children:
@@ -1003,7 +1105,7 @@ Children:
       Type: BaseDataVariableType
       DataType: Color
       Value: "#55606c"
-  - Name: HGPTap
+  - Name: LGPGaugeTap
     Type: Rectangle
     Children:
     - Name: LeftMargin
@@ -1037,7 +1139,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 132.0
+      Value: 232.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1064,7 +1166,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 110.0
+      Value: 210.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1091,7 +1193,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 118.0
+      Value: 218.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1122,7 +1224,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 172.0
+      Value: 272.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1155,7 +1257,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 232.0
+      Value: 1052.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1182,7 +1284,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 210.0
+      Value: 1030.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1209,7 +1311,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 218.0
+      Value: 1038.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -1240,7 +1342,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 272.0
+      Value: 1092.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size

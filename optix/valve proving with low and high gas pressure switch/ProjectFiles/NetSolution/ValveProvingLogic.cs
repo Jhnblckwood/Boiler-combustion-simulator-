@@ -24,16 +24,20 @@ using FTOptix.UI;
 ///   Lockout - Boolean output, TRUE whenever any safety lockout is
 ///             active; clears on STOP/RESET. Wire to I/O (horn, BMS
 ///             alarm input, stack light) as needed.
-///   LGP - Boolean, low gas pressure switch: MAKES at/above 4 in. H2O.
-///         Must be made to start; dropping out while the sequence or
-///         burner is running trips a lockout.
-///   HGP - Boolean, high gas pressure switch: TRIPS above 70 in. H2O.
-///         Tripping at any time while running trips a lockout.
+///   LGP - Boolean, low gas pressure switch on the inlet line (after
+///         the inlet gauge, before the SKP15/V1): MAKES at/above
+///         4 in. H2O and its light is on only when made. Trying to
+///         start the burner before it makes is a lockout, and dropping
+///         out during the sequence or run is a lockout.
+///   HGP - Boolean, high gas pressure switch downstream of the SKP25
+///         (V2). It must never break: it TRIPS above 70 in. H2O of
+///         downstream pressure and any trip is an immediate lockout.
 ///
-/// The inlet gauge (no switch) at the start of the train reads
-/// Model/SupplyPressure - the gas pressure entering the piping, in
-/// inches of water column. Adjust it with the INLET PRESSURE +/-
-/// buttons (or drive the tag from real I/O).
+/// The inlet gauge (gauge only, no switch) at the start of the train
+/// reads Model/SupplyPressure - the gas pressure entering the piping,
+/// in inches of water column. Adjust it with the INLET PRESSURE +/-
+/// buttons (or drive the tag from real I/O). Model/DownstreamPressure
+/// feeds the HGP gauge: it sees gas only when V2 is passing it.
 ///
 /// Proving sequence (before light-off):
 ///   1. EVACUATE  - V2 opens, test volume vents to the burner/stack
@@ -94,7 +98,7 @@ public class ValveProvingLogic : BaseNetLogic
     private IUAVariable vp1Var, vp2Var, vpsVar, pilotVar, lockoutVar;
     private IUAVariable lgpVar, hgpVar;
     private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
-    private IUAVariable chamberPressureVar, supplyPressureVar;
+    private IUAVariable chamberPressureVar, supplyPressureVar, downstreamPressureVar;
     private IUAVariable stateVar, stateTextVar;
 
     // Widgets
@@ -150,6 +154,7 @@ public class ValveProvingLogic : BaseNetLogic
         leakV2Var = Project.Current.GetVariable("Model/LeakV2");
         chamberPressureVar = Project.Current.GetVariable("Model/ChamberPressure");
         supplyPressureVar = Project.Current.GetVariable("Model/SupplyPressure");
+        downstreamPressureVar = Project.Current.GetVariable("Model/DownstreamPressure");
         stateVar = Project.Current.GetVariable("Model/State");
         stateTextVar = Project.Current.GetVariable("Model/StateText");
 
@@ -242,9 +247,12 @@ public class ValveProvingLogic : BaseNetLogic
         if (ReadBool(vp1Var) || ReadBool(vp2Var) || ReadBool(pilotVar))
             return;
 
-        // Gas pressure must be inside the LGP/HGP window to begin.
-        if (!ReadBool(lgpVar) || ReadBool(hgpVar))
+        // Trying to start before the LGP has made is a safety lockout.
+        if (!ReadBool(lgpVar))
+        {
+            Lockout("LOW GAS PRESSURE - START ATTEMPTED BEFORE LGP MADE (NEEDS 4 IN. H2O)", assertVps: false);
             return;
+        }
 
         lockoutReason = "";
         failedStepIndex = -1;
@@ -405,8 +413,11 @@ public class ValveProvingLogic : BaseNetLogic
     private void UpdateGasPressureSwitches()
     {
         float supply = SupplyPressure();
-        lgpVar.Value = supply >= LgpSetpoint; // LGP makes at/above setpoint
-        hgpVar.Value = supply > HgpSetpoint;  // HGP trips above setpoint
+        // Downstream of the SKP25 (V2): sees gas only when V2 passes it.
+        float downstream = ReadBool(vp2Var) ? chamberPressure : 0f;
+        downstreamPressureVar.Value = downstream;
+        lgpVar.Value = supply >= LgpSetpoint;     // LGP makes at/above setpoint
+        hgpVar.Value = downstream > HgpSetpoint;  // HGP must not break
     }
 
     private void SimulatePressure()
@@ -456,6 +467,13 @@ public class ValveProvingLogic : BaseNetLogic
             return;
         }
 
+        // The HGP switch must never break: any trip is an immediate lockout.
+        if (ReadBool(hgpVar))
+        {
+            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE 70 IN. H2O)", assertVps: false);
+            return;
+        }
+
         if (step == Step.Standby)
         {
             if (auto)
@@ -471,16 +489,10 @@ public class ValveProvingLogic : BaseNetLogic
             return;
         }
 
-        // Gas pressure limits: LGP must stay made and HGP must stay off
-        // for the whole sequence and while the burner runs.
+        // The LGP must stay made for the whole sequence and run.
         if (!ReadBool(lgpVar))
         {
             Lockout("LOW GAS PRESSURE - LGP DROPPED OUT (BELOW 4 IN. H2O)", assertVps: false);
-            return;
-        }
-        if (ReadBool(hgpVar))
-        {
-            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE 70 IN. H2O)", assertVps: false);
             return;
         }
 
@@ -704,7 +716,7 @@ public class ValveProvingLogic : BaseNetLogic
 
         // Buttons.
         modeButton.Text = auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (OPERATOR DRILL)";
-        startButton.Enabled = step == Step.Standby && !v1 && !v2 && !pilotLit && ReadBool(lgpVar) && !ReadBool(hgpVar);
+        startButton.Enabled = step == Step.Standby && !v1 && !v2 && !pilotLit;
         vp1Button.Enabled = !auto;
         vp2Button.Enabled = !auto;
         pilotButton.Enabled = !auto;
@@ -724,8 +736,8 @@ public class ValveProvingLogic : BaseNetLogic
                 stateLabel.Text = auto
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
-                if (!ReadBool(lgpVar) || ReadBool(hgpVar))
-                    stateLabel.Text = "GAS PRESSURE OUT OF RANGE - LGP 4 / HGP 70 IN. H2O - ADJUST INLET PRESSURE";
+                if (!ReadBool(lgpVar))
+                    stateLabel.Text = "LOW GAS PRESSURE - LGP NOT MADE (BELOW 4 IN. H2O) - STARTING NOW WILL LOCK OUT";
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:

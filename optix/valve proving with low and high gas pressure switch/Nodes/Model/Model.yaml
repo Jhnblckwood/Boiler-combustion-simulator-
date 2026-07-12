@@ -38,6 +38,9 @@ Children:
 - Name: ChamberPressure
   Type: BaseDataVariableType
   DataType: Float
+- Name: DownstreamPressure
+  Type: BaseDataVariableType
+  DataType: Float
 - Name: SupplyPressure
   Type: BaseDataVariableType
   DataType: Float
