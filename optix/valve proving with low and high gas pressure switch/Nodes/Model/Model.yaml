@@ -41,6 +41,18 @@ Children:
 - Name: DownstreamPressure
   Type: BaseDataVariableType
   DataType: Float
+- Name: LGPSetpoint
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 4.0
+- Name: HGPSetpoint
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 70.0
+- Name: VPSSetpoint
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 14.0
 - Name: SupplyPressure
   Type: BaseDataVariableType
   DataType: Float

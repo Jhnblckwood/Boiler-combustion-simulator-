@@ -494,11 +494,6 @@ Children:
     - Name: Value
       Type: BaseDataVariableType
       DataType: Float
-      Children:
-      - Name: DynamicLink
-        Type: DynamicLink
-        DataType: NodePath
-        Value: "/Objects/ValveProvingGasPressure/Model/ChamberPressure"
     - Name: MinValue
       Type: BaseDataVariableType
       DataType: Float
@@ -633,11 +628,6 @@ Children:
     - Name: Value
       Type: BaseDataVariableType
       DataType: Float
-      Children:
-      - Name: DynamicLink
-        Type: DynamicLink
-        DataType: NodePath
-        Value: "/Objects/ValveProvingGasPressure/Model/SupplyPressure"
     - Name: MinValue
       Type: BaseDataVariableType
       DataType: Float
@@ -708,7 +698,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"LGP (MAKES AT 4)"}
+      Value: {"LocaleId":"en-US","Text":"LGP (IN. H2O)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -745,11 +735,6 @@ Children:
     - Name: Value
       Type: BaseDataVariableType
       DataType: Float
-      Children:
-      - Name: DynamicLink
-        Type: DynamicLink
-        DataType: NodePath
-        Value: "/Objects/ValveProvingGasPressure/Model/SupplyPressure"
     - Name: MinValue
       Type: BaseDataVariableType
       DataType: Float
@@ -783,7 +768,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"HGP (TRIPS OVER 70)"}
+      Value: {"LocaleId":"en-US","Text":"HGP (IN. H2O)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -820,11 +805,6 @@ Children:
     - Name: Value
       Type: BaseDataVariableType
       DataType: Float
-      Children:
-      - Name: DynamicLink
-        Type: DynamicLink
-        DataType: NodePath
-        Value: "/Objects/ValveProvingGasPressure/Model/DownstreamPressure"
     - Name: MinValue
       Type: BaseDataVariableType
       DataType: Float
@@ -1368,6 +1348,105 @@ Children:
       DataType: Color
       ModellingRule: Optional
       Value: "#c8d3de"
+  - Name: LgpSpin
+    Type: SpinBox
+    Children:
+    - Name: Value
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Float
+      Value: 70.0
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 140.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 336.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 60.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+  - Name: HgpSpin
+    Type: SpinBox
+    Children:
+    - Name: Value
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Float
+      Value: 70.0
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 966.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 336.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 60.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+  - Name: VpsSpin
+    Type: SpinBox
+    Children:
+    - Name: Value
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Float
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Float
+      Value: 70.0
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 700.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 196.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 60.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
   - Name: Actuator1Stem
     Type: Rectangle
     Children:
@@ -1756,7 +1835,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"SSOV V2 + REGULATOR - TAG VP2"}
+      Value: {"LocaleId":"en-US","Text":"SSOV V2 + REG - TAG VP2"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -1771,7 +1850,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 240.0
+      Value: 170.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size

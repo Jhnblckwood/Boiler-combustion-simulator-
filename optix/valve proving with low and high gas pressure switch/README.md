@@ -20,7 +20,22 @@ Optix Studio. All pressures are in **inches of water column (in. H2O)**.
   switch **must not break**: its light stays off unless downstream pressure exceeds
   the **70 in. H2O** setting, and **any trip is an immediate lockout**
   (`Model/Lockout` goes high, STOP/RESET clears).
-- **Operating spread: 4 to 70 in. H2O.**
+- **Numeric setpoint inputs** next to the LGP, HGP, and VPS switches
+  (range **0–70 in. H2O**; entering a higher number snaps back to 70):
+  - **LGP** — trip point on inlet pressure: below it the switch drops out (light
+    off) and a lockout occurs (or on a start attempt before it makes).
+  - **HGP** — trip point on downstream pressure: exceeded with the valves open
+    (gas passing V2) = lockout.
+  - **VPS** — the **allowed differential** during each hold test: the V1 test
+    fails if the evacuated volume gains more than this, the V2 test fails if the
+    charged volume decays more than this below supply. Default 14 matches the old
+    fixed mid-point behavior.
+  Settings publish to `Model/LGPSetpoint`, `Model/HGPSetpoint`, `Model/VPSSetpoint`.
+- **Gauges read live pressures, gated by the valves before them**: inlet and LGP
+  gauges always see the incoming pressure; the test-volume gauge sees gas only via
+  V1; the HGP gauge sees gas only when V2 passes it. All gauge dials and readouts
+  are driven by the logic at runtime (press Play/emulator in Studio — values do
+  not change in the designer).
 
 ## Tags for I/O (Model folder)
 

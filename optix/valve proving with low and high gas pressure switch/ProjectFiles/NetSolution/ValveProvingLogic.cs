@@ -39,6 +39,15 @@ using FTOptix.UI;
 /// buttons (or drive the tag from real I/O). Model/DownstreamPressure
 /// feeds the HGP gauge: it sees gas only when V2 is passing it.
 ///
+/// The LGP, HGP, and VPS settings are entered with the numeric spin
+/// boxes next to each switch (0-70 in. H2O; higher entries are
+/// rejected) and published to Model/LGPSetpoint, Model/HGPSetpoint,
+/// and Model/VPSSetpoint. LGP/HGP are trip points on their gauges'
+/// pressure; the VPS setting is the ALLOWED DIFFERENTIAL during each
+/// hold test: the V1 test fails if the evacuated volume gains more
+/// than that, the V2 test fails if the charged volume loses more than
+/// that below supply.
+///
 /// Proving sequence (before light-off):
 ///   1. EVACUATE  - V2 opens, test volume vents to the burner/stack
 ///   2. TEST V1   - both valves closed; pressure must stay LOW.
@@ -71,10 +80,12 @@ public class ValveProvingLogic : BaseNetLogic
     private const float IgnitionTime = 4.0f;
     private const float LightOffTime = 10.0f; // manual RUN establishment window
 
-    // --- Gas pressure limits, inches H2O (water column) ----------------
-    private const float LgpSetpoint = 4.0f;   // LGP makes at/above this
-    private const float HgpSetpoint = 70.0f;  // HGP trips above this
-    private const float InletStep = 2.0f;     // INLET +/- button increment
+    // --- Gas pressure settings, inches H2O (water column) ---------------
+    // LGP / HGP / VPS trip points are set at runtime with the spin boxes
+    // next to each switch (defaults come from the Model setpoint tags).
+    private const float SetpointMin = 0.0f;
+    private const float SetpointMax = 70.0f; // higher entries are rejected
+    private const float InletStep = 2.0f;    // INLET +/- button increment
     private const float InletMax = 80.0f;
 
     // --- Pressure model, inches w.c. ----------------------------------
@@ -97,6 +108,7 @@ public class ValveProvingLogic : BaseNetLogic
     // Model variables
     private IUAVariable vp1Var, vp2Var, vpsVar, pilotVar, lockoutVar;
     private IUAVariable lgpVar, hgpVar;
+    private IUAVariable lgpSetVar, hgpSetVar, vpsSetVar;
     private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
     private IUAVariable chamberPressureVar, supplyPressureVar, downstreamPressureVar;
     private IUAVariable stateVar, stateTextVar;
@@ -110,12 +122,15 @@ public class ValveProvingLogic : BaseNetLogic
     private Label[] stepLabels;
     private Label stateLabel, timerLabel, pressureLabel, inletReadout;
     private Button modeButton, startButton, vp1Button, vp2Button, pilotButton, leak1Button, leak2Button, pilotFailButton;
+    private SpinBox lgpSpin, hgpSpin, vpsSpin;
+    private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
 
     private PeriodicTask periodicTask;
 
     private Step step = Step.Standby;
     private float stepElapsed;
     private float chamberPressure;
+    private float lgpSet = 4.0f, hgpSet = 70.0f, vpsSet = 14.0f;
     private bool runEstablished;
     private string lockoutReason = "";
     private int failedStepIndex = -1;
@@ -148,6 +163,9 @@ public class ValveProvingLogic : BaseNetLogic
         lockoutVar = Project.Current.GetVariable("Model/Lockout");
         lgpVar = Project.Current.GetVariable("Model/LGP");
         hgpVar = Project.Current.GetVariable("Model/HGP");
+        lgpSetVar = Project.Current.GetVariable("Model/LGPSetpoint");
+        hgpSetVar = Project.Current.GetVariable("Model/HGPSetpoint");
+        vpsSetVar = Project.Current.GetVariable("Model/VPSSetpoint");
         pilotFailVar = Project.Current.GetVariable("Model/PilotFail");
         autoModeVar = Project.Current.GetVariable("Model/AutoMode");
         leakV1Var = Project.Current.GetVariable("Model/LeakV1");
@@ -184,6 +202,13 @@ public class ValveProvingLogic : BaseNetLogic
         leak1Button = Owner.Get<Button>("Leak1Button");
         leak2Button = Owner.Get<Button>("Leak2Button");
         pilotFailButton = Owner.Get<Button>("PilotFailButton");
+        lgpSpin = Owner.Get<SpinBox>("LgpSpin");
+        hgpSpin = Owner.Get<SpinBox>("HgpSpin");
+        vpsSpin = Owner.Get<SpinBox>("VpsSpin");
+        inletGauge = Owner.Get<CircularGauge>("InletGauge");
+        lgpGauge = Owner.Get<CircularGauge>("LGPGauge");
+        hgpGauge = Owner.Get<CircularGauge>("HGPGauge");
+        pressGauge = Owner.Get<CircularGauge>("PressGauge");
 
         stepLeds = new Ellipse[6];
         stepLabels = new Label[6];
@@ -194,6 +219,9 @@ public class ValveProvingLogic : BaseNetLogic
         }
 
         chamberPressure = ReadFloat(chamberPressureVar);
+        lgpSpin.Value = Clamp(ReadFloat(lgpSetVar));
+        hgpSpin.Value = Clamp(ReadFloat(hgpSetVar));
+        vpsSpin.Value = Clamp(ReadFloat(vpsSetVar));
         step = Step.Standby;
         stepElapsed = 0f;
         runEstablished = false;
@@ -250,7 +278,7 @@ public class ValveProvingLogic : BaseNetLogic
         // Trying to start before the LGP has made is a safety lockout.
         if (!ReadBool(lgpVar))
         {
-            Lockout("LOW GAS PRESSURE - START ATTEMPTED BEFORE LGP MADE (NEEDS 4 IN. H2O)", assertVps: false);
+            Lockout("LOW GAS PRESSURE - START ATTEMPTED BEFORE LGP MADE (NEEDS " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
             return;
         }
 
@@ -399,6 +427,7 @@ public class ValveProvingLogic : BaseNetLogic
         {
             bool auto = ReadBool(autoModeVar);
 
+            SyncSetpoints();
             SimulatePressure();
             UpdateGasPressureSwitches();
             RunSequence(auto);
@@ -410,14 +439,41 @@ public class ValveProvingLogic : BaseNetLogic
         }
     }
 
+    private static float Clamp(float v)
+    {
+        if (v < SetpointMin) return SetpointMin;
+        if (v > SetpointMax) return SetpointMax; // reject anything above 70
+        return v;
+    }
+
+    /// <summary>
+    /// The spin boxes own the trip settings: clamp each entry to 0-70
+    /// in. H2O (an attempt to enter more snaps back) and publish to the
+    /// Model setpoint tags.
+    /// </summary>
+    private void SyncSetpoints()
+    {
+        lgpSet = Clamp((float)lgpSpin.Value);
+        if ((float)lgpSpin.Value != lgpSet) lgpSpin.Value = lgpSet;
+        lgpSetVar.Value = lgpSet;
+
+        hgpSet = Clamp((float)hgpSpin.Value);
+        if ((float)hgpSpin.Value != hgpSet) hgpSpin.Value = hgpSet;
+        hgpSetVar.Value = hgpSet;
+
+        vpsSet = Clamp((float)vpsSpin.Value);
+        if ((float)vpsSpin.Value != vpsSet) vpsSpin.Value = vpsSet;
+        vpsSetVar.Value = vpsSet;
+    }
+
     private void UpdateGasPressureSwitches()
     {
         float supply = SupplyPressure();
         // Downstream of the SKP25 (V2): sees gas only when V2 passes it.
         float downstream = ReadBool(vp2Var) ? chamberPressure : 0f;
         downstreamPressureVar.Value = downstream;
-        lgpVar.Value = supply >= LgpSetpoint;     // LGP makes at/above setpoint
-        hgpVar.Value = downstream > HgpSetpoint;  // HGP must not break
+        lgpVar.Value = supply >= lgpSet;     // LGP makes at/above its setting
+        hgpVar.Value = downstream > hgpSet;  // HGP must not break
     }
 
     private void SimulatePressure()
@@ -456,8 +512,6 @@ public class ValveProvingLogic : BaseNetLogic
 
     private void RunSequence(bool auto)
     {
-        float halfTrip = SupplyPressure() * 0.5f; // VPS pressure switch setpoint
-
         if (step == Step.Lockout)
         {
             vp1Var.Value = false;
@@ -470,7 +524,7 @@ public class ValveProvingLogic : BaseNetLogic
         // The HGP switch must never break: any trip is an immediate lockout.
         if (ReadBool(hgpVar))
         {
-            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE 70 IN. H2O)", assertVps: false);
+            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE " + hgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
             return;
         }
 
@@ -492,7 +546,7 @@ public class ValveProvingLogic : BaseNetLogic
         // The LGP must stay made for the whole sequence and run.
         if (!ReadBool(lgpVar))
         {
-            Lockout("LOW GAS PRESSURE - LGP DROPPED OUT (BELOW 4 IN. H2O)", assertVps: false);
+            Lockout("LOW GAS PRESSURE - LGP DROPPED OUT (BELOW " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
             return;
         }
 
@@ -521,7 +575,8 @@ public class ValveProvingLogic : BaseNetLogic
         // VPS pressure switch evaluation during the hold tests (both modes).
         if (step == Step.TestV1)
         {
-            vpsVar.Value = chamberPressure > halfTrip;
+            // Rose more than the allowed differential above the evacuated volume.
+            vpsVar.Value = chamberPressure > vpsSet;
             if (ReadBool(vpsVar))
             {
                 VpsFailLockout("V1 LEAK DETECTED (PRESSURE ROSE DURING TEST)");
@@ -530,7 +585,8 @@ public class ValveProvingLogic : BaseNetLogic
         }
         else if (step == Step.TestV2)
         {
-            vpsVar.Value = chamberPressure < halfTrip;
+            // Decayed more than the allowed differential below supply pressure.
+            vpsVar.Value = chamberPressure < SupplyPressure() - vpsSet;
             if (ReadBool(vpsVar))
             {
                 VpsFailLockout("V2 / DOWNSTREAM LEAK (PRESSURE DECAYED DURING TEST)");
@@ -713,6 +769,10 @@ public class ValveProvingLogic : BaseNetLogic
         // Pressure readout.
         pressureLabel.Text = chamberPressure.ToString("0.0");
         inletReadout.Text = supply.ToString("0.0");
+        inletGauge.Value = supply;
+        lgpGauge.Value = supply;
+        hgpGauge.Value = ReadFloat(downstreamPressureVar);
+        pressGauge.Value = chamberPressure;
 
         // Buttons.
         modeButton.Text = auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (OPERATOR DRILL)";
@@ -737,7 +797,7 @@ public class ValveProvingLogic : BaseNetLogic
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
                 if (!ReadBool(lgpVar))
-                    stateLabel.Text = "LOW GAS PRESSURE - LGP NOT MADE (BELOW 4 IN. H2O) - STARTING NOW WILL LOCK OUT";
+                    stateLabel.Text = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:
