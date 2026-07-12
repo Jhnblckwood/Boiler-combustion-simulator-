@@ -13,6 +13,9 @@ Children:
 - Name: Pilot
   Type: BaseDataVariableType
   DataType: Boolean
+- Name: Lockout
+  Type: BaseDataVariableType
+  DataType: Boolean
 - Name: PilotFail
   Type: BaseDataVariableType
   DataType: Boolean

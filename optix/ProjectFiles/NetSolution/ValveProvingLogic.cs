@@ -21,6 +21,9 @@ using FTOptix.UI;
 ///   VPS - Boolean, valve proving switch input; TRUE = test failed
 ///   Pilot - Boolean, pilot valve/flame. Only legal during the ignition
 ///           trial; TRUE at any other time trips a safety lockout.
+///   Lockout - Boolean output, TRUE whenever any safety lockout is
+///             active; clears on STOP/RESET. Wire to I/O (horn, BMS
+///             alarm input, stack light) as needed.
 ///
 /// Proving sequence (before light-off):
 ///   1. EVACUATE  - V2 opens, test volume vents to the burner/stack
@@ -72,7 +75,7 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     // Model variables
-    private IUAVariable vp1Var, vp2Var, vpsVar, pilotVar;
+    private IUAVariable vp1Var, vp2Var, vpsVar, pilotVar, lockoutVar;
     private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
     private IUAVariable chamberPressureVar, supplyPressureVar;
     private IUAVariable stateVar, stateTextVar;
@@ -120,6 +123,7 @@ public class ValveProvingLogic : BaseNetLogic
         vp2Var = Project.Current.GetVariable("Model/VP2");
         vpsVar = Project.Current.GetVariable("Model/VPS");
         pilotVar = Project.Current.GetVariable("Model/Pilot");
+        lockoutVar = Project.Current.GetVariable("Model/Lockout");
         pilotFailVar = Project.Current.GetVariable("Model/PilotFail");
         autoModeVar = Project.Current.GetVariable("Model/AutoMode");
         leakV1Var = Project.Current.GetVariable("Model/LeakV1");
@@ -229,6 +233,7 @@ public class ValveProvingLogic : BaseNetLogic
         vp2Var.Value = false;
         pilotVar.Value = false;
         vpsVar.Value = false;
+        lockoutVar.Value = false;
         lockoutReason = "";
         failedStepIndex = -1;
         runEstablished = false;
@@ -245,6 +250,7 @@ public class ValveProvingLogic : BaseNetLogic
         vp2Var.Value = false;
         pilotVar.Value = false;
         vpsVar.Value = false;
+        lockoutVar.Value = false;
         lockoutReason = "";
         failedStepIndex = -1;
         runEstablished = false;
@@ -557,6 +563,7 @@ public class ValveProvingLogic : BaseNetLogic
         pilotVar.Value = false;
         if (assertVps)
             vpsVar.Value = true;
+        lockoutVar.Value = true; // I/O output: any lockout drives this high
         EnterStep(Step.Lockout);
     }
 

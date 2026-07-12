@@ -17,6 +17,7 @@ The gas train is drawn Siemens-style: **SKP15** actuator on SSOV V1 and an
 | `VP2` | Boolean | Safety shutoff valve **V2** (downstream) open |
 | `VPS` | Boolean | Valve proving switch input — **TRUE = test failed** |
 | `Pilot` | Boolean | Pilot valve/flame. Only legal during the ignition trial — TRUE at **any other time** (auto or manual, including from real I/O) trips a safety lockout |
+| `Lockout` | Boolean | Output — goes **high on any safety lockout** and clears on STOP / RESET. Attach to I/O (alarm horn, stack light, BMS alarm input) |
 
 Supporting simulation variables also live in `Model`: `AutoMode`, `LeakV1`, `LeakV2`,
 `PilotFail`, `ChamberPressure`, `SupplyPressure`, `State`, `StateText`.
