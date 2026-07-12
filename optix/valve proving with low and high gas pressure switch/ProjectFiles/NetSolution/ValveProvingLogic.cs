@@ -39,10 +39,12 @@ using FTOptix.UI;
 /// buttons (or drive the tag from real I/O). Model/DownstreamPressure
 /// feeds the HGP gauge: it sees gas only when V2 is passing it.
 ///
-/// The LGP, HGP, and VPS settings are entered with the numeric spin
-/// boxes next to each switch (0-70 in. H2O; higher entries are
-/// rejected) and published to Model/LGPSetpoint, Model/HGPSetpoint,
-/// and Model/VPSSetpoint. LGP/HGP are trip points on their gauges'
+/// The LGP, HGP, and VPS settings are typed into the number input
+/// boxes next to each switch (0-70 in. H2O; higher entries snap back
+/// to 70) and published to Model/LGPSetpoint, Model/HGPSetpoint, and
+/// Model/VPSSetpoint. The inlet gauge is the only adjustable gauge -
+/// drag its needle or use the INLET +/- buttons; every other gauge is
+/// a read-only display driven by the logic. LGP/HGP are trip points on their gauges'
 /// pressure; the VPS setting is the ALLOWED DIFFERENTIAL during each
 /// hold test: the V1 test fails if the evacuated volume gains more
 /// than that, the V2 test fails if the charged volume loses more than
@@ -122,7 +124,7 @@ public class ValveProvingLogic : BaseNetLogic
     private Label[] stepLabels;
     private Label stateLabel, timerLabel, pressureLabel, inletReadout;
     private Button modeButton, startButton, vp1Button, vp2Button, pilotButton, leak1Button, leak2Button, pilotFailButton;
-    private SpinBox lgpSpin, hgpSpin, vpsSpin;
+    private TextBox lgpSetInput, hgpSetInput, vpsSetInput;
     private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
 
     private PeriodicTask periodicTask;
@@ -155,6 +157,19 @@ public class ValveProvingLogic : BaseNetLogic
     private static readonly Color FlameB = new Color(0xFFFFB000u);
 
     public override void Start()
+    {
+        try
+        {
+            StartInternal();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("ValveProvingLogic", "Start FAILED - screen controls will be dead: " + ex.Message);
+            throw;
+        }
+    }
+
+    private void StartInternal()
     {
         vp1Var = Project.Current.GetVariable("Model/VP1");
         vp2Var = Project.Current.GetVariable("Model/VP2");
@@ -202,9 +217,9 @@ public class ValveProvingLogic : BaseNetLogic
         leak1Button = Owner.Get<Button>("Leak1Button");
         leak2Button = Owner.Get<Button>("Leak2Button");
         pilotFailButton = Owner.Get<Button>("PilotFailButton");
-        lgpSpin = Owner.Get<SpinBox>("LgpSpin");
-        hgpSpin = Owner.Get<SpinBox>("HgpSpin");
-        vpsSpin = Owner.Get<SpinBox>("VpsSpin");
+        lgpSetInput = Owner.Get<TextBox>("LgpSetInput");
+        hgpSetInput = Owner.Get<TextBox>("HgpSetInput");
+        vpsSetInput = Owner.Get<TextBox>("VpsSetInput");
         inletGauge = Owner.Get<CircularGauge>("InletGauge");
         lgpGauge = Owner.Get<CircularGauge>("LGPGauge");
         hgpGauge = Owner.Get<CircularGauge>("HGPGauge");
@@ -219,9 +234,13 @@ public class ValveProvingLogic : BaseNetLogic
         }
 
         chamberPressure = ReadFloat(chamberPressureVar);
-        lgpSpin.Value = Clamp(ReadFloat(lgpSetVar));
-        hgpSpin.Value = Clamp(ReadFloat(hgpSetVar));
-        vpsSpin.Value = Clamp(ReadFloat(vpsSetVar));
+        lgpSet = Clamp(ReadFloat(lgpSetVar));
+        hgpSet = Clamp(ReadFloat(hgpSetVar));
+        vpsSet = Clamp(ReadFloat(vpsSetVar));
+        lgpSetInput.Text = lgpSet.ToString("0.##");
+        hgpSetInput.Text = hgpSet.ToString("0.##");
+        vpsSetInput.Text = vpsSet.ToString("0.##");
+        inletGauge.Value = ReadFloat(supplyPressureVar);
         step = Step.Standby;
         stepElapsed = 0f;
         runEstablished = false;
@@ -385,13 +404,15 @@ public class ValveProvingLogic : BaseNetLogic
     [ExportMethod]
     public void InletUp()
     {
-        supplyPressureVar.Value = Math.Min(SupplyPressure() + InletStep, InletMax);
+        inletGauge.Value = Math.Min((float)inletGauge.Value + InletStep, InletMax);
+        supplyPressureVar.Value = (float)inletGauge.Value;
     }
 
     [ExportMethod]
     public void InletDown()
     {
-        supplyPressureVar.Value = Math.Max(SupplyPressure() - InletStep, 0f);
+        inletGauge.Value = Math.Max((float)inletGauge.Value - InletStep, 0f);
+        supplyPressureVar.Value = (float)inletGauge.Value;
     }
 
     /// <summary>
@@ -427,6 +448,7 @@ public class ValveProvingLogic : BaseNetLogic
         {
             bool auto = ReadBool(autoModeVar);
 
+            ReadInletGauge();
             SyncSetpoints();
             SimulatePressure();
             UpdateGasPressureSwitches();
@@ -447,23 +469,42 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     /// <summary>
-    /// The spin boxes own the trip settings: clamp each entry to 0-70
-    /// in. H2O (an attempt to enter more snaps back) and publish to the
-    /// Model setpoint tags.
+    /// The inlet gauge is the ONLY adjustable gauge: dragging its needle
+    /// (or the INLET +/- buttons) sets the incoming gas pressure.
+    /// </summary>
+    private void ReadInletGauge()
+    {
+        float g = (float)inletGauge.Value;
+        if (g < 0f) g = 0f;
+        if (g > InletMax) g = InletMax;
+        if ((float)inletGauge.Value != g)
+            inletGauge.Value = g;
+        supplyPressureVar.Value = g;
+    }
+
+    /// <summary>
+    /// The number inputs own the trip settings: parse each entry, clamp
+    /// to 0-70 in. H2O (an attempt to enter more snaps back to 70) and
+    /// publish to the Model setpoint tags. Unparseable text (mid-typing)
+    /// keeps the last valid setting.
     /// </summary>
     private void SyncSetpoints()
     {
-        lgpSet = Clamp((float)lgpSpin.Value);
-        if ((float)lgpSpin.Value != lgpSet) lgpSpin.Value = lgpSet;
-        lgpSetVar.Value = lgpSet;
+        lgpSet = SyncSetpoint(lgpSetInput, lgpSetVar, lgpSet);
+        hgpSet = SyncSetpoint(hgpSetInput, hgpSetVar, hgpSet);
+        vpsSet = SyncSetpoint(vpsSetInput, vpsSetVar, vpsSet);
+    }
 
-        hgpSet = Clamp((float)hgpSpin.Value);
-        if ((float)hgpSpin.Value != hgpSet) hgpSpin.Value = hgpSet;
-        hgpSetVar.Value = hgpSet;
-
-        vpsSet = Clamp((float)vpsSpin.Value);
-        if ((float)vpsSpin.Value != vpsSet) vpsSpin.Value = vpsSet;
-        vpsSetVar.Value = vpsSet;
+    private float SyncSetpoint(TextBox box, IUAVariable setVar, float current)
+    {
+        float parsed;
+        if (!float.TryParse(box.Text, out parsed))
+            return current;
+        float clamped = Clamp(parsed);
+        if (clamped != parsed)
+            box.Text = clamped.ToString("0.##");
+        setVar.Value = clamped;
+        return clamped;
     }
 
     private void UpdateGasPressureSwitches()
@@ -769,7 +810,6 @@ public class ValveProvingLogic : BaseNetLogic
         // Pressure readout.
         pressureLabel.Text = chamberPressure.ToString("0.0");
         inletReadout.Text = supply.ToString("0.0");
-        inletGauge.Value = supply;
         lgpGauge.Value = supply;
         hgpGauge.Value = ReadFloat(downstreamPressureVar);
         pressGauge.Value = chamberPressure;
