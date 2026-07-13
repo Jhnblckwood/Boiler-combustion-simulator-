@@ -1373,8 +1373,8 @@ Children:
     Children:
     - Name: Text
       Type: BaseDataVariableType
-      DataType: String
-      Value: "4"
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"4"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -1400,8 +1400,8 @@ Children:
     Children:
     - Name: Text
       Type: BaseDataVariableType
-      DataType: String
-      Value: "70"
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"70"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -1427,8 +1427,8 @@ Children:
     Children:
     - Name: Text
       Type: BaseDataVariableType
-      DataType: String
-      Value: "14"
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"14"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size

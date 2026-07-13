@@ -122,7 +122,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v4 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v5 started OK");
         }
         catch (Exception ex)
         {

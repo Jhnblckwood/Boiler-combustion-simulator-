@@ -161,7 +161,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v4 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v5 started OK");
         }
         catch (Exception ex)
         {
@@ -238,9 +238,9 @@ public class ValveProvingLogic : BaseNetLogic
         lgpSet = Clamp(ReadFloat(lgpSetVar));
         hgpSet = Clamp(ReadFloat(hgpSetVar));
         vpsSet = Clamp(ReadFloat(vpsSetVar));
-        lgpSetInput.Text = lgpSet.ToString("0.##");
-        hgpSetInput.Text = hgpSet.ToString("0.##");
-        vpsSetInput.Text = vpsSet.ToString("0.##");
+        SetText(lgpSetInput, lgpSet.ToString("0.##"));
+        SetText(hgpSetInput, hgpSet.ToString("0.##"));
+        SetText(vpsSetInput, vpsSet.ToString("0.##"));
         inletGauge.Value = ReadFloat(supplyPressureVar);
         step = Step.Standby;
         stepElapsed = 0f;
@@ -499,11 +499,11 @@ public class ValveProvingLogic : BaseNetLogic
     private float SyncSetpoint(TextBox box, IUAVariable setVar, float current)
     {
         float parsed;
-        if (!float.TryParse(box.Text, out parsed))
+        if (!float.TryParse(GetText(box), out parsed))
             return current;
         float clamped = Clamp(parsed);
         if (clamped != parsed)
-            box.Text = clamped.ToString("0.##");
+            SetText(box, clamped.ToString("0.##"));
         setVar.Value = clamped;
         return clamped;
     }
@@ -967,6 +967,23 @@ public class ValveProvingLogic : BaseNetLogic
     private static void SetText(Button widget, string text)
     {
         widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
+    }
+
+    private static void SetText(TextBox widget, string text)
+    {
+        widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
+    }
+
+    /// <summary>
+    /// TextBox.Text is LocalizedText underneath (reading it as a plain
+    /// string is what crashed the scan) - unwrap whatever is stored.
+    /// </summary>
+    private static string GetText(TextBox widget)
+    {
+        object raw = widget.GetVariable("Text").Value?.Value;
+        if (raw is LocalizedText localized)
+            return localized.Text;
+        return raw as string ?? string.Empty;
     }
 
     private static bool ReadBool(IUAVariable variable)
