@@ -86,7 +86,7 @@ public class ValveProvingLogic : BaseNetLogic
     // LGP / HGP / VPS trip points are set at runtime with the spin boxes
     // next to each switch (defaults come from the Model setpoint tags).
     private const float SetpointMin = 0.0f;
-    private const float SetpointMax = 70.0f; // higher entries are rejected
+    private const float SetpointMax = 80.0f; // entries outside 0-80 are rejected
     private const float InletStep = 2.0f;    // INLET +/- button increment
     private const float InletMax = 80.0f;
 
@@ -124,7 +124,7 @@ public class ValveProvingLogic : BaseNetLogic
     private Label[] stepLabels;
     private Label stateLabel, timerLabel, pressureLabel, inletReadout;
     private Button modeButton, startButton, vp1Button, vp2Button, pilotButton, leak1Button, leak2Button, pilotFailButton;
-    private TextBox lgpSetInput, hgpSetInput, vpsSetInput;
+    private SpinBox lgpSetInput, hgpSetInput, vpsSetInput;
     private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
 
     private PeriodicTask periodicTask;
@@ -161,7 +161,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v5 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v6 started OK");
         }
         catch (Exception ex)
         {
@@ -218,9 +218,9 @@ public class ValveProvingLogic : BaseNetLogic
         leak1Button = Owner.Get<Button>("Leak1Button");
         leak2Button = Owner.Get<Button>("Leak2Button");
         pilotFailButton = Owner.Get<Button>("PilotFailButton");
-        lgpSetInput = Owner.Get<TextBox>("LgpSetInput");
-        hgpSetInput = Owner.Get<TextBox>("HgpSetInput");
-        vpsSetInput = Owner.Get<TextBox>("VpsSetInput");
+        lgpSetInput = Owner.Get<SpinBox>("LgpSetInput");
+        hgpSetInput = Owner.Get<SpinBox>("HgpSetInput");
+        vpsSetInput = Owner.Get<SpinBox>("VpsSetInput");
         inletGauge = Owner.Get<CircularGauge>("InletGauge");
         lgpGauge = Owner.Get<CircularGauge>("LGPGauge");
         hgpGauge = Owner.Get<CircularGauge>("HGPGauge");
@@ -238,9 +238,9 @@ public class ValveProvingLogic : BaseNetLogic
         lgpSet = Clamp(ReadFloat(lgpSetVar));
         hgpSet = Clamp(ReadFloat(hgpSetVar));
         vpsSet = Clamp(ReadFloat(vpsSetVar));
-        SetText(lgpSetInput, lgpSet.ToString("0.##"));
-        SetText(hgpSetInput, hgpSet.ToString("0.##"));
-        SetText(vpsSetInput, vpsSet.ToString("0.##"));
+        lgpSetInput.Value = lgpSet;
+        hgpSetInput.Value = hgpSet;
+        vpsSetInput.Value = vpsSet;
         inletGauge.Value = ReadFloat(supplyPressureVar);
         step = Step.Standby;
         stepElapsed = 0f;
@@ -484,28 +484,25 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     /// <summary>
-    /// The number inputs own the trip settings: parse each entry, clamp
-    /// to 0-70 in. H2O (an attempt to enter more snaps back to 70) and
-    /// publish to the Model setpoint tags. Unparseable text (mid-typing)
-    /// keeps the last valid setting.
+    /// The numeric spin boxes own the trip settings. The widget itself
+    /// only accepts numbers (numeric keypad, no letters) and enforces
+    /// 0-80 in. H2O; the logic clamps again as a backstop and publishes
+    /// to the Model setpoint tags.
     /// </summary>
     private void SyncSetpoints()
     {
-        lgpSet = SyncSetpoint(lgpSetInput, lgpSetVar, lgpSet);
-        hgpSet = SyncSetpoint(hgpSetInput, hgpSetVar, hgpSet);
-        vpsSet = SyncSetpoint(vpsSetInput, vpsSetVar, vpsSet);
+        lgpSet = SyncSetpoint(lgpSetInput, lgpSetVar);
+        hgpSet = SyncSetpoint(hgpSetInput, hgpSetVar);
+        vpsSet = SyncSetpoint(vpsSetInput, vpsSetVar);
     }
 
-    private float SyncSetpoint(TextBox box, IUAVariable setVar, float current)
+    private float SyncSetpoint(SpinBox box, IUAVariable setVar)
     {
-        float parsed;
-        if (!float.TryParse(GetText(box), out parsed))
-            return current;
-        float clamped = Clamp(parsed);
-        if (clamped != parsed)
-            SetText(box, clamped.ToString("0.##"));
-        setVar.Value = clamped;
-        return clamped;
+        float value = Clamp((float)box.Value);
+        if ((float)box.Value != value)
+            box.Value = value; // reject out-of-range entries
+        setVar.Value = value;
+        return value;
     }
 
     private void UpdateGasPressureSwitches()
@@ -969,22 +966,6 @@ public class ValveProvingLogic : BaseNetLogic
         widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
     }
 
-    private static void SetText(TextBox widget, string text)
-    {
-        widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
-    }
-
-    /// <summary>
-    /// TextBox.Text is LocalizedText underneath (reading it as a plain
-    /// string is what crashed the scan) - unwrap whatever is stored.
-    /// </summary>
-    private static string GetText(TextBox widget)
-    {
-        object raw = widget.GetVariable("Text").Value?.Value;
-        if (raw is LocalizedText localized)
-            return localized.Text;
-        return raw as string ?? string.Empty;
-    }
 
     private static bool ReadBool(IUAVariable variable)
     {

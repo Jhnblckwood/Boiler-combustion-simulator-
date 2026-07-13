@@ -1369,12 +1369,19 @@ Children:
       ModellingRule: Optional
       Value: "#c8d3de"
   - Name: LgpSetInput
-    Type: TextBox
+    Type: SpinBox
     Children:
-    - Name: Text
+    - Name: Value
       Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"4"}
+      DataType: Double
+      Value: 4.0
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Double
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Double
+      Value: 80.0
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -1396,12 +1403,19 @@ Children:
       ModellingRule: Optional
       Value: 24.0
   - Name: HgpSetInput
-    Type: TextBox
+    Type: SpinBox
     Children:
-    - Name: Text
+    - Name: Value
       Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"70"}
+      DataType: Double
+      Value: 70.0
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Double
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Double
+      Value: 80.0
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -1423,12 +1437,19 @@ Children:
       ModellingRule: Optional
       Value: 24.0
   - Name: VpsSetInput
-    Type: TextBox
+    Type: SpinBox
     Children:
-    - Name: Text
+    - Name: Value
       Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"14"}
+      DataType: Double
+      Value: 14.0
+    - Name: MinValue
+      Type: BaseDataVariableType
+      DataType: Double
+    - Name: MaxValue
+      Type: BaseDataVariableType
+      DataType: Double
+      Value: 80.0
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size

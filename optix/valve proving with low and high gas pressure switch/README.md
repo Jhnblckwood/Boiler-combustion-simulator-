@@ -20,8 +20,9 @@ Optix Studio. All pressures are in **inches of water column (in. H2O)**.
   switch **must not break**: its light stays off unless downstream pressure exceeds
   the **70 in. H2O** setting, and **any trip is an immediate lockout**
   (`Model/Lockout` goes high, STOP/RESET clears).
-- **Number input boxes** next to the LGP, HGP, and VPS switches
-  (range **0–70 in. H2O**; entering a higher number snaps back to 70):
+- **Numeric spin-box inputs** next to the LGP, HGP, and VPS switches. They accept
+  **numbers only** (numeric keypad — letters are impossible to enter) and enforce
+  **0–80 in. H2O** at the widget, with the logic clamping again as a backstop:
   - **LGP** — trip point on inlet pressure: below it the switch drops out (light
     off) and a lockout occurs (or on a start attempt before it makes).
   - **HGP** — trip point on downstream pressure: exceeded with the valves open
@@ -49,18 +50,19 @@ Optix Studio. All pressures are in **inches of water column (in. H2O)**.
 | `HGP` | Boolean | High gas pressure switch (downstream of V2) — TRUE = tripped (above its setpoint, default 70 in. H2O); must not break |
 | `SupplyPressure` | Float | Inlet gas pressure, in. H2O (drives the inlet and LGP gauges) |
 | `DownstreamPressure` | Float | Pressure after the SKP25/V2, in. H2O (drives the HGP gauge) |
-| `LGPSetpoint` | Float | LGP trip point, set with its number input (0–70 in. H2O, default 4) |
-| `HGPSetpoint` | Float | HGP trip point, set with its number input (0–70 in. H2O, default 70) |
-| `VPSSetpoint` | Float | VPS allowed differential per hold test, set with its number input (0–70 in. H2O, default 14) |
+| `LGPSetpoint` | Float | LGP trip point, set with its numeric input (0–80 in. H2O, default 4) |
+| `HGPSetpoint` | Float | HGP trip point, set with its numeric input (0–80 in. H2O, default 70) |
+| `VPSSetpoint` | Float | VPS allowed differential per hold test, set with its numeric input (0–80 in. H2O, default 14) |
 
 In simulation the logic computes `LGP` from `SupplyPressure` and `HGP` from
 `DownstreamPressure` against the spin-box settings; for a real train, bind the two
 switch tags (and `SupplyPressure` from a transmitter) to your controller and the
 screen behaves the same.
 
-The old fixed C# setpoint constants are gone — the trip settings are typed into
-the number boxes on the screen (clamped to 0–70 in. H2O by the logic) and are
-published to the three `*Setpoint` Model tags every scan.
+The old fixed C# setpoint constants are gone — the trip settings are entered in
+the numeric spin boxes on the screen (numbers only, 0–80 in. H2O enforced by the
+widget and re-clamped by the logic) and are published to the three `*Setpoint`
+Model tags every scan.
 
 Everything else — the Honeywell 7800 SERIES proving sequence, AUTO and MANUAL drill
 modes, pilot handling, leak simulation — is identical to the base project; see
