@@ -161,10 +161,11 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v4 started OK");
         }
         catch (Exception ex)
         {
-            Log.Error("ValveProvingLogic", "Start FAILED - screen controls will be dead: " + ex.Message);
+            Log.Error("ValveProvingLogic", "Start FAILED - screen controls will be dead: " + ex.ToString());
             throw;
         }
     }
@@ -457,7 +458,7 @@ public class ValveProvingLogic : BaseNetLogic
         }
         catch (Exception ex)
         {
-            Log.Error("ValveProvingLogic", ex.Message);
+            Log.Error("ValveProvingLogic", ex.ToString());
         }
     }
 
@@ -951,13 +952,21 @@ public class ValveProvingLogic : BaseNetLogic
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// Label and Button Text variables are LocalizedText: writing a plain
-    /// string throws "Unable to cast System.String to LocalizedText", so
-    /// every runtime text write goes through this wrapper.
+    /// Label and Button texts are LocalizedText: writing a plain string
+    /// can throw "Unable to cast System.String to LocalizedText". These
+    /// overloads use the LocalizedText typed property with the 3-argument
+    /// constructor (textId, text, localeId) - the exact pattern used by
+    /// Rockwell's own template NetLogic - so the write always carries a
+    /// real LocalizedText value.
     /// </summary>
-    private static void SetText(IUANode widget, string text)
+    private static void SetText(Label widget, string text)
     {
-        widget.GetVariable("Text").Value = new UAValue(new LocalizedText(text, "en-US"));
+        widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
+    }
+
+    private static void SetText(Button widget, string text)
+    {
+        widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
     }
 
     private static bool ReadBool(IUAVariable variable)
