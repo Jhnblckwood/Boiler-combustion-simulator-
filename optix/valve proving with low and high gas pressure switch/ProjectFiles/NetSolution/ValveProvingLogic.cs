@@ -808,66 +808,67 @@ public class ValveProvingLogic : BaseNetLogic
         hgpLed.FillColor = ReadBool(hgpVar) ? LedRed : LedOff;
 
         // Pressure readout.
-        pressureLabel.Text = chamberPressure.ToString("0.0");
-        inletReadout.Text = supply.ToString("0.0");
+        SetText(pressureLabel, chamberPressure.ToString("0.0"));
+        SetText(inletReadout, supply.ToString("0.0"));
         lgpGauge.Value = supply;
         hgpGauge.Value = ReadFloat(downstreamPressureVar);
         pressGauge.Value = chamberPressure;
 
         // Buttons.
-        modeButton.Text = auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (OPERATOR DRILL)";
+        SetText(modeButton, auto ? "MODE: AUTO (BMS SEQUENCE)" : "MODE: MANUAL (OPERATOR DRILL)");
         startButton.Enabled = step == Step.Standby && !v1 && !v2 && !pilotLit;
         vp1Button.Enabled = !auto;
         vp2Button.Enabled = !auto;
         pilotButton.Enabled = !auto;
-        leak1Button.Text = ReadBool(leakV1Var) ? "SIM V1 LEAK: ON" : "SIM V1 LEAK: OFF";
-        leak2Button.Text = ReadBool(leakV2Var) ? "SIM V2 LEAK: ON" : "SIM V2 LEAK: OFF";
-        pilotFailButton.Text = ReadBool(pilotFailVar) ? "SIM PILOT FAIL: ON" : "SIM PILOT FAIL: OFF";
+        SetText(leak1Button, ReadBool(leakV1Var) ? "SIM V1 LEAK: ON" : "SIM V1 LEAK: OFF");
+        SetText(leak2Button, ReadBool(leakV2Var) ? "SIM V2 LEAK: ON" : "SIM V2 LEAK: OFF");
+        SetText(pilotFailButton, ReadBool(pilotFailVar) ? "SIM PILOT FAIL: ON" : "SIM PILOT FAIL: OFF");
 
         // Banner, timer, and step list are the same in both modes; only
         // standby and run texts differ so the operator knows what to do.
+        string banner = "";
         float remaining = RemainingSeconds(auto);
-        timerLabel.Text = remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") + " S" : "T- --";
+        SetText(timerLabel, remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") + " S" : "T- --");
 
         switch (step)
         {
             case Step.Standby:
                 bannerRect.FillColor = BannerIdle;
-                stateLabel.Text = auto
+                banner = auto
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
                 if (!ReadBool(lgpVar))
-                    stateLabel.Text = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
+                    banner = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
+                banner = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
                 PaintSteps(0, false);
                 break;
             case Step.TestV1:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
+                banner = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
                 PaintSteps(1, false);
                 break;
             case Step.Fill:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
+                banner = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
                 PaintSteps(2, false);
                 break;
             case Step.TestV2:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVE PROVING - STEP 4: TESTING V2 (ALL VALVES CLOSED) - PRESSURE MUST STAY HIGH";
+                banner = "VALVE PROVING - STEP 4: TESTING V2 (ALL VALVES CLOSED) - PRESSURE MUST STAY HIGH";
                 PaintSteps(3, false);
                 break;
             case Step.Purge:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = "VALVES PROVEN - PREPURGE IN PROGRESS (ALL VALVES CLOSED)";
+                banner = "VALVES PROVEN - PREPURGE IN PROGRESS (ALL VALVES CLOSED)";
                 PaintSteps(4, false);
                 break;
             case Step.Ignition:
                 bannerRect.FillColor = BannerTest;
-                stateLabel.Text = pilotLit
+                banner = pilotLit
                     ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
                     : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
                 PaintSteps(4, false);
@@ -876,23 +877,24 @@ public class ValveProvingLogic : BaseNetLogic
                 if (!auto && !runEstablished)
                 {
                     bannerRect.FillColor = BannerTest;
-                    stateLabel.Text = "LIGHT-OFF - OPEN VP1 + VP2, THEN PILOT OFF";
+                    banner = "LIGHT-OFF - OPEN VP1 + VP2, THEN PILOT OFF";
                 }
                 else
                 {
                     bannerRect.FillColor = BannerRun;
-                    stateLabel.Text = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
+                    banner = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
                 }
                 PaintSteps(5, false);
                 break;
             case Step.Lockout:
                 bannerRect.FillColor = BannerAlarm;
-                stateLabel.Text = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
+                banner = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
                 PaintSteps(failedStepIndex, true);
                 break;
         }
 
-        stateTextVar.Value = stateLabel.Text;
+        SetText(stateLabel, banner);
+        stateTextVar.Value = banner;
     }
 
     private float RemainingSeconds(bool auto)
@@ -947,6 +949,16 @@ public class ValveProvingLogic : BaseNetLogic
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    /// <summary>
+    /// Label and Button Text variables are LocalizedText: writing a plain
+    /// string throws "Unable to cast System.String to LocalizedText", so
+    /// every runtime text write goes through this wrapper.
+    /// </summary>
+    private static void SetText(IUANode widget, string text)
+    {
+        widget.GetVariable("Text").Value = new UAValue(new LocalizedText(text, "en-US"));
+    }
 
     private static bool ReadBool(IUAVariable variable)
     {
