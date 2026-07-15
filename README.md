@@ -10,3 +10,7 @@ Gross output 11,716,000 btu/hr
 **optix/** — FactoryTalk Optix Studio project: valve proving system screen
 (Honeywell 7800 SERIES sequence, Siemens SKP gas train) running off tags
 VP1, VP2, VPS. See optix/README.md.
+
+**panelview7/** — the same valve-proving HMI retargeted to a PanelView Plus 7
+(FactoryTalk View ME): PLC Structured Text sequence, importable tag CSV, and a
+display build spec. See panelview7/README.md.
