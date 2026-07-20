@@ -1,53 +1,69 @@
-# Valve Proving with Honeywell HFLF Switch Supervision — FactoryTalk Optix Project
+# Valve Proving with Low and High Gas Pressure Switch — FactoryTalk Optix Project
 
-A standalone Honeywell 7800 SERIES valve proving system with HFLF switch supervision.
-Open `ValveProvingHFLF.optix` in FactoryTalk Optix Studio. All pressures are in **inches of water column (in. H2O)**.
+A standalone copy of the base valve proving project (`optix/`) extended with gas
+supply pressure supervision. Open `ValveProvingGasPressure.optix` in FactoryTalk
+Optix Studio. All pressures are in **inches of water column (in. H2O)**.
 
-## HFLF Supervision
+## What was added
 
-This variant is configured as a template for **Honeywell HFLF** switch supervision.
-The 6-step proving sequence (Evacuate → Test V1 → Fill → Test V2 → Proven/Purge → Ignition → Run)
-runs identically to the base project, with AUTO and MANUAL drill modes.
-
-The UI contains:
-- Inlet pressure gauge (adjustable, 0–80 in. H2O) and numeric setpoint input for `SupplyPressure`.
-- HFLF gauge and switch placeholders (ready for integration with Honeywell HFLF supervision logic).
-- Test-volume gauge, piping with gas animation, valves, switch LEDs, step checklist, and banner.
-
-To customize for your HFLF switches:
-1. Edit `Nodes/UI/UI.yaml` — add or modify HFLF gauge and switch widgets per your supervision spec.
-2. Edit `ProjectFiles/NetSolution/ValveProvingLogic.cs` — implement HFLF supervision rules in the `Start()` method
-   and ensure all widget names match the YAML definitions.
-3. Update `Model.yaml` with any additional HFLF-specific tags (e.g., HFLF_Made, HFLF_Tripped, etc.)
+- **Inlet pressure gauge — gauge only, no switch** — at the very beginning of the
+  piping. It is the **only adjustable gauge**: drag its needle or use the
+  **INLET PRESSURE + / −** buttons (2 in. steps, 0–80 in. H2O) to set how much gas
+  pressure is entering the train; the value publishes to `Model/SupplyPressure`.
+- **LGP gauge + switch** after the inlet gauge, before the SKP15 (V1), drawn to
+  mimic the VPS gauge and switch. The switch **makes at 4 in. H2O** and its light
+  is on (green) **only when made**. If the burner **tries to start before the LGP
+  has made, a lockout occurs**; the LGP dropping out during the sequence or run is
+  also a lockout.
+- **HGP gauge + switch** after the SKP25 (V2), on the downstream pipe. Its gauge
+  reads `Model/DownstreamPressure` — it sees gas only when V2 is passing it. The
+  switch **must not break**: its light stays off unless downstream pressure exceeds
+  the **70 in. H2O** setting, and **any trip is an immediate lockout**
+  (`Model/Lockout` goes high, STOP/RESET clears).
+- **Numeric spin-box inputs** next to the LGP, HGP, and VPS switches. They accept
+  **numbers only** (numeric keypad — letters are impossible to enter) and enforce
+  **0–80 in. H2O** at the widget, with the logic clamping again as a backstop:
+  - **LGP** — trip point on inlet pressure: below it the switch drops out (light
+    off) and a lockout occurs (or on a start attempt before it makes).
+  - **HGP** — trip point on downstream pressure: exceeded with the valves open
+    (gas passing V2) = lockout.
+  - **VPS** — the **allowed differential** during each hold test: the V1 test
+    fails if the evacuated volume gains more than this, the V2 test fails if the
+    charged volume decays more than this below supply. Default 14 matches the old
+    fixed mid-point behavior.
+  Settings publish to `Model/LGPSetpoint`, `Model/HGPSetpoint`, `Model/VPSSetpoint`.
+- **Gauges read live pressures, gated by the valves before them**: the LGP gauge
+  always sees the incoming pressure; the test-volume gauge sees gas only via V1;
+  the HGP gauge sees gas only when V2 passes it. These three are **read-only
+  displays** (not draggable) driven by the logic at runtime — press Play/emulator
+  in Studio; values do not change in the designer.
 
 ## Tags for I/O (Model folder)
 
-Core tags (identical to base project):
-
 | Tag | Type | Meaning |
 |-----|------|---------|
-| `VP1` / `VP2` | Boolean | Safety shutoff valves open |
+| `VP1` / `VP2` | Boolean | Safety shutoff valves open (as in the base project) |
 | `VPS` | Boolean | Valve proving switch input — TRUE = test failed |
 | `Pilot` | Boolean | Pilot valve/flame (legal only during the ignition trial) |
 | `Lockout` | Boolean | Output — high on any safety lockout |
-| `SupplyPressure` | Float | Inlet gas pressure, in. H2O |
-| `VPSSetpoint` | Float | VPS allowed differential per hold test (0–80 in. H2O, default 14) |
+| `LGP` | Boolean | Low gas pressure switch (inlet line, before V1) — TRUE = made (at/above its setpoint, default 4 in. H2O) |
+| `HGP` | Boolean | High gas pressure switch (downstream of V2) — TRUE = tripped (above its setpoint, default 70 in. H2O); must not break |
+| `SupplyPressure` | Float | Inlet gas pressure, in. H2O (drives the inlet and LGP gauges) |
+| `DownstreamPressure` | Float | Pressure after the SKP25/V2, in. H2O (drives the HGP gauge) |
+| `LGPSetpoint` | Float | LGP trip point, set with its numeric input (0–80 in. H2O, default 4) |
+| `HGPSetpoint` | Float | HGP trip point, set with its numeric input (0–80 in. H2O, default 70) |
+| `VPSSetpoint` | Float | VPS allowed differential per hold test, set with its numeric input (0–80 in. H2O, default 14) |
 
-HFLF-specific tags (add as needed for your supervision logic):
+In simulation the logic computes `LGP` from `SupplyPressure` and `HGP` from
+`DownstreamPressure` against the spin-box settings; for a real train, bind the two
+switch tags (and `SupplyPressure` from a transmitter) to your controller and the
+screen behaves the same.
 
-| Tag | Type | Notes |
-|-----|------|-------|
-| Add tags for your HFLF switches | Boolean | Created in Model.yaml per your supervision spec |
-| Add tags for HFLF setpoints | Float | Configure in numeric inputs on the UI |
+The old fixed C# setpoint constants are gone — the trip settings are entered in
+the numeric spin boxes on the screen (numbers only, 0–80 in. H2O enforced by the
+widget and re-clamped by the logic) and are published to the three `*Setpoint`
+Model tags every scan.
 
-## Building the project
-
-1. **Customize the UI**: Edit `Nodes/UI/UI.yaml` to add HFLF gauge and switch widgets matching your Honeywell
-   HFLF supervision spec (position, colors, connections to Model tags).
-2. **Add Model tags**: Edit `Nodes/Model/Model.yaml` to declare all HFLF supervision tags.
-3. **Implement supervision logic**: Edit `ProjectFiles/NetSolution/ValveProvingLogic.cs` to implement
-   HFLF supervision checks in the `Start()` method. Ensure all widget names in C# match the YAML definitions.
-4. **Test**: Open in FactoryTalk Optix Studio, press Play/emulator to run the sequence.
-
-For a reference implementation, see the **gas-pressure variant** (`../valve proving with low and high gas
-pressure switch/`) which adds LGP and HGP supervision to the base project.
+Everything else — the Honeywell 7800 SERIES proving sequence, AUTO and MANUAL drill
+modes, pilot handling, leak simulation — is identical to the base project; see
+`../README.md`.
