@@ -26,7 +26,8 @@ gives you the parts that *are* portable plus an authoritative build spec:
 | `plc/ValveProving.st` | The sequence, Structured Text | Complete, correct — paste into Studio 5000 |
 | `plc/ValveProving_PLC_tags.md` | Controller tag list | Complete |
 | `tags/ValveProving_HMI_Tags.csv` | FT View ME tag DB import | Documented ME 6.x format — imports via the wizard |
-| `displays/ValveProving_display.xml` | Graphic display **starter** | Best-effort scaffold; validate/expand in Studio |
+| `displays/ValveProving_<W>x<H>.xml` | Graphic display **starters, one per panel size** | Best-effort scaffolds; validate/expand in Studio |
+| `displays/generate_layouts.py` | Regenerates all size layouts from the 1280×800 master | Edit the master list, re-run, all sizes update |
 | this README → **Screen build spec** | Exact objects, colors, animations, actions | Authoritative — build from this if the XML needs work |
 
 ## Build order in FactoryTalk View Studio (ME)
@@ -39,9 +40,25 @@ gives you the parts that *are* portable plus an authoritative build spec:
    task**, create the tags in `plc/ValveProving_PLC_tags.md`, download. (For a
    PLC-less demo you can drive the memory bits by hand, but the sequence only
    advances when the ST is running — ME can't run it.)
-4. **Display** — try importing `displays/ValveProving_display.xml`
+4. **Display** — pick the XML matching your panel and try importing it
    (`Tools ▸ Import and Export Wizard`). If any object is rejected, build it from
    the spec below and paste in the connection expression the XML shows for it.
+
+   | Your PanelView Plus 7 | Resolution | File |
+   |---|---|---|
+   | 7" or 9" widescreen | 800×480 | `displays/ValveProving_800x480.xml` |
+   | 6.5" or 10.4" | 640×480 | `displays/ValveProving_640x480.xml` |
+   | 12.1" widescreen | 1280×800 | `displays/ValveProving_1280x800.xml` |
+   | 15" | 1024×768 | `displays/ValveProving_1024x768.xml` |
+   | 19" | 1280×1024 | `displays/ValveProving_1280x1024.xml` |
+
+   All five are generated from one master by `displays/generate_layouts.py`
+   (uniform scaling, fonts floored at 8 px). The spec table below lists the
+   **1280×800 master** coordinates; the XMLs carry the scaled ones. On the
+   800×480 and especially the 640×480 panels this dense screen gets tight —
+   buttons land around 72–91 px wide. It works with a stylus/finger, but if
+   it feels cramped in practice, the clean fix is splitting the controls onto
+   a second display and keeping the gas train on the first.
 
 ## Screen build spec (authoritative)
 Layout matches the Optix screen; pixels on a 1280×800 display.
@@ -100,9 +117,11 @@ operator sees which are active; disable the manual buttons while `{AutoMode}`.
 | 7 | BURNER FIRING — VALVES PROVEN | `#14532D` |
 | 8 | SAFETY LOCKOUT — PRESS STOP/RESET | `#7F1D1D` |
 
-Optionally add a second Multistate Indicator on `{LockReason}` (values in
-`plc/ValveProving_PLC_tags.md`) to spell out *why* it locked out. A six-row step
-checklist can be built from six Multistate Indicators keyed off `{State}`.
+A second Multistate Indicator on `{LockReason}` (bottom-left; caption table in
+`plc/ValveProving_PLC_tags.md`, tag included in the CSV) spells out *why* it
+locked out, and the six-row step checklist is included — each step LED is a
+color animation on `{State}` (off / yellow active / green done; expressions are
+in the generated XML).
 
 ## Sequence behavior
 Identical to the Optix gas-pressure variant: Evacuate → Test V1 → Fill → Test V2
