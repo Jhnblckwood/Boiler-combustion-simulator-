@@ -33,6 +33,7 @@ Each column is driven by one `FuelAirCurveData` tag:
 
 Rules:
 
+* Values are **rounded to one decimal place** (e.g. `10.387982` → `10.4`).
 * Any value that is **zero or missing is shown as `0`**.
 * The **O2** column is a special case — its `purge` and `LtOff` rows are always
   left blank, and the whole column is shown **only when

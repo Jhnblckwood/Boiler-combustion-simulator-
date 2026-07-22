@@ -97,8 +97,9 @@ class CurveData:
 def format_value(raw: Optional[str]) -> str:
     """Turn a raw L5X value string into something tidy for the table.
 
-    Zero or missing values are shown as ``"0"``. Whole numbers drop the ``.0``;
-    other floats keep only their significant decimals.
+    Numbers are rounded to **one decimal place** (e.g. ``10.387982`` -> ``10.4``).
+    Zero or missing values are shown as ``"0"``, and a rounded whole number drops
+    the trailing ``.0`` (e.g. ``5.0`` -> ``5``).
     """
     if raw is None:
         return "0"
@@ -106,11 +107,12 @@ def format_value(raw: Optional[str]) -> str:
         num = float(raw)
     except (TypeError, ValueError):
         return str(raw)
+    num = round(num, 1)
     if num == 0:
         return "0"
     if num == int(num):
         return str(int(num))
-    return f"{num:.6f}".rstrip("0").rstrip(".")
+    return f"{num:.1f}"
 
 
 # ---------------------------------------------------------------------------
