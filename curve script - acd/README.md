@@ -98,11 +98,14 @@ python fuel_curves.py path/to/project.L5K     # L5K
 python acd_reader.py  path/to/project.ACD     # ACD
 ```
 
-## The HTML version (`Fuel Curve Reader.html`)
+## The HTML version (`Fuel Curve Reader.html`) — now reads ACD too
 
-Still a single double-click file that needs no install — but browsers can't
-open binary `.ACD` files, so the HTML reader is **`.L5K` only**. For `.ACD`, use
-the Python GUI above.
+A single double-click file that needs **no install** — and it now reads **both
+`.ACD` and `.L5K`**. Open it in a modern browser (Chrome, Edge, Firefox) and
+drop either file in. It unzips and decodes the binary ACD **entirely in the
+browser** (using the built-in gzip decompressor), so nothing is uploaded
+anywhere and no Python is needed. Verified in-browser against RH800_27 — the
+ACD and L5K produce the identical table.
 
 ## Files
 

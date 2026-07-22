@@ -53,16 +53,16 @@
   <h1>Fuel/Air Curve Reader</h1>
 
   <div id="drop" class="drop">
-    <div class="big">Drag a Studio 5000 <b>.L5K</b> file here</div>
+    <div class="big">Drag a Studio 5000 <b>.ACD</b> or <b>.L5K</b> file here</div>
     <div class="sub">(or click to browse)</div>
   </div>
-  <input type="file" id="file" accept=".L5K,.l5k,.txt">
+  <input type="file" id="file" accept=".ACD,.acd,.L5K,.l5k,.txt">
 
   <div id="status" class="status">Ready.</div>
   <div id="tables"></div>
   <div id="notes"></div>
 
-  <div class="hint">This is a single self-contained file — no install needed. Double-click it to open in your browser, then drop an <b>.L5K</b> export in. (<b>.ACD</b> files are binary and can't be read here; export to L5K in Studio 5000.)</div>
+  <div class="hint">Single self-contained file — no install needed. Double-click to open in your browser, then drop a <b>.ACD</b> or <b>.L5K</b> in. ACD files are unpacked and decoded right here in the browser. (Needs a modern browser — Chrome, Edge, or Firefox.)</div>
 
 <script>
 /* ---- L5K multi-fuel parsing (matches fuel_curves.py) ------------------- */
@@ -231,7 +231,7 @@ function render(data, filename){
   }
 
   document.getElementById("status").textContent =
-    filename + "  •  controller: " + (data.controller||"(unknown)") + "  •  both fuels";
+    filename + (data.controller ? "  •  controller: " + data.controller : "") + "  •  both fuels";
 
   const notes = [
     "Fuel 1 = " + data.fuels[0].name + ", Fuel 2 = " + data.fuels[1].name + "  (from the file's fuel-selection config).",
@@ -242,11 +242,142 @@ function render(data, filename){
   document.getElementById("notes").innerHTML = notes.map(n=>"• "+n).join("<br>");
 }
 
+/* ---- ACD reading (binary) --------------------------------------------- */
+async function gunzip(u8){
+  const ds = new DecompressionStream("gzip");
+  const ab = await new Response(new Blob([u8]).stream().pipeThrough(ds)).arrayBuffer();
+  return new Uint8Array(ab);
+}
+const _u16=(dv,o)=>dv.getUint16(o,true), _u32=(dv,o)=>dv.getUint32(o,true);
+const _i32=(dv,o)=>dv.getInt32(o,true), _f32=(dv,o)=>dv.getFloat32(o,true);
+
+function acdFindStream(u8, wanted){
+  const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+  const size=u8.length, noFiles=_u32(dv,size-8);
+  let p=size-noFiles*528-8;
+  for(let k=0;k<noFiles;k++){
+    let name="",q=p; while(true){const c=_u16(dv,q);q+=2;if(c===0)break;name+=String.fromCharCode(c);}
+    const flen=_u32(dv,p+520), foff=_u32(dv,p+524);
+    if(name===wanted) return u8.subarray(foff,foff+flen);
+    p+=528;
+  }
+  return null;
+}
+function acdWalkComps(u8){
+  const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+  const prr=_u32(dv,_u32(dv,12)+14), rhl=_u32(dv,prr+2), no=_u32(dv,20);
+  let p=prr+rhl, count=0; const comps={}, byId={};
+  while(count<no && p+30<u8.length){
+    const id=_u16(dv,p), outer=_u32(dv,p+2);
+    if(outer<10 || p+outer>u8.length+8) break;
+    if(id===0xfafa){
+      const inner=_u32(dv,p+6);
+      const object_id=_u32(dv,p+22), parent_id=_u32(dv,p+26);
+      let name="",q=p+30; while(q<p+154){const c=_u16(dv,q);q+=2;if(c===0)break;name+=String.fromCharCode(c);}
+      const buffer=u8.subarray(p+154,p+154+(inner-148));
+      comps[name]={object_id,parent_id,buffer}; byId[object_id]={name,parent_id,buffer};
+    }
+    p+=outer; count++;
+  }
+  return {comps, byId};
+}
+function _decodeDesired(buf){
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength);
+  for(let off=0; off<buf.length-136; off++){
+    const ln=_u32(dv,off); if(ln<1||ln>20) continue;
+    let ok=true; for(let k=0;k<ln;k++){const c=buf[off+4+k]; if(c<32||c>=127){ok=false;break;}}
+    if(!ok) continue;
+    const c0=buf[off+4]; if(!((c0>=65&&c0<=90)||(c0>=97&&c0<=122))) continue;
+    const curve=[]; let good=true;
+    for(let k=0;k<16;k++){const v=_f32(dv,off+32+4*k); if(!(isFinite(v)&&v>-1e5&&v<1e5)){good=false;break;} curve.push(v);}
+    if(!good) continue;
+    return {purge:_f32(dv,off+24), lightoff:_f32(dv,off+28), curve, cfg:_i32(dv,off+132)};
+  }
+  return null;
+}
+function _decodeArray(buf){
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength);
+  let best=null, bs=-1;
+  for(let i=16;i<buf.length-128;i++){
+    const c0=_f32(dv,i); if(!(isFinite(c0)&&Math.abs(c0)>0.05)) continue;
+    const c1=[]; let good=true;
+    for(let k=0;k<16;k++){const v=_f32(dv,i+4*k); if(!(isFinite(v)&&v>-1e5&&v<1e5)){good=false;break;} c1.push(v);}
+    if(!good) continue;
+    let dbl=true; for(let k=0;k<16;k++){if(Math.abs(c1[k]-_f32(dv,i+64+4*k))>=1e-3){dbl=false;break;}}
+    if(!dbl) continue;
+    const p0=_f32(dv,i-16),p1=_f32(dv,i-12),l0=_f32(dv,i-8),l1=_f32(dv,i-4);
+    if(!(Math.abs(p0-p1)<1e-3 && Math.abs(l0-l1)<1e-3)) continue;
+    let score=0; for(const x of c1) if(Math.abs(x)>0.1) score++;
+    if(score>bs){bs=score; best={purge:p0, lightoff:l0, curve:c1};}
+  }
+  return best;
+}
+async function extractMultiFuelACD(u8){
+  let compsDat = acdFindStream(u8, "Comps.Dat");
+  if(!compsDat) throw new Error("Comps.Dat not found — not a valid ACD?");
+  if(compsDat[0]===0x1f && compsDat[1]===0x8b) compsDat = await gunzip(compsDat);
+  const {comps, byId} = acdWalkComps(compsDat);
+  const refsOf = tag => {
+    const d=comps[tag]; if(!d) return [];
+    const dv=new DataView(d.buffer.buffer,d.buffer.byteOffset,d.buffer.byteLength);
+    const out=[], seen=new Set();
+    for(let o=0;o<d.buffer.length-4;o++){const oid=_u32(dv,o); if(byId[oid]&&!seen.has(oid)){seen.add(oid);out.push(oid);}}
+    return out;
+  };
+  let vp=null, o2dec=null;
+  for(const oid of refsOf("DesiredO2")){
+    const dec=_decodeDesired(byId[oid].buffer);
+    if(dec && Math.abs(dec.curve[0])>0.01){ vp=byId[oid].parent_id; o2dec=dec; break; }
+  }
+  const o2en = !!(o2dec && ((o2dec.cfg>>3)&1));
+  const valueRec = tag => {
+    for(const oid of refsOf(tag)) if(vp===null || byId[oid].parent_id===vp) return byId[oid].buffer;
+    return null;
+  };
+  let names=[]; const ftn=valueRec("FuelTypeNames");
+  if(ftn){
+    const txt=Array.from(ftn).map(c=>(c>=32&&c<127)?String.fromCharCode(c):"\n").join("");
+    for(const m of txt.matchAll(/[A-Za-z0-9#][A-Za-z0-9 #]{2,19}/g)) names.push(m[0]);
+  }
+  const fuels=[];
+  for(const n of [1,2]){
+    const cols={};
+    for(const col in COLUMN_SUFFIX){
+      const rec=valueRec("ArrayMgmt_F"+n+COLUMN_SUFFIX[col]);
+      const dec=rec?_decodeArray(rec):null;
+      cols[col]= dec ? {found:true, purge:dec.purge, lightoff:dec.lightoff, curve:dec.curve} : {found:false};
+    }
+    fuels.push({number:n, name: names[n-1] || ("Fuel "+n), cols});
+  }
+  return {o2en, fuels, controller: (comps["Controller"]&&comps["Controller"].name)||"" };
+}
+
 /* ---- file intake ------------------------------------------------------ */
 function loadFile(file){
   const status = document.getElementById("status");
-  status.textContent = "Reading " + file.name + " …";
+  const isAcd = /\.acd$/i.test(file.name);
   const reader = new FileReader();
+  reader.onerror = () => { status.textContent = "Could not read the file."; };
+
+  if(isAcd){
+    status.textContent = "Decrypting ACD…  (this takes a moment)";
+    reader.onload = async e => {
+      try{
+        const data = await extractMultiFuelACD(new Uint8Array(e.target.result));
+        if(!data.fuels.some(f=>Object.values(f.cols).some(c=>c.found))){
+          status.textContent = "No ArrayMgmt_F* curves found in this ACD.";
+          return;
+        }
+        render(data, file.name);
+      }catch(err){
+        status.textContent = "Could not read ACD: " + err.message;
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  status.textContent = "Reading " + file.name + " …";
   reader.onload = e => {
     try{
       const data = extractMultiFuel(e.target.result);
@@ -259,7 +390,6 @@ function loadFile(file){
       status.textContent = "Could not parse file: " + err.message;
     }
   };
-  reader.onerror = () => { status.textContent = "Could not read the file."; };
   reader.readAsText(file);
 }
 
