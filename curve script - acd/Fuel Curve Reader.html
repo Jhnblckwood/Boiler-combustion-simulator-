@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fuel/Air Curve Reader</title>
+<title>Combustion Curve Reader</title>
 <style>
   :root{
     --winbg:#f4f5f7; --ink:#1e1e1e; --drop-bg:#eef3f8; --drop-fg:#33475b;
@@ -13,7 +13,8 @@
   *{box-sizing:border-box;}
   body{margin:0;background:var(--winbg);color:var(--ink);
        font-family:"Segoe UI",system-ui,Arial,sans-serif;padding:18px;}
-  h1{font-size:17px;margin:2px 2px 12px;}
+  h1{font-size:17px;margin:2px 2px 2px;}
+  .byline{color:var(--muted);font-size:12px;margin:0 2px 14px;}
   .drop{border:2px dashed var(--drop-border);background:var(--drop-bg);color:var(--drop-fg);
         text-align:center;border-radius:8px;padding:26px 12px;line-height:1.55;
         font-size:14px;cursor:pointer;transition:background .15s,border-color .15s;}
@@ -34,7 +35,8 @@
   tr.section td{background:var(--section);}
   tr:last-child td{border-bottom:none;}
   .notes{background:var(--notes);border:1px solid #ececdf;border-radius:6px;
-         margin-top:16px;padding:10px 13px;font-size:12.5px;color:#3a3a2f;line-height:1.7;}
+         margin-top:16px;padding:10px 13px;font-size:12.5px;color:#3a3a2f;line-height:1.7;
+         text-align:center;}
   .hint{color:var(--muted);font-size:12px;margin-top:14px;}
   input[type=file]{display:none;}
   @media (prefers-color-scheme: dark){
@@ -50,7 +52,8 @@
 </style>
 </head>
 <body>
-  <h1>Fuel/Air Curve Reader</h1>
+  <h1>Combustion Curve Reader</h1>
+  <div class="byline">Created and Designed by John Rohlfing Jr.</div>
 
   <div id="drop" class="drop">
     <div class="big">Drag a Studio 5000 <b>.ACD</b> or <b>.L5K</b> file here</div>
@@ -61,8 +64,6 @@
   <div id="status" class="status">Ready.</div>
   <div id="tables"></div>
   <div id="notes"></div>
-
-  <div class="hint">Single self-contained file — no install needed. Double-click to open in your browser, then drop a <b>.ACD</b> or <b>.L5K</b> in. ACD files are unpacked and decoded right here in the browser. (Needs a modern browser — Chrome, Edge, or Firefox.)</div>
 
 <script>
 /* ---- L5K multi-fuel parsing (matches fuel_curves.py) ------------------- */
@@ -233,13 +234,11 @@ function render(data, filename){
   document.getElementById("status").textContent =
     filename + (data.controller ? "  •  controller: " + data.controller : "") + "  •  both fuels";
 
-  const notes = [
-    "Fuel 1 = " + data.fuels[0].name + ", Fuel 2 = " + data.fuels[1].name + "  (from the file's fuel-selection config).",
-    data.o2en ? "O2 trim is enabled (DesiredO2.Cfg.O2Curve = 1) — O2 column shown."
-              : "O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted."
-  ];
+  const o2note = data.o2en
+    ? "O2 trim is enabled (DesiredO2.Cfg.O2Curve = 1) — O2 column shown."
+    : "O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted.";
   document.getElementById("notes").className = "notes";
-  document.getElementById("notes").innerHTML = notes.map(n=>"• "+n).join("<br>");
+  document.getElementById("notes").innerHTML = "• " + o2note;
 }
 
 /* ---- ACD reading (binary) --------------------------------------------- */
