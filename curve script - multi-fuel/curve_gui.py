@@ -178,7 +178,8 @@ class CurveApp:
     def _show_result(self, data):
         if isinstance(data, fc.MultiFuelData):
             table = fc.build_combined_table(data)
-            self._render_table(table, label_width=140)
+            # Wider first data column (Air) so the fuel-name banner fits over it.
+            self._render_table(table, label_width=70, first_col_width=180)
             who = data.controller_name or "(unknown)"
             self._set_status(
                 f"{data.source_file}  •  controller: {who}  •  L5K (both fuels)"
@@ -194,16 +195,18 @@ class CurveApp:
         )
         self._show_notes(list(data.notes))
 
-    def _render_table(self, table: dict, label_width: int = 90):
+    def _render_table(self, table: dict, label_width: int = 90,
+                     first_col_width: int = 100):
         self._clear_table()
         columns = ["__label__"] + table["columns"]
         self.tree["columns"] = columns
 
         self.tree.heading("__label__", text=table["corner"])
         self.tree.column("__label__", width=label_width, anchor="center")
-        for col in table["columns"]:
+        for i, col in enumerate(table["columns"]):
             self.tree.heading(col, text=col)
-            self.tree.column(col, width=100, anchor="center")
+            width = first_col_width if i == 0 else 100
+            self.tree.column(col, width=width, anchor="center")
 
         self.tree.tag_configure("section", background="#e8eef5")
         self.tree.tag_configure("fuel", background="#d5e3d5", font=("Segoe UI", 10, "bold"))

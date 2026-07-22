@@ -296,20 +296,23 @@ def build_combined_table(data: MultiFuelData) -> dict:
         present.update(t["columns"])
     columns = [c for c in CANONICAL_COLUMNS if c in present]
 
+    banner_col = columns[0] if columns else None   # the Air column
     rows = []
     for fuel, table in per_fuel:
-        rows.append({
-            "label": f"Fuel {fuel.number} — {fuel.name}",
-            "is_header": True,
-            "cells": {c: "" for c in columns},
-        })
+        # Fuel-name banner centered over the Air column; label cell left blank
+        # so each fuel's x-axis (purge / LtOff / 1..16) reads cleanly below.
+        banner = {c: "" for c in columns}
+        if banner_col:
+            banner[banner_col] = f"Fuel {fuel.number} — {fuel.name}"
+        rows.append({"label": "", "is_header": True, "cells": banner})
+
         by_col = {c: {r["label"]: r["cells"][c] for r in table["rows"]}
                   for c in table["columns"]}
         for label in ROW_LABELS:
             cells = {c: by_col.get(c, {}).get(label, "") for c in columns}
             rows.append({"label": label, "is_header": False, "cells": cells})
 
-    return {"corner": "Fuel", "columns": columns, "rows": rows}
+    return {"corner": "", "columns": columns, "rows": rows}
 
 
 def render_fuel_tables_text(data: MultiFuelData) -> str:
