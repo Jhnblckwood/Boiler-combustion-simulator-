@@ -299,18 +299,23 @@ def build_combined_table(data: MultiFuelData) -> dict:
     banner_col = columns[0] if columns else None   # the Air column
     rows = []
     for fuel, table in per_fuel:
-        # Fuel-name banner centered over the Air column; label cell left blank
-        # so each fuel's x-axis (purge / LtOff / 1..16) reads cleanly below.
+        # Each fuel block is self-contained:
+        #   1. fuel-name banner over the Air column
+        #   2. a column-header row (Air, Fuel Act1, FGR, VFD, O2)
+        #   3. the data rows (purge / LtOff / 1..16)
         banner = {c: "" for c in columns}
         if banner_col:
             banner[banner_col] = f"Fuel {fuel.number} — {fuel.name}"
-        rows.append({"label": "", "is_header": True, "cells": banner})
+        rows.append({"label": "", "kind": "banner", "cells": banner})
+
+        rows.append({"label": "", "kind": "colheader",
+                     "cells": {c: c for c in columns}})
 
         by_col = {c: {r["label"]: r["cells"][c] for r in table["rows"]}
                   for c in table["columns"]}
         for label in ROW_LABELS:
             cells = {c: by_col.get(c, {}).get(label, "") for c in columns}
-            rows.append({"label": label, "is_header": False, "cells": cells})
+            rows.append({"label": label, "kind": "data", "cells": cells})
 
     return {"corner": "", "columns": columns, "rows": rows}
 

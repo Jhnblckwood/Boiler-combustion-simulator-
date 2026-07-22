@@ -179,7 +179,8 @@ class CurveApp:
         if isinstance(data, fc.MultiFuelData):
             table = fc.build_combined_table(data)
             # Wider first data column (Air) so the fuel-name banner fits over it.
-            self._render_table(table, label_width=70, first_col_width=180)
+            self._render_table(table, label_width=70, first_col_width=180,
+                              headers_in_body=True)
             who = data.controller_name or "(unknown)"
             self._set_status(
                 f"{data.source_file}  •  controller: {who}  •  L5K (both fuels)"
@@ -196,24 +197,32 @@ class CurveApp:
         self._show_notes(list(data.notes))
 
     def _render_table(self, table: dict, label_width: int = 90,
-                     first_col_width: int = 100):
+                     first_col_width: int = 100, headers_in_body: bool = False):
         self._clear_table()
         columns = ["__label__"] + table["columns"]
         self.tree["columns"] = columns
 
-        self.tree.heading("__label__", text=table["corner"])
+        # When each fuel block carries its own header row, blank the sticky
+        # column headings so the fuel name reads at the very top.
+        self.tree.heading("__label__", text="" if headers_in_body else table["corner"])
         self.tree.column("__label__", width=label_width, anchor="center")
         for i, col in enumerate(table["columns"]):
-            self.tree.heading(col, text=col)
+            self.tree.heading(col, text="" if headers_in_body else col)
             width = first_col_width if i == 0 else 100
             self.tree.column(col, width=width, anchor="center")
 
         self.tree.tag_configure("section", background="#e8eef5")
-        self.tree.tag_configure("fuel", background="#d5e3d5", font=("Segoe UI", 10, "bold"))
+        self.tree.tag_configure("fuel", background="#d5e3d5",
+                               font=("Segoe UI", 10, "bold"))
+        self.tree.tag_configure("colheader", background="#eef1f4",
+                               font=("Segoe UI", 9, "bold"))
         for row in table["rows"]:
             values = [row["label"]] + [row["cells"][c] for c in table["columns"]]
-            if row.get("is_header"):
+            kind = row.get("kind")
+            if kind == "banner" or row.get("is_header"):
                 tag = "fuel"
+            elif kind == "colheader":
+                tag = "colheader"
             elif row["label"] in ("purge", "LtOff"):
                 tag = "section"
             else:
