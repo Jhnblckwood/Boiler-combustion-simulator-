@@ -6,15 +6,25 @@ Reads a Studio 5000 / RSLogix 5000 project (an ``.ACD`` file, or later an
 ``.L5K`` export) and pulls out the fuel/air *curve* configuration so it can be
 laid out as a table.
 
-Right now the only tag wired up is ``DesiredO2`` (data type ``FuelAirCurveData``).
-That single tag drives the "O2" column of the table:
+Each column of the table is driven by one ``FuelAirCurveData`` tag:
 
-    * ``DesiredO2.Cfg.O2Curve``  -> whether the O2 column is shown at all
-    * ``DesiredO2.Curve[0..15]`` -> the numbered rows (1..16) of the O2 column
-    * ``DesiredO2.Purge`` / ``DesiredO2.LightOff`` -> shown for reference
+    ==========  =================  ==================================
+    Column      Tag                Notes
+    ==========  =================  ==================================
+    Air         DesiredAir
+    Fuel Act1   DesiredFuel_A1
+    FGR         DesiredFGR
+    VFD         DesiredVFD
+    O2          DesiredO2          shown only when Cfg.O2Curve == 1
+    ==========  =================  ==================================
 
-The columns for ``Air``, ``Fuel Act1``, ``FGR`` and ``VFD`` are laid out but
-left empty until we identify the tags that feed them.
+For every column tag the rows map like this:
+
+    * ``purge`` row  -> ``<tag>.Purge``     (blank for the O2 column)
+    * ``LtOff`` row  -> ``<tag>.LightOff``  (blank for the O2 column)
+    * rows ``1``..``16`` -> ``<tag>.Curve[0]`` .. ``<tag>.Curve[15]``
+
+Any value that is zero or missing is shown as ``0``.
 
 The module has no GUI code so it can be imported and unit-tested on its own.
 """
@@ -24,25 +34,44 @@ from __future__ import annotations
 import os
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
-# The row labels that run down the left edge of the table, in order.
-# "gas" is the corner / title cell; then Purge, LtOff, then firing points 1..16.
+# How many numbered firing points run down the table (Curve[0]..Curve[15]).
 NUMBERED_POINTS = 16
 ROW_LABELS = ["purge", "LtOff"] + [str(n) for n in range(1, NUMBERED_POINTS + 1)]
 
-# The column headers that run across the top of the table, in order.
-# "O2" is appended only when DesiredO2.Cfg.O2Curve == 1.
-BASE_COLUMNS = ["Air", "Fuel Act1", "FGR", "VFD"]
+# Column header  ->  tag name that feeds it. Order here is the column order.
+COLUMN_TAGS = {
+    "Air": "DesiredAir",
+    "Fuel Act1": "DesiredFuel_A1",
+    "FGR": "DesiredFGR",
+    "VFD": "DesiredVFD",
+}
+
+# The O2 column is special: it is only shown when DesiredO2.Cfg.O2Curve == 1,
+# and its purge / LtOff rows are always left blank.
 O2_COLUMN = "O2"
+O2_TAG = "DesiredO2"
 
 # Corner / title label shown in the top-left cell.
 CORNER_LABEL = "gas"
 
 
 class ExtractError(Exception):
-    """Raised when a file cannot be read or the expected tag is missing."""
+    """Raised when a file cannot be read or a required tag is missing."""
+
+
+@dataclass
+class TagCurve:
+    """Parsed contents of one ``FuelAirCurveData`` tag."""
+
+    name: str
+    found: bool = False
+    purge: Optional[str] = None
+    lightoff: Optional[str] = None
+    o2curve: int = 0
+    curve: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -52,14 +81,13 @@ class CurveData:
     controller_name: Optional[str] = None
     source_file: Optional[str] = None
     file_kind: Optional[str] = None          # "ACD" or "L5K"
-
-    # DesiredO2 tag ---------------------------------------------------------
-    o2_curve_enabled: bool = False           # Cfg.O2Curve == 1
-    o2_purge: Optional[str] = None           # DesiredO2.Purge
-    o2_lightoff: Optional[str] = None        # DesiredO2.LightOff
-    o2_curve: List[str] = field(default_factory=list)   # DesiredO2.Curve[]
-
+    tags: Dict[str, TagCurve] = field(default_factory=dict)
     notes: List[str] = field(default_factory=list)
+
+    @property
+    def o2_curve_enabled(self) -> bool:
+        o2 = self.tags.get(O2_TAG)
+        return bool(o2 and o2.found and o2.o2curve == 1)
 
 
 # ---------------------------------------------------------------------------
@@ -69,12 +97,11 @@ class CurveData:
 def format_value(raw: Optional[str]) -> str:
     """Turn a raw L5X value string into something tidy for the table.
 
-    A zero of any kind is shown as ``"0"`` (per spec: "if the value ... is zero
-    just fill the space in with a zero"). Whole numbers drop the ``.0``; other
-    floats keep only the significant decimals.
+    Zero or missing values are shown as ``"0"``. Whole numbers drop the ``.0``;
+    other floats keep only their significant decimals.
     """
     if raw is None:
-        return ""
+        return "0"
     try:
         num = float(raw)
     except (TypeError, ValueError):
@@ -83,7 +110,6 @@ def format_value(raw: Optional[str]) -> str:
         return "0"
     if num == int(num):
         return str(int(num))
-    # Trim trailing zeros on the decimal part but keep it readable.
     return f"{num:.6f}".rstrip("0").rstrip(".")
 
 
@@ -91,34 +117,34 @@ def format_value(raw: Optional[str]) -> str:
 # ACD parsing
 # ---------------------------------------------------------------------------
 
-def _parse_desired_o2_xml(tag_xml: str) -> dict:
-    """Parse the L5X ``<Tag ...>`` block for DesiredO2 into a plain dict."""
+def _parse_curve_tag_xml(tag_xml: str, name: str) -> TagCurve:
+    """Parse an L5X ``<Tag ...>`` block for a FuelAirCurveData tag."""
     root = ET.fromstring(tag_xml)
     struct = root.find(".//Structure")
     if struct is None:
-        raise ExtractError("DesiredO2 tag has no decorated data.")
+        return TagCurve(name=name, found=False)
 
-    out = {"purge": None, "lightoff": None, "o2curve": 0, "curve": []}
+    tc = TagCurve(name=name, found=True)
 
     for dvm in struct.findall("./DataValueMember"):
         if dvm.get("Name") == "Purge":
-            out["purge"] = dvm.get("Value")
+            tc.purge = dvm.get("Value")
         elif dvm.get("Name") == "LightOff":
-            out["lightoff"] = dvm.get("Value")
+            tc.lightoff = dvm.get("Value")
 
     curve = struct.find("./ArrayMember[@Name='Curve']")
     if curve is not None:
-        out["curve"] = [e.get("Value") for e in curve.findall("./Element")]
+        tc.curve = [e.get("Value") for e in curve.findall("./Element")]
 
     cfg = struct.find("./StructureMember[@Name='Cfg']")
     if cfg is not None:
         o2 = cfg.find("./DataValueMember[@Name='O2Curve']")
         if o2 is not None:
             try:
-                out["o2curve"] = int(o2.get("Value"))
+                tc.o2curve = int(o2.get("Value"))
             except (TypeError, ValueError):
-                out["o2curve"] = 0
-    return out
+                tc.o2curve = 0
+    return tc
 
 
 def extract_from_acd(path: str) -> CurveData:
@@ -143,30 +169,31 @@ def extract_from_acd(path: str) -> CurveData:
         file_kind="ACD",
     )
 
-    tag = None
+    # Index the controller tags we care about by name.
+    wanted = set(COLUMN_TAGS.values()) | {O2_TAG}
+    by_name = {}
     for t in controller.tags:
-        if (getattr(t, "name", "") or "") == "DesiredO2":
-            tag = t
-            break
-    if tag is None:
-        raise ExtractError("No 'DesiredO2' tag found in this project.")
+        n = getattr(t, "name", "") or ""
+        if n in wanted:
+            by_name[n] = t
 
-    xml_obj = tag.to_xml()
-    tag_xml = xml_obj if isinstance(xml_obj, str) else xml_obj.toxml()
-    parsed = _parse_desired_o2_xml(tag_xml)
+    for tag_name in wanted:
+        tag = by_name.get(tag_name)
+        if tag is None:
+            data.tags[tag_name] = TagCurve(name=tag_name, found=False)
+            data.notes.append(f"Tag '{tag_name}' was not found in this project.")
+            continue
+        xml_obj = tag.to_xml()
+        tag_xml = xml_obj if isinstance(xml_obj, str) else xml_obj.toxml()
+        data.tags[tag_name] = _parse_curve_tag_xml(tag_xml, tag_name)
 
-    data.o2_curve_enabled = parsed["o2curve"] == 1
-    data.o2_purge = parsed["purge"]
-    data.o2_lightoff = parsed["lightoff"]
-    data.o2_curve = parsed["curve"]
-
-    if not data.o2_curve_enabled:
+    if data.o2_curve_enabled:
         data.notes.append(
-            "DesiredO2.Cfg.O2Curve = 0  ->  the O2 column is omitted."
+            "DesiredO2.Cfg.O2Curve = 1  ->  the O2 column is shown."
         )
     else:
         data.notes.append(
-            "DesiredO2.Cfg.O2Curve = 1  ->  the O2 column is shown."
+            "DesiredO2.Cfg.O2Curve = 0  ->  the O2 column is omitted."
         )
     return data
 
@@ -179,8 +206,8 @@ def extract_from_l5k(path: str) -> CurveData:
     """Extract curve data from an ``.L5K`` text export.
 
     L5K support is not wired up yet — we need a sample export to confirm the
-    exact text layout of the DesiredO2 initializer. This returns a clearly
-    labelled placeholder rather than guessing at the format.
+    exact text layout of the tag initializers. This returns a clearly labelled
+    placeholder rather than guessing at the format.
     """
     data = CurveData(
         source_file=os.path.basename(path),
@@ -207,6 +234,31 @@ def extract(path: str) -> CurveData:
     raise ExtractError(f"Unsupported file type '{ext}'. Expected .ACD or .L5K.")
 
 
+def _cell_value(tc: Optional[TagCurve], label: str) -> str:
+    """Value for one cell of a normal (non-O2) column."""
+    if tc is None or not tc.found:
+        return ""
+    if label == "purge":
+        return format_value(tc.purge)
+    if label == "LtOff":
+        return format_value(tc.lightoff)
+    # numbered point N -> Curve[N-1]; missing/zero -> "0"
+    idx = int(label) - 1
+    raw = tc.curve[idx] if 0 <= idx < len(tc.curve) else None
+    return format_value(raw)
+
+
+def _o2_cell_value(tc: Optional[TagCurve], label: str) -> str:
+    """Value for one cell of the O2 column (purge / LtOff blank)."""
+    if label in ("purge", "LtOff"):
+        return ""
+    if tc is None or not tc.found:
+        return ""
+    idx = int(label) - 1
+    raw = tc.curve[idx] if 0 <= idx < len(tc.curve) else None
+    return format_value(raw)
+
+
 def build_table(data: CurveData) -> dict:
     """Turn a CurveData into a simple table model the GUI can render.
 
@@ -215,27 +267,17 @@ def build_table(data: CurveData) -> dict:
         columns : list of column headers
         rows    : list of {"label": str, "cells": {column: str}}
     """
-    columns = list(BASE_COLUMNS)
+    columns = list(COLUMN_TAGS.keys())
     if data.o2_curve_enabled:
         columns.append(O2_COLUMN)
 
     rows = []
     for label in ROW_LABELS:
-        cells = {col: "" for col in columns}
-
-        if data.o2_curve_enabled and O2_COLUMN in columns:
-            if label in ("purge", "LtOff"):
-                # Per spec: leave purge and LtOff blank in the O2 column.
-                cells[O2_COLUMN] = ""
-            else:
-                # Numbered rows: point N -> Curve[N-1].
-                point = int(label)
-                idx = point - 1
-                if 0 <= idx < len(data.o2_curve):
-                    cells[O2_COLUMN] = format_value(data.o2_curve[idx])
-                else:
-                    cells[O2_COLUMN] = ""
-
+        cells = {}
+        for col in COLUMN_TAGS:
+            cells[col] = _cell_value(data.tags.get(COLUMN_TAGS[col]), label)
+        if O2_COLUMN in columns:
+            cells[O2_COLUMN] = _o2_cell_value(data.tags.get(O2_TAG), label)
         rows.append({"label": label, "cells": cells})
 
     return {"corner": CORNER_LABEL, "columns": columns, "rows": rows}

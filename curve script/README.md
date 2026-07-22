@@ -19,22 +19,28 @@ LtOff  |     |           |     |     |
   `LtOff`, then firing points `1`–`16`.
 * **Columns** run across the top: `Air`, `Fuel Act1`, `FGR`, `VFD`, and `O2`.
 
-## What's wired up so far
+## What's wired up
 
-Only one tag drives the table right now — **`DesiredO2`** (data type
-`FuelAirCurveData`) — and it controls the **O2** column:
+Each column is driven by one `FuelAirCurveData` tag:
 
-| Condition | Result |
-|-----------|--------|
-| `DesiredO2.Cfg.O2Curve = 0` | The **O2** column is **omitted** entirely. |
-| `DesiredO2.Cfg.O2Curve = 1` | The **O2** column is shown. `purge` and `LtOff` are left blank; rows `1`–`16` are filled from `DesiredO2.Curve[0]`…`Curve[15]`. A value of zero is shown as `0`. |
+| Column | Tag | `purge` row | `LtOff` row | Rows `1`–`16` |
+|--------|-----|-------------|-------------|----------------|
+| Air | `DesiredAir` | `.Purge` | `.LightOff` | `.Curve[0]`…`.Curve[15]` |
+| Fuel Act1 | `DesiredFuel_A1` | `.Purge` | `.LightOff` | `.Curve[0]`…`.Curve[15]` |
+| FGR | `DesiredFGR` | `.Purge` | `.LightOff` | `.Curve[0]`…`.Curve[15]` |
+| VFD | `DesiredVFD` | `.Purge` | `.LightOff` | `.Curve[0]`…`.Curve[15]` |
+| O2 | `DesiredO2` | *(blank)* | *(blank)* | `.Curve[0]`…`.Curve[15]` |
 
-The `Air`, `Fuel Act1`, `FGR` and `VFD` columns are laid out but left empty —
-we still need to identify the tags/arrays that feed them.
+Rules:
 
-> The sample file used to build this (`…RH150_29.ACD`) has
-> `DesiredO2.Cfg.O2Curve = 0` and an all-zero curve — a blank template — so the
-> tool correctly omits the O2 column for it.
+* Any value that is **zero or missing is shown as `0`**.
+* The **O2** column is a special case — its `purge` and `LtOff` rows are always
+  left blank, and the whole column is shown **only when
+  `DesiredO2.Cfg.O2Curve = 1`**. When it's `0` the O2 column is omitted.
+
+> The sample file used to build this (`…RH150_29.ACD`) is a blank template:
+> `DesiredO2.Cfg.O2Curve = 0` and every curve is all-zero, so the tool omits the
+> O2 column and fills the other four columns with `0`.
 
 ## Requirements
 
@@ -71,13 +77,7 @@ python curve_extractor.py path/to/project.ACD
 | `curve_extractor.py` | All the parsing/table logic — no GUI, importable & testable. |
 | `requirements.txt` | Python dependencies. |
 
-## Open questions / next steps
+## Next steps
 
-1. **`.L5K` support** — not implemented yet; drop a sample export in and the
-   parser gets added (the `.ACD` path is fully working).
-2. **Slot 16 of the O2 column** — the spec described filling points `1`–`15`
-   from `Curve[0]`…`Curve[14]`, but the `Curve` array actually has **16**
-   elements (`[0]`–`[15]`). Right now point `16` is filled from `Curve[15]`.
-   Say the word if point `16` should instead be left blank.
-3. **The other columns** — need the tags/arrays that feed `Air`, `Fuel Act1`,
-   `FGR` and `VFD`.
+* **`.L5K` support** — not implemented yet; drop a sample export in and the
+  parser gets added (the `.ACD` path is fully working).

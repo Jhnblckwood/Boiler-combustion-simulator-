@@ -175,13 +175,7 @@ class CurveApp:
         self._set_status(
             f"{data.source_file}  •  controller: {who}  •  {data.file_kind}"
         )
-        notes = list(data.notes)
-        if not data.o2_curve_enabled and data.file_kind == "ACD":
-            notes.append(
-                "Air / Fuel Act1 / FGR / VFD columns are laid out but empty — "
-                "their source tags are still to be identified."
-            )
-        self._show_notes(notes)
+        self._show_notes(list(data.notes))
 
     def _render_table(self, table: dict):
         self._clear_table()
