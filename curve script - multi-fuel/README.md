@@ -6,7 +6,19 @@ This is the **multi-fuel** version of `curve script`. The original folder
 
 > The original `curve script` folder is left untouched as a working checkpoint.
 
-## What it does
+## No-install version (recommended)
+
+**`Fuel Curve Reader.html`** is a single self-contained file — **no Python, no
+install, nothing to set up**. Double-click it to open in any web browser, then
+drag an `.L5K` export onto the drop zone. It shows both fuels' tables, identical
+to the Python GUI. Because it's one HTML file, everything it needs is already
+inside it, and you can email/copy it anywhere.
+
+> Browsers can't read binary `.ACD` files, so the HTML version is `.L5K` only —
+> which is the format that carries the real values anyway. The Python version
+> below also reads `.ACD` (structure only).
+
+## Python version
 
 Drop a Studio 5000 file on the window:
 
