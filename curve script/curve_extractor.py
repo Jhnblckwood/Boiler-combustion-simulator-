@@ -32,6 +32,7 @@ The module has no GUI code so it can be imported and unit-tested on its own.
 from __future__ import annotations
 
 import os
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -204,21 +205,182 @@ def extract_from_acd(path: str) -> CurveData:
 # L5K parsing (placeholder — awaiting a sample .L5K file)
 # ---------------------------------------------------------------------------
 
-def extract_from_l5k(path: str) -> CurveData:
-    """Extract curve data from an ``.L5K`` text export.
+# A FuelAirCurveData initializer in an L5K export is a positional, nested
+# bracket list. The members we care about sit at these fixed positions:
+#
+#   [ [LEN,'Name'],   # 0  Name (STRING_20)
+#     Purge,          # 1
+#     LightOff,       # 2
+#     [Curve x16],    # 3
+#     ConfigSP,       # 4
+#     PosnActual,     # 5
+#     [Display x4],   # 6
+#     Sts_ConfigSaved,# 7
+#     Sts_CurveSize,  # 8
+#     Err_DataNotValid,#9
+#     [Cfg] ]         # last: [packedBOOLs, MinIncDecPct, StuckBttnDelay]
+#
+# The seven Cfg BOOLs pack into one integer, so O2Curve is bit 3.
+_L5K_PURGE_IDX = 1
+_L5K_LIGHTOFF_IDX = 2
+_L5K_CURVE_IDX = 3
+_O2CURVE_BIT = 3
 
-    L5K support is not wired up yet — we need a sample export to confirm the
-    exact text layout of the tag initializers. This returns a clearly labelled
-    placeholder rather than guessing at the format.
+
+def _l5k_parse_initializer(text: str):
+    """Parse an L5K initializer (``[...]``) into nested Python lists.
+
+    Scalars stay as their raw token strings; quoted ``'...'`` strings are
+    returned as-is (with L5K ``$`` escapes left intact).
     """
-    data = CurveData(
-        source_file=os.path.basename(path),
-        file_kind="L5K",
+    idx = 0
+    n = len(text)
+
+    def skip_ws():
+        nonlocal idx
+        while idx < n and text[idx] in " \t\r\n":
+            idx += 1
+
+    def parse_value():
+        skip_ws()
+        c = text[idx]
+        if c == "[":
+            return parse_list()
+        if c == "'":
+            return parse_string()
+        return parse_scalar()
+
+    def parse_list():
+        nonlocal idx
+        idx += 1  # consume '['
+        items = []
+        skip_ws()
+        if idx < n and text[idx] == "]":
+            idx += 1
+            return items
+        while idx < n:
+            items.append(parse_value())
+            skip_ws()
+            if idx < n and text[idx] == ",":
+                idx += 1
+                continue
+            if idx < n and text[idx] == "]":
+                idx += 1
+                break
+            break
+        return items
+
+    def parse_string():
+        nonlocal idx
+        idx += 1  # consume opening quote
+        start = idx
+        while idx < n:
+            if text[idx] == "$":     # L5K escape — skip next char
+                idx += 2
+                continue
+            if text[idx] == "'":
+                s = text[start:idx]
+                idx += 1
+                return s
+            idx += 1
+        return text[start:idx]
+
+    def parse_scalar():
+        nonlocal idx
+        start = idx
+        while idx < n and text[idx] not in ",[]' \t\r\n":
+            idx += 1
+        return text[start:idx]
+
+    return parse_value()
+
+
+def _l5k_extract_initializer(txt: str, tag_name: str):
+    """Return the raw ``[...]`` initializer text for one FuelAirCurveData tag."""
+    m = re.search(
+        r"\b" + re.escape(tag_name) + r"\s*:\s*FuelAirCurveData\s*:=",
+        txt,
     )
-    data.notes.append(
-        ".L5K parsing is not implemented yet. Drop a sample .L5K export in and "
-        "we'll add the parser (the .ACD path is fully working)."
-    )
+    if not m:
+        return None
+    idx = m.end()
+    n = len(txt)
+    # Skip to the opening bracket, then track bracket depth (ignoring quoted
+    # strings) until the matching close.
+    while idx < n and txt[idx] != "[":
+        idx += 1
+    start = idx
+    depth = 0
+    in_str = False
+    while idx < n:
+        c = txt[idx]
+        if in_str:
+            if c == "$":
+                idx += 2
+                continue
+            if c == "'":
+                in_str = False
+        elif c == "'":
+            in_str = True
+        elif c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                return txt[start:idx + 1]
+        idx += 1
+    return None
+
+
+def _l5k_parse_curve_tag(txt: str, tag_name: str) -> TagCurve:
+    """Parse one FuelAirCurveData tag out of the L5K text."""
+    raw = _l5k_extract_initializer(txt, tag_name)
+    if raw is None:
+        return TagCurve(name=tag_name, found=False)
+
+    parsed = _l5k_parse_initializer(raw)
+    tc = TagCurve(name=tag_name, found=True)
+
+    if isinstance(parsed, list) and len(parsed) > _L5K_CURVE_IDX:
+        tc.purge = parsed[_L5K_PURGE_IDX]
+        tc.lightoff = parsed[_L5K_LIGHTOFF_IDX]
+        curve = parsed[_L5K_CURVE_IDX]
+        if isinstance(curve, list):
+            tc.curve = list(curve)
+        # Cfg is the last bracketed group; its first element packs the BOOLs.
+        cfg = parsed[-1]
+        if isinstance(cfg, list) and cfg:
+            try:
+                packed = int(float(cfg[0]))
+                tc.o2curve = (packed >> _O2CURVE_BIT) & 1
+            except (TypeError, ValueError):
+                tc.o2curve = 0
+    return tc
+
+
+def extract_from_l5k(path: str) -> CurveData:
+    """Extract curve data from an ``.L5K`` text export."""
+    try:
+        txt = open(path, encoding="utf-8-sig", errors="replace").read()
+    except OSError as exc:
+        raise ExtractError(f"Could not read L5K file:\n{exc}") from exc
+
+    data = CurveData(source_file=os.path.basename(path), file_kind="L5K")
+
+    m = re.search(r"CONTROLLER\s+(\w+)", txt)
+    if m:
+        data.controller_name = m.group(1)
+
+    for tag_name in set(COLUMN_TAGS.values()) | {O2_TAG}:
+        tc = _l5k_parse_curve_tag(txt, tag_name)
+        data.tags[tag_name] = tc
+        if not tc.found:
+            data.notes.append(f"Tag '{tag_name}' was not found in this export.")
+
+    if data.o2_curve_enabled:
+        data.notes.append("DesiredO2.Cfg.O2Curve = 1  ->  the O2 column is shown.")
+    else:
+        data.notes.append("DesiredO2.Cfg.O2Curve = 0  ->  the O2 column is omitted.")
     return data
 
 

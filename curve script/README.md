@@ -3,7 +3,7 @@
 A small desktop tool that reads a Rockwell **Studio 5000 / RSLogix 5000**
 project and lays its fuel/air **curve** configuration out as a table.
 
-Drag a `.ACD` file (or, later, an `.L5K` export) onto the window and it renders:
+Drag a `.ACD` file or an `.L5K` export onto the window and it renders:
 
 ```
 gas    | Air | Fuel Act1 | FGR | VFD | O2
@@ -39,9 +39,18 @@ Rules:
   left blank, and the whole column is shown **only when
   `DesiredO2.Cfg.O2Curve = 1`**. When it's `0` the O2 column is omitted.
 
-> The sample file used to build this (`…RH150_29.ACD`) is a blank template:
-> `DesiredO2.Cfg.O2Curve = 0` and every curve is all-zero, so the tool omits the
-> O2 column and fills the other four columns with `0`.
+### A note on `.ACD` vs `.L5K` values
+
+**`.L5K` exports carry the real, commissioned values** and are fully parsed —
+purge, light-off, all curves, and the `Cfg` bit-packed flags (`O2Curve` is
+bit 3 of the packed config integer).
+
+**`.ACD` files are read for tag *structure* only.** The open-source ACD library
+this tool uses reconstructs each tag's layout but emits zero placeholders for
+the stored values — it does not read a tag's initial-value buffer. So an `.ACD`
+will show the correct rows/columns but zeros for the numbers. **For real values,
+use the `.L5K` export.** (An `.ACD` that was never populated — e.g. an offline
+template like `…RH150_29.ACD` — is genuinely all-zero anyway.)
 
 ## Requirements
 
@@ -67,7 +76,7 @@ Then drag a `.ACD` file onto the window (or click the drop zone to browse).
 The extractor also runs on its own and prints the table as text:
 
 ```bash
-python curve_extractor.py path/to/project.ACD
+python curve_extractor.py path/to/project.L5K
 ```
 
 ## Files
@@ -76,9 +85,4 @@ python curve_extractor.py path/to/project.ACD
 |------|---------|
 | `curve_gui.py` | The drag-and-drop GUI (tkinter). |
 | `curve_extractor.py` | All the parsing/table logic — no GUI, importable & testable. |
-| `requirements.txt` | Python dependencies. |
-
-## Next steps
-
-* **`.L5K` support** — not implemented yet; drop a sample export in and the
-  parser gets added (the `.ACD` path is fully working).
+| `requirements.txt` | Python dependencies (only needed for `.ACD`; `.L5K` is pure-Python). |
