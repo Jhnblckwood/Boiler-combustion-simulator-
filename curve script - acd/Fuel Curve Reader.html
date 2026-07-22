@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fuel/Air Curve Reader</title>
+<style>
+  :root{
+    --winbg:#f4f5f7; --ink:#1e1e1e; --drop-bg:#eef3f8; --drop-fg:#33475b;
+    --drop-border:#9fb2c6; --section:#e8eef5; --fuel:#d5e3d5; --colhdr:#eef1f4;
+    --notes:#fbfbf7; --line:#d3d6db; --muted:#5b6470; --accent:#2f6f4f;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--winbg);color:var(--ink);
+       font-family:"Segoe UI",system-ui,Arial,sans-serif;padding:18px;}
+  h1{font-size:17px;margin:2px 2px 12px;}
+  .drop{border:2px dashed var(--drop-border);background:var(--drop-bg);color:var(--drop-fg);
+        text-align:center;border-radius:8px;padding:26px 12px;line-height:1.55;
+        font-size:14px;cursor:pointer;transition:background .15s,border-color .15s;}
+  .drop:hover{background:#e4edf6;}
+  .drop.over{background:#dcecff;border-color:#3a7bd5;}
+  .drop .big{font-size:15px;font-weight:600;}
+  .drop .sub{font-size:12.5px;opacity:.85;margin-top:3px;}
+  .status{color:var(--muted);font-size:12.5px;margin:12px 2px 6px;min-height:1.2em;}
+  #tables{display:flex;flex-direction:column;gap:20px;}
+  .fueltable{border:1px solid var(--line);border-radius:6px;overflow:hidden;
+             background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .banner{background:var(--fuel);font-weight:700;font-size:13.5px;padding:8px 14px;}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;}
+  th,td{padding:4px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #eee;}
+  th{background:var(--colhdr);color:#2b3a4a;font-weight:700;}
+  td.lbl,th.lbl{width:66px;color:#333;font-weight:600;background:#fafafa;}
+  th.air,td.air{min-width:120px;}
+  tr.section td{background:var(--section);}
+  tr:last-child td{border-bottom:none;}
+  .notes{background:var(--notes);border:1px solid #ececdf;border-radius:6px;
+         margin-top:16px;padding:10px 13px;font-size:12.5px;color:#3a3a2f;line-height:1.7;}
+  .hint{color:var(--muted);font-size:12px;margin-top:14px;}
+  input[type=file]{display:none;}
+  @media (prefers-color-scheme: dark){
+    :root{--winbg:#20242b;--ink:#e7e9ec;--drop-bg:#263041;--drop-fg:#cfe0f2;
+          --drop-border:#4a5a6e;--section:#2a333f;--fuel:#2f4638;--colhdr:#2b333d;
+          --notes:#2a2a24;--line:#3a4048;--muted:#9aa4b1;}
+    .drop:hover{background:#2c384a;} .drop.over{background:#31445e;}
+    .fueltable{background:#242932;box-shadow:none;}
+    th,td{border-bottom-color:#333a43;}
+    td.lbl,th.lbl{background:#20252c;color:#cdd3da;}
+    .notes{border-color:#3a3a2f;color:#d8d8c8;}
+  }
+</style>
+</head>
+<body>
+  <h1>Fuel/Air Curve Reader</h1>
+
+  <div id="drop" class="drop">
+    <div class="big">Drag a Studio 5000 <b>.L5K</b> file here</div>
+    <div class="sub">(or click to browse)</div>
+  </div>
+  <input type="file" id="file" accept=".L5K,.l5k,.txt">
+
+  <div id="status" class="status">Ready.</div>
+  <div id="tables"></div>
+  <div id="notes"></div>
+
+  <div class="hint">This is a single self-contained file — no install needed. Double-click it to open in your browser, then drop an <b>.L5K</b> export in. (<b>.ACD</b> files are binary and can't be read here; export to L5K in Studio 5000.)</div>
+
+<script>
+/* ---- L5K multi-fuel parsing (matches fuel_curves.py) ------------------- */
+const COLUMN_SUFFIX = { "Air":"Air", "Fuel Act1":"A1", "FGR":"FGR", "VFD":"VFD", "O2":"O2" };
+const ROW_LABELS = ["purge","LtOff","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"];
+
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+function fmt(raw){
+  if(raw===null || raw===undefined || raw==="") return "";
+  const num = parseFloat(raw);
+  if(isNaN(num)) return String(raw);
+  let r = Math.round(num*10)/10;
+  if(r===0) return "0";
+  if(Number.isInteger(r)) return String(r);
+  return r.toFixed(1);
+}
+
+function parseInitializer(text){
+  let i=0; const n=text.length;
+  const skipws=()=>{ while(i<n && " \t\r\n".indexOf(text[i])>=0) i++; };
+  function parseValue(){
+    skipws(); const c=text[i];
+    if(c==="[") return parseList();
+    if(c==="'") return parseString();
+    return parseScalar();
+  }
+  function parseList(){
+    i++; const items=[]; skipws();
+    if(i<n && text[i]==="]"){ i++; return items; }
+    while(i<n){
+      items.push(parseValue()); skipws();
+      if(i<n && text[i]===","){ i++; continue; }
+      if(i<n && text[i]==="]"){ i++; break; }
+      break;
+    }
+    return items;
+  }
+  function parseString(){
+    i++; let s="";
+    while(i<n){
+      if(text[i]==="$"){ i+=2; continue; }
+      if(text[i]==="'"){ i++; break; }
+      s+=text[i]; i++;
+    }
+    return s;
+  }
+  function parseScalar(){
+    let start=i;
+    while(i<n && ",[]' \t\r\n".indexOf(text[i])<0) i++;
+    return text.slice(start,i);
+  }
+  return parseValue();
+}
+
+function extractBalanced(txt, tagName, type){
+  const re = new RegExp("\\b"+escapeRe(tagName)+"\\s*:\\s*"+type+"\\s*:=");
+  const m = re.exec(txt); if(!m) return null;
+  let i = m.index + m[0].length; const n = txt.length;
+  while(i<n && txt[i]!=="[") i++;
+  const start=i; let depth=0, inStr=false;
+  while(i<n){
+    const c=txt[i];
+    if(inStr){ if(c==="$"){i+=2;continue;} if(c==="'") inStr=false; }
+    else if(c==="'") inStr=true;
+    else if(c==="[") depth++;
+    else if(c==="]"){ depth--; if(depth===0) return txt.slice(start, i+1); }
+    i++;
+  }
+  return null;
+}
+
+function isNumericList(x, len){
+  if(!Array.isArray(x)) return false;
+  if(len!==undefined && x.length!==len) return false;
+  return x.every(e => typeof e==="string" && /^-?[\d.]/.test(e));
+}
+
+function parseArrayMgmt(txt, tag){
+  const raw = extractBalanced(txt, tag, "FA_DataMgmt");
+  if(raw===null) return {found:false};
+  const parsed = parseInitializer(raw);
+  if(!Array.isArray(parsed)) return {found:false};
+  let ci=-1;
+  for(let k=0;k<parsed.length;k++){ if(isNumericList(parsed[k],16)){ ci=k; break; } }
+  if(ci<0) return {found:false};
+  return {
+    found:true,
+    curve: parsed[ci].slice(),
+    purge: (ci>=2 && isNumericList(parsed[ci-2])) ? parsed[ci-2][0] : null,
+    lightoff: (ci>=1 && isNumericList(parsed[ci-1])) ? parsed[ci-1][0] : null
+  };
+}
+
+function o2TrimEnabled(txt){
+  const raw = extractBalanced(txt, "DesiredO2", "FuelAirCurveData");
+  if(raw===null) return false;
+  const parsed = parseInitializer(raw);
+  if(!Array.isArray(parsed) || parsed.length===0) return false;
+  const cfg = parsed[parsed.length-1];
+  if(!Array.isArray(cfg) || cfg.length===0) return false;
+  const packed = parseInt(parseFloat(cfg[0]));
+  return ((packed>>3)&1)===1;
+}
+
+function fuelTypeNames(txt){
+  const names={};
+  const m = /FuelTypeNames\s*:\s*String_20\[\d+\]\s*\(/.exec(txt);
+  if(!m) return names;
+  const j = txt.indexOf(") :=", m.index); if(j<0) return names;
+  const block = txt.slice(j, txt.indexOf(";", j));
+  const re = /\[\s*\d+\s*,\s*'([^']*)'/g; let mm, idx=0;
+  while((mm=re.exec(block))!==null){ names[idx]= mm[1].split("$00")[0].trim(); idx++; }
+  return names;
+}
+
+function extractMultiFuel(txt){
+  const tn = fuelTypeNames(txt);
+  const o2en = o2TrimEnabled(txt);
+  const fuels=[];
+  for(const num of [1,2]){
+    const cols={};
+    for(const col in COLUMN_SUFFIX) cols[col] = parseArrayMgmt(txt, "ArrayMgmt_F"+num+COLUMN_SUFFIX[col]);
+    fuels.push({number:num, name: tn[num-1] || ("Fuel "+num), cols});
+  }
+  return {o2en, fuels, controller: (txt.match(/CONTROLLER\s+(\w+)/)||[])[1] || "" };
+}
+
+function cell(col, label, cc){
+  if(!cc || !cc.found) return "";
+  if(label==="purge"){ return (col==="Fuel Act1"||col==="O2") ? "" : fmt(cc.purge); }
+  if(label==="LtOff"){ return (col==="O2") ? "" : fmt(cc.lightoff); }
+  const i = parseInt(label)-1;
+  return fmt((i>=0 && i<cc.curve.length) ? cc.curve[i] : null);
+}
+
+/* ---- rendering -------------------------------------------------------- */
+function render(data, filename){
+  const columns = ["Air","Fuel Act1","FGR","VFD"];
+  if(data.o2en) columns.push("O2");
+
+  const wrap = document.getElementById("tables");
+  wrap.innerHTML = "";
+  for(const fuel of data.fuels){
+    const box = document.createElement("div");
+    box.className = "fueltable";
+
+    const banner = document.createElement("div");
+    banner.className = "banner";
+    banner.textContent = "Fuel " + fuel.number + " — " + fuel.name;
+    box.appendChild(banner);
+
+    const tbl = document.createElement("table");
+    let html = "<tr><th class='lbl'></th>";
+    columns.forEach((c,idx)=>{ html += "<th class='"+(idx===0?"air":"")+"'>"+c+"</th>"; });
+    html += "</tr>";
+    for(const label of ROW_LABELS){
+      const sect = (label==="purge"||label==="LtOff") ? " class='section'" : "";
+      html += "<tr"+sect+"><td class='lbl'>"+label+"</td>";
+      columns.forEach((c,idx)=>{ html += "<td class='"+(idx===0?"air":"")+"'>"+cell(c,label,fuel.cols[c])+"</td>"; });
+      html += "</tr>";
+    }
+    tbl.innerHTML = html;
+    box.appendChild(tbl);
+    wrap.appendChild(box);
+  }
+
+  document.getElementById("status").textContent =
+    filename + "  •  controller: " + (data.controller||"(unknown)") + "  •  both fuels";
+
+  const notes = [
+    "Fuel 1 = " + data.fuels[0].name + ", Fuel 2 = " + data.fuels[1].name + "  (from the file's fuel-selection config).",
+    data.o2en ? "O2 trim is enabled (DesiredO2.Cfg.O2Curve = 1) — O2 column shown."
+              : "O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted."
+  ];
+  document.getElementById("notes").className = "notes";
+  document.getElementById("notes").innerHTML = notes.map(n=>"• "+n).join("<br>");
+}
+
+/* ---- file intake ------------------------------------------------------ */
+function loadFile(file){
+  const status = document.getElementById("status");
+  status.textContent = "Reading " + file.name + " …";
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = extractMultiFuel(e.target.result);
+      if(!data.fuels.some(f=>Object.values(f.cols).some(c=>c.found))){
+        status.textContent = "No ArrayMgmt_F* curve tags found — is this the right L5K export?";
+        return;
+      }
+      render(data, file.name);
+    }catch(err){
+      status.textContent = "Could not parse file: " + err.message;
+    }
+  };
+  reader.onerror = () => { status.textContent = "Could not read the file."; };
+  reader.readAsText(file);
+}
+
+const drop = document.getElementById("drop");
+const fileInput = document.getElementById("file");
+drop.addEventListener("click", ()=> fileInput.click());
+fileInput.addEventListener("change", e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e=>{ if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+window.addEventListener("dragover", e=>e.preventDefault());
+window.addEventListener("drop", e=>e.preventDefault());
+</script>
+</body>
+</html>
