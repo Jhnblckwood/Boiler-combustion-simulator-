@@ -391,7 +391,9 @@ function loadFile(file){
       try{
         const data = await extractMultiFuelACD(new Uint8Array(e.target.result));
         if(!data.fuels.some(f=>Object.values(f.cols).some(c=>c.found))){
-          status.textContent = "No ArrayMgmt_F* curves found in this ACD.";
+          document.getElementById("tables").innerHTML = "";
+          document.getElementById("notes").innerHTML = "";
+          status.textContent = "Current boiler is configured with linkage, not actuators.  No curve stored";
           return;
         }
         render(data, file.name);
