@@ -1,10 +1,7 @@
-# --- Reading .ACD files -----------------------------------------------------
-# Parses Rockwell Studio 5000 / RSLogix 5000 binary .ACD projects.
-# NOTE: the current PyPI release (acd-tools 0.2a8) crashes on some projects'
-# comment records, so we install from the upstream git repo which handles them.
-acd-tools @ git+https://github.com/hutcheb/acd.git
+# The ACD and L5K readers are pure Python standard library — no third-party
+# packages are required to read either file type.
 
 # --- Optional: real drag-and-drop ------------------------------------------
-# Enables dragging a file onto the window. If it isn't installed the GUI still
-# works — the drop zone just becomes a click-to-browse button.
+# Enables dragging a file onto the GUI window. If it isn't installed the GUI
+# still works — the drop zone just becomes a click-to-browse button.
 tkinterdnd2

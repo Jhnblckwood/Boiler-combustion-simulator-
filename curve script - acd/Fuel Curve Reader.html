@@ -263,18 +263,45 @@ function acdFindStream(u8, wanted){
   }
   return null;
 }
+// The comps record header shrank by 4 bytes between older (V20) and newer
+// (V35) ACDs, so the tag name sits at a different offset from the record
+// marker. In BOTH layouts object_id = name-8 and parent_id = name-4, so we
+// only detect the name offset (extra candidates cover other versions).
+const _NAME_OFFSETS=[30,26,34,38,22];
+function _readName(dv,nameAbs){
+  let name="",q=nameAbs,end=nameAbs+124;
+  while(q<end){const c=_u16(dv,q);q+=2;if(c===0)break;name+=String.fromCharCode(c);}
+  return name;
+}
+function _walkStart(dv){ const prr=_u32(dv,_u32(dv,12)+18); return prr+_u32(dv,prr+2); }
+function _detectNameOffset(u8,dv,start,no){
+  let best=30,bestScore=-1;
+  for(const off of _NAME_OFFSETS){
+    let p=start,ok=0,seen=0;
+    for(let count=0;count<no&&seen<400&&p+off+4<u8.length;count++){
+      const outer=_u32(dv,p+2); if(outer<10||p+outer>u8.length+8) break;
+      if(_u16(dv,p)===0xfafa){seen++; const c0=u8[p+off];
+        if(u8[p+off+1]===0 && ((c0>=65&&c0<=90)||(c0>=97&&c0<=122)||c0===36||c0===95)) ok++;}
+      p+=outer;
+    }
+    if(seen>10 && ok>bestScore){bestScore=ok;best=off;}
+  }
+  return best;
+}
 function acdWalkComps(u8){
   const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
-  const prr=_u32(dv,_u32(dv,12)+14), rhl=_u32(dv,prr+2), no=_u32(dv,20);
-  let p=prr+rhl, count=0; const comps={}, byId={};
-  while(count<no && p+30<u8.length){
+  const no=_u32(dv,20), start=_walkStart(dv);
+  const nameOff=_detectNameOffset(u8,dv,start,no);
+  const comps={}, byId={};
+  let p=start, count=0;
+  while(count<no && p+6<=u8.length){
     const id=_u16(dv,p), outer=_u32(dv,p+2);
     if(outer<10 || p+outer>u8.length+8) break;
-    if(id===0xfafa){
-      const inner=_u32(dv,p+6);
-      const object_id=_u32(dv,p+22), parent_id=_u32(dv,p+26);
-      let name="",q=p+30; while(q<p+154){const c=_u16(dv,q);q+=2;if(c===0)break;name+=String.fromCharCode(c);}
-      const buffer=u8.subarray(p+154,p+154+(inner-148));
+    if(id===0xfafa && p+nameOff+124<=u8.length){
+      const nameAbs=p+nameOff;
+      const object_id=_u32(dv,nameAbs-8), parent_id=_u32(dv,nameAbs-4);
+      const name=_readName(dv,nameAbs);
+      const buffer=u8.subarray(nameAbs+124, p+outer);
       comps[name]={object_id,parent_id,buffer}; byId[object_id]={name,parent_id,buffer};
     }
     p+=outer; count++;

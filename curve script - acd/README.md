@@ -22,16 +22,23 @@ against the same project's ACD and L5K.
 
 ### How ACD reading works (the hard part)
 
-The open-source `acd-tools` library rebuilds tag *structure* but writes zeros for
-the values. So `acd_reader.py` goes further: it uses the library only to
-decompress the ACD, then reads the values from the raw binary records —
+`acd_reader.py` is **pure Python standard library** — no third-party packages.
+(The open-source `acd-tools` library only rebuilds tag *structure*, writes zeros
+for the values, and fails to parse older V20 projects, so it isn't used.)
 
-1. each tag definition record holds a 4-byte pointer to its **value record**
-   (a child of `RxDataCollection`);
-2. `DesiredX` value records are clean `FuelAirCurveData` blobs (used for the
-   `O2Curve` enable bit);
-3. `ArrayMgmt_F<n>X` value records store the curve as `Ref_Data` + an identical
-   working copy — located by that "double curve" signature.
+1. Unzip the ACD container and gzip-decompress the `Comps.Dat` stream.
+2. Walk the `Comps.Dat` records. The record header shrank by 4 bytes between
+   V20 and V35, so the tag-name offset is **auto-detected**; in every layout
+   `object_id = name-8` and `parent_id = name-4`.
+3. Each tag definition record holds a 4-byte pointer to its **value record**.
+4. `DesiredX` value records are clean `FuelAirCurveData` blobs (used for the
+   `O2Curve` enable bit); `ArrayMgmt_F<n>X` records store the curve as
+   `Ref_Data` + an identical working copy — located by that "double curve"
+   signature.
+
+**Versions:** verified on **V20** (RH250) and **V35** (RH800). The auto-detection
+is built to carry across the versions in between and newer ones; if a future
+file reads wrong, it's usually one more name-offset to add.
 
 ### The `.L5K` path
 
@@ -87,7 +94,7 @@ Fuel 1 and Fuel 2 are labelled from the file's fuel config
 ## Running
 
 ```bash
-pip install -r requirements.txt      # only needed for .ACD; .L5K is pure-Python
+pip install -r requirements.txt      # optional — only for real drag-and-drop
 python curve_gui.py
 ```
 
@@ -116,4 +123,4 @@ ACD and L5K produce the identical table.
 | `fuel_curves.py` | `.L5K` extraction + shared table building. |
 | `curve_extractor.py` | Shared helpers / original single-set extractor. |
 | `Fuel Curve Reader.html` | No-install single-file reader (`.L5K` only). |
-| `requirements.txt` | Python dependencies (needed for `.ACD`). |
+| `requirements.txt` | Optional dep (`tkinterdnd2`) for drag-and-drop; readers need nothing. |
