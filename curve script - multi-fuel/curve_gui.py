@@ -178,7 +178,7 @@ class CurveApp:
     def _show_result(self, data):
         if isinstance(data, fc.MultiFuelData):
             table = fc.build_combined_table(data)
-            self._render_table(table, label_width=170)
+            self._render_table(table, label_width=140)
             who = data.controller_name or "(unknown)"
             self._set_status(
                 f"{data.source_file}  •  controller: {who}  •  L5K (both fuels)"

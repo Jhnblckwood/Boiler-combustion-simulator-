@@ -39,6 +39,8 @@ from curve_extractor import (
     ROW_LABELS,
     format_value,
     _l5k_parse_initializer,
+    _l5k_parse_curve_tag,
+    O2_TAG,
     ExtractError,
 )
 
@@ -85,7 +87,7 @@ class FuelCurves:
 class MultiFuelData:
     source_file: Optional[str] = None
     controller_name: Optional[str] = None
-    active_fuel_note: Optional[str] = None
+    o2_trim_enabled: bool = False
     fuels: List[FuelCurves] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
 
@@ -203,6 +205,12 @@ def extract_multifuel_l5k(path: str) -> MultiFuelData:
     if m:
         data.controller_name = m.group(1)
 
+    # O2 trim enable comes from DesiredO2.Cfg.O2Curve (bit 3) — the same flag
+    # the single-set reader uses. The per-fuel FA_DataMgmt tags don't expose
+    # their Cfg bits cleanly, so this active-config flag gates the O2 column.
+    desired_o2 = _l5k_parse_curve_tag(txt, O2_TAG)
+    data.o2_trim_enabled = bool(desired_o2.found and desired_o2.o2curve == 1)
+
     # Fuel 1 -> FuelTypeNames[0], Fuel 2 -> FuelTypeNames[1]
     # (from the burner fuel-selection config: 0 = Gas, 1 = #2 Oil).
     type_names = _read_fuel_type_names(txt)
@@ -219,6 +227,10 @@ def extract_multifuel_l5k(path: str) -> MultiFuelData:
         "Fuel 1 = " + data.fuels[0].name + ", Fuel 2 = " + data.fuels[1].name
         + "  (from the file's fuel-selection config)."
     )
+    if data.o2_trim_enabled:
+        data.notes.append("O2 trim is enabled (DesiredO2.Cfg.O2Curve = 1) — O2 column shown.")
+    else:
+        data.notes.append("O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted.")
     return data
 
 
@@ -226,19 +238,18 @@ def extract_multifuel_l5k(path: str) -> MultiFuelData:
 # Table building
 # ---------------------------------------------------------------------------
 
-def build_fuel_table(fuel: FuelCurves) -> dict:
+def build_fuel_table(fuel: FuelCurves, o2_enabled: bool = False) -> dict:
     """Build a table model for one fuel.
 
     Rows: purge, LtOff, 1..16.  Columns: Air, Fuel Act1, FGR, VFD, and O2
-    (only when that fuel actually has O2 trim data).
+    (only when O2 trim is enabled).
 
     Blank cells (per spec):
         * Fuel Act1 -> purge blank
         * O2        -> purge and LtOff blank
     """
     columns = ["Air", FUEL_COLUMN, "FGR", "VFD"]
-    o2 = fuel.columns.get(O2_COLUMN)
-    if o2 and o2.found and o2.has_data:
+    if o2_enabled:
         columns.append(O2_COLUMN)
 
     rows = []
@@ -279,7 +290,7 @@ def build_combined_table(data: MultiFuelData) -> dict:
     fuel contributes a header row (``is_header=True``) carrying its name, then
     its purge / LtOff / 1..16 rows.
     """
-    per_fuel = [(f, build_fuel_table(f)) for f in data.fuels]
+    per_fuel = [(f, build_fuel_table(f, data.o2_trim_enabled)) for f in data.fuels]
     present = set()
     for _f, t in per_fuel:
         present.update(t["columns"])
@@ -298,13 +309,13 @@ def build_combined_table(data: MultiFuelData) -> dict:
             cells = {c: by_col.get(c, {}).get(label, "") for c in columns}
             rows.append({"label": label, "is_header": False, "cells": cells})
 
-    return {"corner": "Point", "columns": columns, "rows": rows}
+    return {"corner": "Fuel", "columns": columns, "rows": rows}
 
 
 def render_fuel_tables_text(data: MultiFuelData) -> str:
     out = []
     for fuel in data.fuels:
-        table = build_fuel_table(fuel)
+        table = build_fuel_table(fuel, data.o2_trim_enabled)
         out.append(f"Fuel {fuel.number} — {fuel.name}")
         out.append(_render_one(table))
         out.append("")
