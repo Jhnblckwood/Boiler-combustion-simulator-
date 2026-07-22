@@ -1,0 +1,7 @@
+# The ACD and L5K readers are pure Python standard library — no third-party
+# packages are required to read either file type.
+
+# --- Optional: real drag-and-drop ------------------------------------------
+# Enables dragging a file onto the GUI window. If it isn't installed the GUI
+# still works — the drop zone just becomes a click-to-browse button.
+tkinterdnd2
