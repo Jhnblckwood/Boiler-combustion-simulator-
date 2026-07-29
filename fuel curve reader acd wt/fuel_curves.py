@@ -279,7 +279,10 @@ def build_fuel_table(fuel: FuelCurves, o2_enabled: bool = False,
             cells[col] = _cell(col, label, cc)
         rows.append({"label": label, "cells": cells})
 
-    return {"corner": fuel.name, "columns": columns, "rows": rows}
+    # The corner cell stays empty: the label column holds purge / LtOff / the
+    # numbered points, so the fuel name doesn't belong over it. Callers print
+    # the fuel name as a banner above the table instead.
+    return {"corner": "", "columns": columns, "rows": rows}
 
 
 def _cell(col: str, label: str, cc: Optional[ColumnCurve]) -> str:
