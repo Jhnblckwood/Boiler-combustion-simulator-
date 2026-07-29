@@ -136,12 +136,17 @@ def _scalar(lookup, names):
 
 
 def _array(lookup, names):
-    best = None
+    """First name that resolves to a real array wins.
+
+    The alias lists are priority-ordered, so a project that happens to carry
+    both ``_Oil_`` and ``_No2Oil_`` tags resolves to the canonical name rather
+    than to whichever array happens to be longer.
+    """
     for nm in names:
         vals = decode_reals(lookup(nm))
-        if vals and len(vals) > 1 and (best is None or len(vals) > len(best)):
-            best = vals
-    return best
+        if vals and len(vals) > 1:
+            return vals, nm
+    return None, None
 
 
 # ---------------------------------------------------------------------------
@@ -157,19 +162,21 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
     data.column_order = WT_COLUMNS
 
     points = 0
-    o2_has_data = False
+    o2_tags = []          # per-fuel O2 trim source, for the note
 
     for number, key in enumerate(("gas", "oil"), start=1):
         fuel = FuelCurves(number=number, name=FUEL_TITLE[key])
         for col in WT_COLUMNS:
             curve_tpl, purge_tpl, ltoff_tpl = WT_TAGS[col]
-            curve = _array(lookup, _candidates(curve_tpl, key))
+            curve, tag = _array(lookup, _candidates(curve_tpl, key))
             if curve is None:
                 fuel.columns[col] = ColumnCurve(found=False)
                 continue
             points = max(points, len(curve))
+            # Each fuel trims off its own characterizer, so record which tag
+            # actually supplied it rather than assuming the two fuels match.
             if col == "O2" and any(abs(v) > 1e-6 for v in curve):
-                o2_has_data = True
+                o2_tags.append((FUEL_TITLE[key], tag))
             fuel.columns[col] = ColumnCurve(
                 found=True,
                 purge=_scalar(lookup, _candidates(purge_tpl, key)),
@@ -181,14 +188,16 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
     data.point_count = points or None
     # There's no single Cfg bit here the way the firetube DesiredO2 tag has, so
     # the O2 column is shown whenever an O2 characterizer actually holds data.
-    data.o2_trim_enabled = o2_has_data
+    data.o2_trim_enabled = bool(o2_tags)
 
     data.notes.append(
         "Water-tube program — curves read from the "
         "<actuator>Characterizer_<fuel>_Y arrays (the _X breakpoint arrays are "
         "the firing-rate axis and are not shown).")
-    data.notes.append(
-        "O2 trim characterizer %s — O2 column %s."
-        % (("has data" if o2_has_data else "is empty"),
-           ("shown" if o2_has_data else "omitted")))
+    if o2_tags:
+        data.notes.append(
+            "O2 trim is per fuel — "
+            + ", ".join("%s from %s" % (f, t) for f, t in o2_tags) + ".")
+    else:
+        data.notes.append("No O2 trim characterizer data — O2 column omitted.")
     return data

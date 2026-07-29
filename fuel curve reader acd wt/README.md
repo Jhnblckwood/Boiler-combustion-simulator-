@@ -95,9 +95,18 @@ tries a list of aliases.
 **Row count is taken from the file** — the sample water-tube project
 (`CCS_230021`, V37) has 11 curve points rather than the firetube's 16.
 
-The O2 column is shown when the O2 characterizer actually holds data. (Unlike
-firetube, there's no `DesiredO2.Cfg.O2Curve` bit to gate on — the water-tube
+### O2 trim
+
+Each fuel trims off **its own** characterizer — `OxygenTrimCharacterizer_Gas_Y`
+for gas, `OxygenTrimCharacterizer_Oil_Y` for #2 oil — and the note under the
+table names the tag each fuel's column actually came from.
+
+The column is shown when an O2 characterizer holds data. (Unlike firetube,
+there's no `DesiredO2.Cfg.O2Curve` bit to gate on — the water-tube
 `OxygenTrimEnableDisable` tag is a `REAL` setpoint, not an enable flag.)
+
+> The two fuels having identical O2 numbers is normal in an uncommissioned
+> file; they're read from separate tags, so real differences do show up.
 
 ### Auto-detection
 

@@ -404,19 +404,21 @@ function wtDecodeReals(buf){
   return null;
 }
 function wtExtract(lookup){
-  const fuels=[]; let points=0, o2HasData=false;
+  const fuels=[]; let points=0; const o2Tags=[];
   for(let n=0;n<WT_FUELS.length;n++){
     const fuel=WT_FUELS[n], cols={};
     for(const col of WT_COLUMNS){
       const [curveT, purgeT, ltoffT] = WT_TAGS[col];
-      let curve=null;
+      // Alias lists are priority-ordered — the first name that resolves wins.
+      let curve=null, curveTag=null;
       for(const nm of wtCandidates(curveT, fuel)){
         const v=wtDecodeReals(lookup(nm));
-        if(v && v.length>1 && (!curve || v.length>curve.length)) curve=v;
+        if(v && v.length>1){ curve=v; curveTag=nm; break; }
       }
       if(!curve){ cols[col]={found:false}; continue; }
       points=Math.max(points, curve.length);
-      if(col==="O2" && curve.some(v=>Math.abs(v)>1e-6)) o2HasData=true;
+      // Each fuel trims off its own characterizer.
+      if(col==="O2" && curve.some(v=>Math.abs(v)>1e-6)) o2Tags.push(fuel.title+" from "+curveTag);
       const scalar = tpls => {
         for(const nm of wtCandidates(tpls, fuel)){
           const v=wtDecodeReals(lookup(nm));
@@ -431,11 +433,12 @@ function wtExtract(lookup){
   const rowLabels=["purge","LtOff"];
   for(let i=1;i<=points;i++) rowLabels.push(String(i));
   return {
-    o2en:o2HasData, fuels, controller:"",
+    o2en:o2Tags.length>0, fuels, controller:"",
     columnOrder:WT_COLUMNS, rowLabels,
     o2note:"Water-tube program — curves read from the &lt;actuator&gt;Characterizer_&lt;fuel&gt;_Y arrays "
           +"(the _X breakpoint arrays are the firing-rate axis and are not shown). "
-          +"O2 trim characterizer "+(o2HasData?"has data — O2 column shown.":"is empty — O2 column omitted.")
+          +(o2Tags.length ? "O2 trim is per fuel — "+o2Tags.join(", ")+"."
+                          : "No O2 trim characterizer data — O2 column omitted.")
   };
 }
 
