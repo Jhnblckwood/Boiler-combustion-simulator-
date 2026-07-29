@@ -97,6 +97,23 @@ def _candidates(templates, fuel_key):
     return out
 
 
+def _check_curve_templates():
+    """Every curve template must read a ``_Y`` array — never an ``_X`` one.
+
+    The ``_X`` arrays are the firing-rate breakpoint axis. Reading one would
+    silently produce a plausible-looking 0/10/20…100 ramp instead of the
+    commissioned positions, so the tag map is checked rather than trusted.
+    """
+    for col, (curve_tpl, _, _) in WT_TAGS.items():
+        for tpl in curve_tpl:
+            if not tpl.endswith("_Y") or "_X" in tpl:
+                raise AssertionError(
+                    "%s curve template %r must read a _Y array" % (col, tpl))
+
+
+_check_curve_templates()
+
+
 def has_characterizers(comps) -> bool:
     """True when this project uses the water-tube characterizer layout."""
     return any(k.endswith("_Y") and "haracterizer" in k for k in comps)
@@ -177,12 +194,14 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
             # actually supplied it rather than assuming the two fuels match.
             if col == "O2" and any(abs(v) > 1e-6 for v in curve):
                 o2_tags.append((FUEL_TITLE[key], tag))
-            fuel.columns[col] = ColumnCurve(
+            cc = ColumnCurve(
                 found=True,
                 purge=_scalar(lookup, _candidates(purge_tpl, key)),
                 lightoff=_scalar(lookup, _candidates(ltoff_tpl, key)),
                 curve=curve,
             )
+            cc.source_tag = tag        # which tag actually fed this column
+            fuel.columns[col] = cc
         data.fuels.append(fuel)
 
     data.point_count = points or None

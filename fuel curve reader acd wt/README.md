@@ -161,9 +161,31 @@ python curve_gui.py
 Command line:
 
 ```bash
-python fuel_curves.py path/to/project.L5K     # L5K
-python acd_reader.py  path/to/project.ACD     # ACD
+python fuel_curves.py path/to/project.L5K            # L5K
+python acd_reader.py  path/to/project.ACD            # ACD
+python acd_reader.py --tags path/to/project.ACD      # + which tag fed each column
 ```
+
+`--tags` prints the resolved tag for every column of every fuel. Worth a look
+on a file whose naming hasn't been seen before — it's how you confirm the
+reader latched onto the right arrays:
+
+```
+Fuel 1 — Gas
+  Air        AirCharacterizer_Gas_Y
+  Fuel       GasCharacterizer_Y
+  FGR        FGRCharacterizer_Gas_Y
+  Fresh Air  FreshAirCharacterizer_Gas_Y
+  O2         OxygenTrimCharacterizer_Gas_Y
+Fuel 2 — Number 2 Oil
+  Air        AirCharacterizer_Oil_Y
+  ...
+```
+
+Oil is the gas tag set with the fuel token swapped, and every column reads a
+**`_Y`** array. That's enforced, not just intended — `wt_reader` refuses to
+start if any curve template points at an `_X` array, since reading one would
+quietly yield a plausible 0/10/20…100 ramp instead of real positions.
 
 ## The HTML version (`Fuel Curve Reader.html`) — now reads ACD too
 

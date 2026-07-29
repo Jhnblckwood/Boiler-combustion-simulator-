@@ -310,11 +310,25 @@ if __name__ == "__main__":
     import sys
     from fuel_curves import render_fuel_tables_text
 
-    if len(sys.argv) < 2:
-        print("usage: python acd_reader.py <file.ACD>")
+    args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    show_tags = "--tags" in sys.argv
+    if not args:
+        print("usage: python acd_reader.py [--tags] <file.ACD>")
         raise SystemExit(1)
-    result = extract_multifuel_acd(sys.argv[1], progress=lambda m: print("[", m, "]"))
+    result = extract_multifuel_acd(args[0], progress=lambda m: print("[", m, "]"))
     for note in result.notes:
         print(f"Note       : {note}")
     print()
+
+    if show_tags:
+        # Which tag fed each column — worth checking on a file whose naming
+        # hasn't been seen before.
+        print("Tag map")
+        for fuel in result.fuels:
+            print(f"  Fuel {fuel.number} — {fuel.name}")
+            for col, cc in fuel.columns.items():
+                tag = getattr(cc, "source_tag", None)
+                print("    %-10s %s" % (col, tag or "(not found)"))
+        print()
+
     print(render_fuel_tables_text(result))
