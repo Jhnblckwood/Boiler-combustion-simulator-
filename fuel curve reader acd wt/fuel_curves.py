@@ -54,7 +54,8 @@ COLUMN_SUFFIX = {
     "O2": "O2",
 }
 O2_COLUMN = "O2"
-FUEL_COLUMN = "Fuel Act1"
+FUEL_COLUMN = "Fuel Act1"      # firetube fuel column
+FUEL_COLUMN_WT = "Fuel"        # water-tube fuel column (fuel valve characterizer)
 
 # Fuel numbers we read (the non-"B" sets).
 FUEL_NUMBERS = (1, 2)
@@ -90,6 +91,21 @@ class MultiFuelData:
     o2_trim_enabled: bool = False
     fuels: List[FuelCurves] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
+    # Firetube programs always have 16 curve points and the Air/Fuel Act1/FGR/
+    # VFD/O2 column set. Water-tube programs use characterizer arrays whose
+    # length and column set differ, so both are overridable.
+    column_order: Optional[List[str]] = None
+    point_count: Optional[int] = None
+
+    @property
+    def columns(self) -> List[str]:
+        return self.column_order or CANONICAL_COLUMNS
+
+    @property
+    def row_labels(self) -> List[str]:
+        if not self.point_count:
+            return ROW_LABELS
+        return ["purge", "LtOff"] + [str(n) for n in range(1, self.point_count + 1)]
 
 
 def _nonzero(raw) -> bool:
@@ -238,22 +254,25 @@ def extract_multifuel_l5k(path: str) -> MultiFuelData:
 # Table building
 # ---------------------------------------------------------------------------
 
-def build_fuel_table(fuel: FuelCurves, o2_enabled: bool = False) -> dict:
+def build_fuel_table(fuel: FuelCurves, o2_enabled: bool = False,
+                     column_order=None, row_labels=None) -> dict:
     """Build a table model for one fuel.
 
-    Rows: purge, LtOff, 1..16.  Columns: Air, Fuel Act1, FGR, VFD, and O2
-    (only when O2 trim is enabled).
+    Rows: purge, LtOff, then one row per curve point.  Columns default to the
+    firetube set (Air, Fuel Act1, FGR, VFD) plus O2 when O2 trim is enabled;
+    ``column_order`` overrides that for water-tube programs.
 
     Blank cells (per spec):
-        * Fuel Act1 -> purge blank
-        * O2        -> purge and LtOff blank
+        * the fuel column -> purge blank
+        * O2              -> purge and LtOff blank
     """
-    columns = ["Air", FUEL_COLUMN, "FGR", "VFD"]
-    if o2_enabled:
+    order = column_order or CANONICAL_COLUMNS
+    columns = [c for c in order if c != O2_COLUMN]
+    if o2_enabled and O2_COLUMN in order:
         columns.append(O2_COLUMN)
 
     rows = []
-    for label in ROW_LABELS:
+    for label in (row_labels or ROW_LABELS):
         cells = {}
         for col in columns:
             cc = fuel.columns.get(col)
@@ -267,11 +286,12 @@ def _cell(col: str, label: str, cc: Optional[ColumnCurve]) -> str:
     if cc is None or not cc.found:
         return ""
     if label == "purge":
-        if col in (FUEL_COLUMN, O2_COLUMN):   # fuel + O2 purge left blank
+        # Fuel + O2 purge are left blank, as is any column with no purge tag.
+        if col in (FUEL_COLUMN, FUEL_COLUMN_WT, O2_COLUMN) or cc.purge is None:
             return ""
         return format_value(cc.purge)
     if label == "LtOff":
-        if col == O2_COLUMN:                  # O2 light-off left blank
+        if col == O2_COLUMN or cc.lightoff is None:   # O2 light-off left blank
             return ""
         return format_value(cc.lightoff)
     # numbered point N -> Curve[N-1]; zero/missing -> "0"
@@ -290,11 +310,13 @@ def build_combined_table(data: MultiFuelData) -> dict:
     fuel contributes a header row (``is_header=True``) carrying its name, then
     its purge / LtOff / 1..16 rows.
     """
-    per_fuel = [(f, build_fuel_table(f, data.o2_trim_enabled)) for f in data.fuels]
+    order, labels = data.columns, data.row_labels
+    per_fuel = [(f, build_fuel_table(f, data.o2_trim_enabled, order, labels))
+                for f in data.fuels]
     present = set()
     for _f, t in per_fuel:
         present.update(t["columns"])
-    columns = [c for c in CANONICAL_COLUMNS if c in present]
+    columns = [c for c in order if c in present]
 
     banner_col = columns[0] if columns else None   # the Air column
     rows = []
@@ -313,7 +335,7 @@ def build_combined_table(data: MultiFuelData) -> dict:
 
         by_col = {c: {r["label"]: r["cells"][c] for r in table["rows"]}
                   for c in table["columns"]}
-        for label in ROW_LABELS:
+        for label in labels:
             cells = {c: by_col.get(c, {}).get(label, "") for c in columns}
             rows.append({"label": label, "kind": "data", "cells": cells})
 
@@ -323,7 +345,8 @@ def build_combined_table(data: MultiFuelData) -> dict:
 def render_fuel_tables_text(data: MultiFuelData) -> str:
     out = []
     for fuel in data.fuels:
-        table = build_fuel_table(fuel, data.o2_trim_enabled)
+        table = build_fuel_table(fuel, data.o2_trim_enabled,
+                                 data.columns, data.row_labels)
         out.append(f"Fuel {fuel.number} — {fuel.name}")
         out.append(_render_one(table))
         out.append("")

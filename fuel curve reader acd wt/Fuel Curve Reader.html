@@ -194,16 +194,28 @@ function extractMultiFuel(txt){
 
 function cell(col, label, cc){
   if(!cc || !cc.found) return "";
-  if(label==="purge"){ return (col==="Fuel Act1"||col==="O2") ? "" : fmt(cc.purge); }
-  if(label==="LtOff"){ return (col==="O2") ? "" : fmt(cc.lightoff); }
+  if(label==="purge"){
+    // Fuel + O2 purge are blank, as is any column with no purge tag.
+    if(col==="Fuel Act1" || col==="Fuel" || col==="O2" ||
+       cc.purge===null || cc.purge===undefined) return "";
+    return fmt(cc.purge);
+  }
+  if(label==="LtOff"){
+    if(col==="O2" || cc.lightoff===null || cc.lightoff===undefined) return "";
+    return fmt(cc.lightoff);
+  }
   const i = parseInt(label)-1;
   return fmt((i>=0 && i<cc.curve.length) ? cc.curve[i] : null);
 }
 
 /* ---- rendering -------------------------------------------------------- */
 function render(data, filename){
-  const columns = ["Air","Fuel Act1","FGR","VFD"];
-  if(data.o2en) columns.push("O2");
+  // Firetube files use the default column set and 16 points; water-tube files
+  // supply their own (Air / Fuel / FGR / Fresh Air / O2, 11 points).
+  const base = data.columnOrder || ["Air","Fuel Act1","FGR","VFD","O2"];
+  const columns = base.filter(c => c!=="O2");
+  if(data.o2en && base.indexOf("O2")>=0) columns.push("O2");
+  const ROWS = data.rowLabels || ROW_LABELS;
 
   const wrap = document.getElementById("tables");
   wrap.innerHTML = "";
@@ -220,7 +232,7 @@ function render(data, filename){
     let html = "<tr><th class='lbl'></th>";
     columns.forEach((c,idx)=>{ html += "<th class='"+(idx===0?"air":"")+"'>"+c+"</th>"; });
     html += "</tr>";
-    for(const label of ROW_LABELS){
+    for(const label of ROWS){
       const sect = (label==="purge"||label==="LtOff") ? " class='section'" : "";
       html += "<tr"+sect+"><td class='lbl'>"+label+"</td>";
       columns.forEach((c,idx)=>{ html += "<td class='"+(idx===0?"air":"")+"'>"+cell(c,label,fuel.cols[c])+"</td>"; });
@@ -234,9 +246,9 @@ function render(data, filename){
   document.getElementById("status").textContent =
     filename + (data.controller ? "  •  controller: " + data.controller : "") + "  •  both fuels";
 
-  const o2note = data.o2en
+  const o2note = data.o2note || (data.o2en
     ? "O2 trim is enabled (DesiredO2.Cfg.O2Curve = 1) — O2 column shown."
-    : "O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted.";
+    : "O2 trim is disabled (DesiredO2.Cfg.O2Curve = 0) — O2 column omitted.");
   document.getElementById("notes").className = "notes";
   document.getElementById("notes").innerHTML = "• " + o2note;
 }
@@ -338,6 +350,95 @@ function _decodeArray(buf){
   }
   return best;
 }
+/* ---- water-tube layout (characterizer arrays) --------------------------
+   Water-tube programs don't use FA_DataMgmt tags at all. Each actuator has a
+   characterizer: an X/Y pair of REAL arrays per fuel. X is the firing-rate
+   breakpoint axis and is ignored — the commissioned positions are the Y
+   arrays. Purge and light-off are separate scalar REAL tags.               */
+const WT_FUELS = [
+  {key:"gas", title:"Gas",
+   aliases:["Gas","NaturalGas","NatGas","NG"]},
+  {key:"oil", title:"Number 2 Oil",
+   aliases:["Oil","No2Oil","No2_Oil","NO2Oil","No2FuelOil","Oil2","FuelOil"]}
+];
+const WT_COLUMNS = ["Air","Fuel","FGR","Fresh Air","O2"];
+const WT_TAGS = {
+  "Air":       [["AirCharacterizer_{F}_Y","FDFanAirCharacterizer_{F}_Y","CombustionAirCharacterizer_{F}_Y"],
+                ["FDFanAirDamperPurgePosition","AirDamperPurgePosition","PurgePosition"],
+                ["FDFanAirDamperLightoffPosition_{F}","AirDamperLightoffPosition_{F}","AirDamperLightoff_{F}"]],
+  "Fuel":      [["{F}Characterizer_Y","{F}ValveCharacterizer_Y","FuelCharacterizer_{F}_Y"],
+                [],
+                ["{F}ValveLightoff","{F}ValveLightoffPosition","FuelValveLightoff_{F}"]],
+  "FGR":       [["FGRCharacterizer_{F}_Y"],
+                ["FGRDamperPurgePosition","FGRPurgePosition"],
+                ["FGRDamperLightoff_{F}","FGRDamperLightoffPosition_{F}"]],
+  "Fresh Air": [["FreshAirCharacterizer_{F}_Y"],
+                ["FreshAirDamperPurgePosition","FreshAirPurgePosition"],
+                ["FreshAirDamperLightoff_{F}","FreshAirDamperLightoffPosition_{F}"]],
+  "O2":        [["OxygenTrimCharacterizer_{F}_Y","O2TrimCharacterizer_{F}_Y","OxygenCharacterizer_{F}_Y"],
+                [], []]
+};
+function wtCandidates(templates, fuel){
+  const out=[];
+  for(const tpl of templates){
+    if(tpl.indexOf("{F}")<0){ out.push(tpl); continue; }
+    for(const a of fuel.aliases) out.push(tpl.replace("{F}", a));
+  }
+  return out;
+}
+function hasCharacterizers(comps){
+  for(const k in comps) if(/haracterizer/.test(k) && /_Y$/.test(k)) return true;
+  return false;
+}
+/* A tag value record ends with <u32 byte-count><that many bytes of float32>. */
+function wtDecodeReals(buf){
+  if(!buf) return null;
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), n=buf.length;
+  for(let k=0;k<n-4;k++){
+    const ln=_u32(dv,k);
+    if(ln!==n-k-4 || ln<4 || (ln%4)) continue;
+    const vals=[]; let ok=true;
+    for(let i=0;i<ln/4;i++){const v=_f32(dv,k+4+4*i); if(!(isFinite(v)&&v>-1e9&&v<1e9)){ok=false;break;} vals.push(v);}
+    if(ok) return vals;
+  }
+  return null;
+}
+function wtExtract(lookup){
+  const fuels=[]; let points=0, o2HasData=false;
+  for(let n=0;n<WT_FUELS.length;n++){
+    const fuel=WT_FUELS[n], cols={};
+    for(const col of WT_COLUMNS){
+      const [curveT, purgeT, ltoffT] = WT_TAGS[col];
+      let curve=null;
+      for(const nm of wtCandidates(curveT, fuel)){
+        const v=wtDecodeReals(lookup(nm));
+        if(v && v.length>1 && (!curve || v.length>curve.length)) curve=v;
+      }
+      if(!curve){ cols[col]={found:false}; continue; }
+      points=Math.max(points, curve.length);
+      if(col==="O2" && curve.some(v=>Math.abs(v)>1e-6)) o2HasData=true;
+      const scalar = tpls => {
+        for(const nm of wtCandidates(tpls, fuel)){
+          const v=wtDecodeReals(lookup(nm));
+          if(v && v.length) return v[0];
+        }
+        return null;
+      };
+      cols[col]={found:true, purge:scalar(purgeT), lightoff:scalar(ltoffT), curve};
+    }
+    fuels.push({number:n+1, name:fuel.title, cols});
+  }
+  const rowLabels=["purge","LtOff"];
+  for(let i=1;i<=points;i++) rowLabels.push(String(i));
+  return {
+    o2en:o2HasData, fuels, controller:"",
+    columnOrder:WT_COLUMNS, rowLabels,
+    o2note:"Water-tube program — curves read from the &lt;actuator&gt;Characterizer_&lt;fuel&gt;_Y arrays "
+          +"(the _X breakpoint arrays are the firing-rate axis and are not shown). "
+          +"O2 trim characterizer "+(o2HasData?"has data — O2 column shown.":"is empty — O2 column omitted.")
+  };
+}
+
 async function extractMultiFuelACD(u8){
   let compsDat = acdFindStream(u8, "Comps.Dat");
   if(!compsDat) throw new Error("Comps.Dat not found — not a valid ACD?");
@@ -350,6 +451,20 @@ async function extractMultiFuelACD(u8){
     for(let o=0;o<d.buffer.length-4;o++){const oid=_u32(dv,o); if(byId[oid]&&!seen.has(oid)){seen.add(oid);out.push(oid);}}
     return out;
   };
+
+  // Water-tube programs take a completely different path.
+  if(hasCharacterizers(comps)){
+    // A tag definition points at a "$hash$" record — that one holds the value.
+    const wtLookup = tag => {
+      for(const oid of refsOf(tag)){
+        const nm = byId[oid].name;
+        if(nm.charAt(0)==="$" && nm.charAt(nm.length-1)==="$") return byId[oid].buffer;
+      }
+      return null;
+    };
+    return wtExtract(wtLookup);
+  }
+
   let vp=null, o2dec=null;
   for(const oid of refsOf("DesiredO2")){
     const dec=_decodeDesired(byId[oid].buffer);

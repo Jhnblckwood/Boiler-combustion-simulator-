@@ -35,6 +35,7 @@ from fuel_curves import (
     MultiFuelData, FuelCurves, ColumnCurve, COLUMN_SUFFIX, FUEL_NUMBERS,
 )
 from curve_extractor import ExtractError
+import wt_reader
 
 O2CURVE_BIT = 3
 _NAME_OFFSETS = (30, 26, 34, 38, 22)   # V35, V20, and room for other versions
@@ -206,6 +207,27 @@ def _fuel_type_names(comps, by_id, value_rec):
     return names
 
 
+def _tag_value_record(comps, by_id, tag):
+    """Return the raw bytes of a tag's value record.
+
+    A tag definition record references its data type, its owning collection and
+    a ``$hash$`` record — that last one holds the actual value.
+    """
+    for oid in _refs_of(comps, by_id, tag):
+        name = by_id[oid][0]
+        if name.startswith("$") and name.endswith("$"):
+            return by_id[oid][2]
+    return None
+
+
+def _extract_watertube(comps, by_id, path) -> MultiFuelData:
+    """Water-tube layout: characterizer Y arrays + scalar purge/light-off tags."""
+    def lookup(tag):
+        return _tag_value_record(comps, by_id, tag)
+
+    return wt_reader.build_watertube(lookup, source_file=os.path.basename(str(path)))
+
+
 # ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
@@ -226,8 +248,15 @@ def extract_multifuel_acd(path, progress=None) -> MultiFuelData:
         comps_stream = gzip.decompress(comps_stream)
 
     comps, by_id = _walk_comps(comps_stream)
+
+    # Water-tube programs use characterizer arrays instead of FA_DataMgmt tags.
+    if wt_reader.has_characterizers(comps):
+        return _extract_watertube(comps, by_id, path)
+
     if "DesiredO2" not in comps and "ArrayMgmt_F1FGR" not in comps:
-        raise ExtractError("Could not locate curve tags in this ACD.")
+        raise ExtractError(
+            "Current boiler is configured with linkage, not actuators. "
+            "No curve stored")
 
     # Value-record collection parent + DesiredO2 config.
     vp, o2dec = None, None

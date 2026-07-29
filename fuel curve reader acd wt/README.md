@@ -38,9 +38,10 @@ for the values, and fails to parse older V20 projects, so it isn't used.)
    `Ref_Data` + an identical working copy — located by that "double curve"
    signature.
 
-**Versions:** verified on **V20** (RH250) and **V35** (RH800). The auto-detection
-is built to carry across the versions in between and newer ones; if a future
-file reads wrong, it's usually one more name-offset to add.
+**Versions:** verified on **V20** (RH250), **V35** (RH800) and **V37**
+(CCS_230021, water tube). The auto-detection is built to carry across the
+versions in between and newer ones; if a future file reads wrong, it's usually
+one more name-offset to add.
 
 ### The `.L5K` path
 
@@ -57,7 +58,55 @@ LtOff        7.4   17.4       1.1   70.2         ← O2 LtOff blank
 16           0     0          0     0     0
 ```
 
-## Where the data comes from
+## Water-tube programs (characterizer arrays)
+
+Water-tube programs don't use `FA_DataMgmt` tags at all. Every actuator gets a
+**characterizer** — an X/Y pair of `REAL` arrays, one pair per fuel:
+
+```
+AirCharacterizer_Gas_X          AirCharacterizer_Gas_Y
+FGRCharacterizer_Gas_X          FGRCharacterizer_Gas_Y
+FreshAirCharacterizer_Gas_X     FreshAirCharacterizer_Gas_Y
+GasCharacterizer_X              GasCharacterizer_Y
+OxygenTrimCharacterizer_Gas_X   OxygenTrimCharacterizer_Gas_Y
+```
+
+…plus the matching `_Oil_` / `_No2Oil_` set for #2 oil.
+
+The **`_X` array is the firing-rate breakpoint axis** (0, 10, 20 … 100) and is
+**ignored** — the commissioned positions are the **`_Y`** arrays.
+
+| Column | Curve tag (fuel *f*) | purge | LtOff |
+|--------|----------------------|-------|-------|
+| Air | `AirCharacterizer_<f>_Y` | `FDFanAirDamperPurgePosition` | `FDFanAirDamperLightoffPosition_<f>` |
+| Fuel | `GasCharacterizer_Y` / `OilCharacterizer_Y` | *(blank)* | `GasValveLightoff` / `OilValveLightoff` |
+| FGR | `FGRCharacterizer_<f>_Y` | `FGRDamperPurgePosition` | `FGRDamperLightoff_<f>` |
+| Fresh Air | `FreshAirCharacterizer_<f>_Y` | `FreshAirDamperPurgePosition` | `FreshAirDamperLightoff_<f>` |
+| O2 | `OxygenTrimCharacterizer_<f>_Y` | *(blank)* | *(blank)* |
+
+Purge and light-off aren't part of the characterizer here — they're separate
+scalar `REAL` tags, read individually so the table keeps the same
+`purge` / `LtOff` / numbered-point shape as the firetube output.
+
+Fuel blocks print as **Gas** and **Number 2 Oil**. Tag naming varies between
+integrators (`_Oil_` vs `_No2Oil_`, `Gas` vs `NaturalGas`), so every lookup
+tries a list of aliases.
+
+**Row count is taken from the file** — the sample water-tube project
+(`CCS_230021`, V37) has 11 curve points rather than the firetube's 16.
+
+The O2 column is shown when the O2 characterizer actually holds data. (Unlike
+firetube, there's no `DesiredO2.Cfg.O2Curve` bit to gate on — the water-tube
+`OxygenTrimEnableDisable` tag is a `REAL` setpoint, not an enable flag.)
+
+### Auto-detection
+
+Drop either kind of file in and the right reader runs: if the project has
+`*Characterizer_*_Y` tags it's read as **water tube**, otherwise it falls back
+to the **firetube** `ArrayMgmt_F*` path. A project with neither reports
+*"Current boiler is configured with linkage, not actuators. No curve stored"*.
+
+## Firetube: where the data comes from
 
 Each fuel stores its curves in `ArrayMgmt_F<n><col>` tags (type `FA_DataMgmt`):
 
@@ -121,8 +170,9 @@ ACD and L5K produce the identical table.
 | File | Purpose |
 |------|---------|
 | `curve_gui.py` | Drag-and-drop GUI; auto-detects `.ACD` / `.L5K`, shows the "Decrypting ACD…" popup. |
-| `acd_reader.py` | Reads real curve values straight from a binary `.ACD`. |
-| `fuel_curves.py` | `.L5K` extraction + shared table building. |
+| `acd_reader.py` | Reads real curve values straight from a binary `.ACD`; picks the water-tube or firetube path. |
+| `wt_reader.py` | Water-tube characterizer decoding (tag map, aliases, `REAL` array payloads). |
+| `fuel_curves.py` | `.L5K` extraction + shared table building (column set and point count are per-file). |
 | `curve_extractor.py` | Shared helpers / original single-set extractor. |
-| `Fuel Curve Reader.html` | No-install single-file reader (`.L5K` only). |
+| `Fuel Curve Reader.html` | No-install single-file reader — `.ACD` + `.L5K`, water tube + firetube. |
 | `requirements.txt` | Optional dep (`tkinterdnd2`) for drag-and-drop; readers need nothing. |
