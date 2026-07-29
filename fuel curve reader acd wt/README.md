@@ -172,13 +172,20 @@ reader latched onto the right arrays:
 
 ```
 Fuel 1 — Gas
-  Air        AirCharacterizer_Gas_Y
-  Fuel       GasCharacterizer_Y
-  FGR        FGRCharacterizer_Gas_Y
-  Fresh Air  FreshAirCharacterizer_Gas_Y
-  O2         OxygenTrimCharacterizer_Gas_Y
+  Air        curve  AirCharacterizer_Gas_Y
+             purge  FDFanAirDamperPurgePosition = 100
+             lightoff FDFanAirDamperLightoffPosition_Gas = 2
+  Fuel       curve  GasCharacterizer_Y
+             lightoff GasValveLightoff = 17
+  FGR        curve  FGRCharacterizer_Gas_Y
+             purge  FGRDamperPurgePosition = 100
+             lightoff FGRDamperLightoff_Gas = 0
+  Fresh Air  curve  FreshAirCharacterizer_Gas_Y
+             purge  FreshAirDamperPurgePosition = 100
+             lightoff FreshAirDamperLightoff_Gas = 100
+  O2         curve  OxygenTrimCharacterizer_Gas_Y
 Fuel 2 — Number 2 Oil
-  Air        AirCharacterizer_Oil_Y
+  Air        curve  AirCharacterizer_Oil_Y
   ...
 ```
 

@@ -145,11 +145,12 @@ def decode_reals(buf):
 
 
 def _scalar(lookup, names):
+    """First name that resolves wins; returns ``(value, tag_name)``."""
     for nm in names:
         vals = decode_reals(lookup(nm))
         if vals:
-            return vals[0]
-    return None
+            return vals[0], nm
+    return None, None
 
 
 def _array(lookup, names):
@@ -194,13 +195,13 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
             # actually supplied it rather than assuming the two fuels match.
             if col == "O2" and any(abs(v) > 1e-6 for v in curve):
                 o2_tags.append((FUEL_TITLE[key], tag))
-            cc = ColumnCurve(
-                found=True,
-                purge=_scalar(lookup, _candidates(purge_tpl, key)),
-                lightoff=_scalar(lookup, _candidates(ltoff_tpl, key)),
-                curve=curve,
-            )
-            cc.source_tag = tag        # which tag actually fed this column
+            purge, purge_tag = _scalar(lookup, _candidates(purge_tpl, key))
+            ltoff, ltoff_tag = _scalar(lookup, _candidates(ltoff_tpl, key))
+            cc = ColumnCurve(found=True, purge=purge, lightoff=ltoff, curve=curve)
+            # Which tags actually fed this column, for `--tags`.
+            cc.source_tag = tag
+            cc.purge_tag = purge_tag
+            cc.lightoff_tag = ltoff_tag
             fuel.columns[col] = cc
         data.fuels.append(fuel)
 

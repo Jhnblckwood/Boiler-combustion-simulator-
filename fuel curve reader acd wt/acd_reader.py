@@ -321,14 +321,20 @@ if __name__ == "__main__":
     print()
 
     if show_tags:
-        # Which tag fed each column — worth checking on a file whose naming
+        # Which tags fed each column — worth checking on a file whose naming
         # hasn't been seen before.
         print("Tag map")
         for fuel in result.fuels:
             print(f"  Fuel {fuel.number} — {fuel.name}")
             for col, cc in fuel.columns.items():
-                tag = getattr(cc, "source_tag", None)
-                print("    %-10s %s" % (col, tag or "(not found)"))
+                curve = getattr(cc, "source_tag", None)
+                print("    %-10s curve  %s" % (col, curve or "(not found)"))
+                for kind in ("purge", "lightoff"):
+                    tag = getattr(cc, kind + "_tag", None)
+                    if tag:
+                        val = cc.purge if kind == "purge" else cc.lightoff
+                        print("    %-10s %-6s %s = %s"
+                              % ("", kind, tag, ("%g" % val) if val is not None else "-"))
         print()
 
     print(render_fuel_tables_text(result))
