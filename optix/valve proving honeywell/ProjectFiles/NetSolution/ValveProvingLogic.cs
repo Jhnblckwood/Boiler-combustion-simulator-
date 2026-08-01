@@ -70,6 +70,24 @@ using FTOptix.UI;
 ///            timer elapsing without the required action also fails the
 ///            VPS. Either way the result is a safety lockout that only
 ///            STOP/RESET clears (mirrors 7800 SERIES lockout behavior).
+///
+/// Firing rate actuator (4-20 mA) with HIGH FIRE / LOW FIRE switches:
+///   Model/FiringRateMA is the mod-motor position feedback: 4 mA = LOW
+///   FIRE (Model/LowFireSwitch made), 20 mA = HIGH FIRE
+///   (Model/HighFireSwitch made). The BMS drives the actuator itself in
+///   both modes: high fire for the prepurge (the purge timer only runs
+///   once the HF switch proves), back to low fire for the pilot trial
+///   (ignition waits on the LF switch). Failing to prove a switch inside
+///   the prove window is a safety lockout. In RUN the rate is released
+///   to modulation with the RATE +/- buttons. SIM ACTUATOR FAULT freezes
+///   the feedback to demonstrate both prove-failure lockouts. On a real
+///   train, wire FiringRateMA to the 4-20 mA analog input and the two
+///   switch tags to the physical end switches (delete SimulateActuator).
+///
+/// The Honeywell 7800 SERIES faceplate (bottom middle) mirrors the relay
+/// module: POWER / PILOT / FLAME / MAIN / ALARM LEDs and a two-line
+/// message display with the phase, countdown, firing rate, and flame
+/// signal (Model/FlameSignal, VDC), blinking LOCKOUT + reason on a trip.
 /// </summary>
 public class ValveProvingLogic : BaseNetLogic
 {
@@ -94,6 +112,20 @@ public class ValveProvingLogic : BaseNetLogic
     private const float LeakRate = 2.2f;       // simulated seat leak, "w.c. per second
     private const float TickSeconds = 0.1f;
 
+    // --- Firing rate actuator, 4-20 mA ---------------------------------
+    // The mod motor position feedback is a 4-20 mA loop: 4 mA = LOW FIRE
+    // (low fire switch made), 20 mA = HIGH FIRE (high fire switch made).
+    // Purge must prove HIGH FIRE before its timer runs; ignition must
+    // prove LOW FIRE before the pilot trial runs. Failing to prove either
+    // switch inside the prove window is a safety lockout.
+    private const float LowFireMA = 4.0f;
+    private const float HighFireMA = 20.0f;
+    private const float LfMakeMA = 4.5f;       // LF switch made at/below this
+    private const float HfMakeMA = 19.5f;      // HF switch made at/above this
+    private const float ModMotorRate = 2.0f;   // mA per second of actuator travel
+    private const float ProveWindow = 15.0f;   // seconds to prove HF/LF switch
+    private const float RateStep = 2.0f;       // RATE +/- button increment, mA
+
     private enum Step
     {
         Standby = 0,
@@ -114,6 +146,7 @@ public class ValveProvingLogic : BaseNetLogic
     private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
     private IUAVariable chamberPressureVar, supplyPressureVar, downstreamPressureVar;
     private IUAVariable stateVar, stateTextVar;
+    private IUAVariable firingRateVar, lowFireVar, highFireVar, actuatorFaultVar, flameSignalVar;
 
     // Widgets
     private Rectangle bannerRect, pipeSupply, pipeChamber, pipeDownstream;
@@ -127,6 +160,14 @@ public class ValveProvingLogic : BaseNetLogic
     private SpinBox lgpSetInput, hgpSetInput, vpsSetInput;
     private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
 
+    // Firing rate panel + Honeywell faceplate widgets
+    private Rectangle frBarFill;
+    private Label frReadout;
+    private Ellipse loFireLed, hiFireLed;
+    private Button frUpButton, frDownButton, frFaultButton;
+    private Label hwLcdLine1, hwLcdLine2;
+    private Ellipse hwPowerLed, hwPilotLed, hwFlameLed, hwMainLed, hwAlarmLed;
+
     private PeriodicTask periodicTask;
 
     private Step step = Step.Standby;
@@ -137,6 +178,9 @@ public class ValveProvingLogic : BaseNetLogic
     private string lockoutReason = "";
     private int failedStepIndex = -1;
     private int flickerCounter;
+    private float firingRateMA = LowFireMA; // actuator position feedback, mA
+    private float modTarget = LowFireMA;    // operator modulation target in RUN
+    private float proveElapsed;             // time spent waiting on the HF/LF switch
 
     // Palette
     private static readonly Color GasYellow = new Color(0xFFFFC400u);
@@ -155,13 +199,14 @@ public class ValveProvingLogic : BaseNetLogic
     private static readonly Color TextBright = new Color(0xFFFFFFFFu);
     private static readonly Color FlameA = new Color(0xFFFF8C00u);
     private static readonly Color FlameB = new Color(0xFFFFB000u);
+    private static readonly Color LedAmber = new Color(0xFFFFB000u);
 
     public override void Start()
     {
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v6 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v7 started OK");
         }
         catch (Exception ex)
         {
@@ -191,6 +236,11 @@ public class ValveProvingLogic : BaseNetLogic
         downstreamPressureVar = Project.Current.GetVariable("Model/DownstreamPressure");
         stateVar = Project.Current.GetVariable("Model/State");
         stateTextVar = Project.Current.GetVariable("Model/StateText");
+        firingRateVar = Project.Current.GetVariable("Model/FiringRateMA");
+        lowFireVar = Project.Current.GetVariable("Model/LowFireSwitch");
+        highFireVar = Project.Current.GetVariable("Model/HighFireSwitch");
+        actuatorFaultVar = Project.Current.GetVariable("Model/ActuatorFault");
+        flameSignalVar = Project.Current.GetVariable("Model/FlameSignal");
 
         bannerRect = Owner.Get<Rectangle>("BannerRect");
         pipeSupply = Owner.Get<Rectangle>("PipeSupply");
@@ -226,6 +276,21 @@ public class ValveProvingLogic : BaseNetLogic
         hgpGauge = Owner.Get<CircularGauge>("HGPGauge");
         pressGauge = Owner.Get<CircularGauge>("PressGauge");
 
+        frBarFill = Owner.Get<Rectangle>("FrBarFill");
+        frReadout = Owner.Get<Label>("FrReadout");
+        loFireLed = Owner.Get<Ellipse>("LoFireLed");
+        hiFireLed = Owner.Get<Ellipse>("HiFireLed");
+        frUpButton = Owner.Get<Button>("FrUpButton");
+        frDownButton = Owner.Get<Button>("FrDownButton");
+        frFaultButton = Owner.Get<Button>("FrFaultButton");
+        hwLcdLine1 = Owner.Get<Label>("HwLcdLine1");
+        hwLcdLine2 = Owner.Get<Label>("HwLcdLine2");
+        hwPowerLed = Owner.Get<Ellipse>("HwPowerLed");
+        hwPilotLed = Owner.Get<Ellipse>("HwPilotLed");
+        hwFlameLed = Owner.Get<Ellipse>("HwFlameLed");
+        hwMainLed = Owner.Get<Ellipse>("HwMainLed");
+        hwAlarmLed = Owner.Get<Ellipse>("HwAlarmLed");
+
         stepLeds = new Ellipse[6];
         stepLabels = new Label[6];
         for (int i = 0; i < 6; i++)
@@ -245,6 +310,9 @@ public class ValveProvingLogic : BaseNetLogic
         step = Step.Standby;
         stepElapsed = 0f;
         runEstablished = false;
+        firingRateMA = LowFireMA;
+        modTarget = LowFireMA;
+        proveElapsed = 0f;
 
         periodicTask = new PeriodicTask(Tick, 100, LogicObject);
         periodicTask.Start();
@@ -371,8 +439,9 @@ public class ValveProvingLogic : BaseNetLogic
 
         if (step == Step.Ignition)
         {
-            // Lights unless the pilot is simulated (or really) failed.
-            pilotVar.Value = !ReadBool(pilotFailVar);
+            // Lights only once the actuator has proven LOW FIRE (the trial
+            // countdown is not running before that), unless the pilot fails.
+            pilotVar.Value = ReadBool(lowFireVar) && !ReadBool(pilotFailVar);
         }
         else if (step == Step.Standby)
         {
@@ -400,6 +469,38 @@ public class ValveProvingLogic : BaseNetLogic
     public void TogglePilotFail()
     {
         pilotFailVar.Value = !ReadBool(pilotFailVar);
+    }
+
+    /// <summary>
+    /// RATE +/- modulate the firing rate target, but only in RUN: everywhere
+    /// else the BMS owns the mod motor (low fire at rest, high fire for
+    /// purge, back to low fire for ignition).
+    /// </summary>
+    [ExportMethod]
+    public void RateUp()
+    {
+        if (step != Step.Run)
+            return;
+        modTarget = Math.Min(modTarget + RateStep, HighFireMA);
+    }
+
+    [ExportMethod]
+    public void RateDown()
+    {
+        if (step != Step.Run)
+            return;
+        modTarget = Math.Max(modTarget - RateStep, LowFireMA);
+    }
+
+    /// <summary>
+    /// Simulates a seized mod motor: the 4-20 mA feedback freezes where it
+    /// is, so the HF/LF switch cannot prove and the prove window elapses
+    /// into a safety lockout (purge or ignition).
+    /// </summary>
+    [ExportMethod]
+    public void ToggleActuatorFault()
+    {
+        actuatorFaultVar.Value = !ReadBool(actuatorFaultVar);
     }
 
     [ExportMethod]
@@ -453,6 +554,7 @@ public class ValveProvingLogic : BaseNetLogic
             SyncSetpoints();
             SimulatePressure();
             UpdateGasPressureSwitches();
+            SimulateActuator();
             RunSequence(auto);
             UpdateGraphics(auto);
         }
@@ -503,6 +605,47 @@ public class ValveProvingLogic : BaseNetLogic
             box.Value = value; // reject out-of-range entries
         setVar.Value = value;
         return value;
+    }
+
+    /// <summary>
+    /// Where the BMS commands the mod motor for the current phase.
+    /// </summary>
+    private float TargetMA()
+    {
+        switch (step)
+        {
+            case Step.Purge: return HighFireMA;      // purge at high fire
+            case Step.Run: return modTarget;         // released to modulation
+            default: return LowFireMA;               // at rest / drive to low fire
+        }
+    }
+
+    /// <summary>
+    /// 4-20 mA firing rate actuator simulation. The feedback ramps toward
+    /// the commanded position at mod-motor speed (frozen by the actuator
+    /// fault sim); the LOW FIRE switch is made at/below 4.5 mA and the
+    /// HIGH FIRE switch at/above 19.5 mA. On a real train, delete this
+    /// and wire FiringRateMA to the analog input and the two switch tags
+    /// to the physical HF/LF end switches.
+    /// </summary>
+    private void SimulateActuator()
+    {
+        if (!ReadBool(actuatorFaultVar))
+        {
+            float target = TargetMA();
+            float delta = ModMotorRate * TickSeconds;
+            if (firingRateMA < target)
+                firingRateMA = Math.Min(firingRateMA + delta, target);
+            else if (firingRateMA > target)
+                firingRateMA = Math.Max(firingRateMA - delta, target);
+        }
+
+        if (firingRateMA < LowFireMA) firingRateMA = LowFireMA;
+        if (firingRateMA > HighFireMA) firingRateMA = HighFireMA;
+
+        firingRateVar.Value = firingRateMA;
+        lowFireVar.Value = firingRateMA <= LfMakeMA;
+        highFireVar.Value = firingRateMA >= HfMakeMA;
     }
 
     private void UpdateGasPressureSwitches()
@@ -589,14 +732,38 @@ public class ValveProvingLogic : BaseNetLogic
             return;
         }
 
-        stepElapsed += TickSeconds;
+        // High/low fire switch proving. The purge timer only runs at proven
+        // HIGH FIRE; the ignition trial only runs at proven LOW FIRE. Not
+        // proving the switch inside the prove window is a safety lockout,
+        // like a 7800 SERIES that never sees its firing rate end switch.
+        bool lfMade = ReadBool(lowFireVar);
+        bool hfMade = ReadBool(highFireVar);
+        bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
+        if (proveWait)
+        {
+            proveElapsed += TickSeconds;
+            if (proveElapsed >= ProveWindow)
+            {
+                if (step == Step.Purge)
+                    Lockout("HIGH FIRE SWITCH NOT PROVEN - ACTUATOR NEVER REACHED HIGH FIRE (20 MA)", assertVps: false);
+                else
+                    Lockout("LOW FIRE SWITCH NOT PROVEN - ACTUATOR NEVER RETURNED TO LOW FIRE (4 MA)", assertVps: false);
+                return;
+            }
+        }
+        else
+        {
+            proveElapsed = 0f;
+            stepElapsed += TickSeconds;
+        }
 
         if (auto)
         {
-            // The logic is the BMS: drive the step's target state.
+            // The logic is the BMS: drive the step's target state. The
+            // pilot may only light once the actuator is proven at LOW FIRE.
             vp1Var.Value = TargetV1(step);
             vp2Var.Value = TargetV2(step);
-            pilotVar.Value = step == Step.Ignition && !ReadBool(pilotFailVar);
+            pilotVar.Value = step == Step.Ignition && lfMade && !ReadBool(pilotFailVar);
         }
 
         bool v1 = ReadBool(vp1Var);
@@ -743,8 +910,12 @@ public class ValveProvingLogic : BaseNetLogic
     {
         step = next;
         stepElapsed = 0f;
+        proveElapsed = 0f;
         if (next == Step.Run)
+        {
             runEstablished = false;
+            modTarget = LowFireMA; // released to modulation from low fire
+        }
         stateVar.Value = (int)step;
     }
 
@@ -822,11 +993,33 @@ public class ValveProvingLogic : BaseNetLogic
         SetText(leak2Button, ReadBool(leakV2Var) ? "SIM V2 LEAK: ON" : "SIM V2 LEAK: OFF");
         SetText(pilotFailButton, ReadBool(pilotFailVar) ? "SIM PILOT FAIL: ON" : "SIM PILOT FAIL: OFF");
 
+        // Firing rate actuator panel: bar 4..20 mA, readout, HF/LF switches.
+        bool lfMade = ReadBool(lowFireVar);
+        bool hfMade = ReadBool(highFireVar);
+        bool actFault = ReadBool(actuatorFaultVar);
+        bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
+        float ratePct = (firingRateMA - LowFireMA) / (HighFireMA - LowFireMA) * 100f;
+        frBarFill.Width = 4f + (firingRateMA - LowFireMA) / (HighFireMA - LowFireMA) * 176f;
+        SetText(frReadout, firingRateMA.ToString("0.0") + " MA");
+        loFireLed.FillColor = lfMade ? LedGreen : LedOff;
+        hiFireLed.FillColor = hfMade ? LedGreen : LedOff;
+        frUpButton.Enabled = step == Step.Run;
+        frDownButton.Enabled = step == Step.Run;
+        SetText(frFaultButton, actFault ? "SIM ACTUATOR FAULT: ON" : "SIM ACTUATOR FAULT: OFF");
+
+        // Flame signal, volts DC, like a 7800 flame amplifier readout.
+        float flameSignal = (pilotLit || running)
+            ? 3.9f + ((flickerCounter / 3) % 2 == 0 ? 0.3f : 0f)
+            : 0f;
+        flameSignalVar.Value = flameSignal;
+
         // Banner, timer, and step list are the same in both modes; only
         // standby and run texts differ so the operator knows what to do.
         string banner = "";
-        float remaining = RemainingSeconds(auto);
+        string lcd1 = "", lcd2 = "";
+        float remaining = proveWait ? ProveWindow - proveElapsed : RemainingSeconds(auto);
         SetText(timerLabel, remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") + " S" : "T- --");
+        string tRem = remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") : "";
 
         switch (step)
         {
@@ -835,40 +1028,75 @@ public class ValveProvingLogic : BaseNetLogic
                 banner = auto
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
+                lcd1 = "STANDBY";
+                lcd2 = "SYSTEM READY";
                 if (!ReadBool(lgpVar))
+                {
                     banner = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
+                    lcd2 = "LGP NOT MADE";
+                }
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
+                lcd1 = "VALVE PROVE";
+                lcd2 = "EVACUATE  " + tRem;
                 PaintSteps(0, false);
                 break;
             case Step.TestV1:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
+                lcd1 = "VALVE PROVE";
+                lcd2 = "TEST V1   " + tRem;
                 PaintSteps(1, false);
                 break;
             case Step.Fill:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
+                lcd1 = "VALVE PROVE";
+                lcd2 = "FILL      " + tRem;
                 PaintSteps(2, false);
                 break;
             case Step.TestV2:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 4: TESTING V2 (ALL VALVES CLOSED) - PRESSURE MUST STAY HIGH";
+                lcd1 = "VALVE PROVE";
+                lcd2 = "TEST V2   " + tRem;
                 PaintSteps(3, false);
                 break;
             case Step.Purge:
                 bannerRect.FillColor = BannerTest;
-                banner = "VALVES PROVEN - PREPURGE IN PROGRESS (ALL VALVES CLOSED)";
+                if (!hfMade)
+                {
+                    banner = "VALVES PROVEN - DRIVING TO HIGH FIRE FOR PREPURGE (AWAITING HIGH FIRE SWITCH)";
+                    lcd1 = "DRIVE HI FIRE";
+                    lcd2 = "AWAIT HF SW  " + firingRateMA.ToString("0.0") + " MA";
+                }
+                else
+                {
+                    banner = "VALVES PROVEN - PREPURGE AT HIGH FIRE (ALL VALVES CLOSED)";
+                    lcd1 = "PREPURGE HI-FIRE";
+                    lcd2 = tRem + "  " + firingRateMA.ToString("0.0") + " MA";
+                }
                 PaintSteps(4, false);
                 break;
             case Step.Ignition:
                 bannerRect.FillColor = BannerTest;
-                banner = pilotLit
-                    ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
-                    : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
+                if (!lfMade)
+                {
+                    banner = "PURGE COMPLETE - DRIVING TO LOW FIRE FOR IGNITION (AWAITING LOW FIRE SWITCH)";
+                    lcd1 = "DRIVE LO FIRE";
+                    lcd2 = "AWAIT LF SW  " + firingRateMA.ToString("0.0") + " MA";
+                }
+                else
+                {
+                    banner = pilotLit
+                        ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
+                        : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
+                    lcd1 = "PILOT IGN  " + tRem;
+                    lcd2 = "FLAME " + flameSignal.ToString("0.0") + " VDC";
+                }
                 PaintSteps(4, false);
                 break;
             case Step.Run:
@@ -882,17 +1110,34 @@ public class ValveProvingLogic : BaseNetLogic
                     bannerRect.FillColor = BannerRun;
                     banner = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
                 }
+                lcd1 = "RUN";
+                lcd2 = "RATE " + ratePct.ToString("000") + "%  FLAME " + flameSignal.ToString("0.0") + "V";
                 PaintSteps(5, false);
                 break;
             case Step.Lockout:
                 bannerRect.FillColor = BannerAlarm;
                 banner = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
+                lcd1 = (flickerCounter / 5) % 2 == 0 ? "LOCKOUT" : "";
+                lcd2 = lockoutReason.Length > 26 ? lockoutReason.Substring(0, 26) : lockoutReason;
                 PaintSteps(failedStepIndex, true);
                 break;
         }
 
         SetText(stateLabel, banner);
         stateTextVar.Value = banner;
+
+        // Honeywell 7800 SERIES faceplate: message display + LED row.
+        // POWER steady; PILOT amber with the pilot valve; FLAME with any
+        // flame; MAIN with the main valves firing; ALARM blinks on lockout.
+        SetText(hwLcdLine1, lcd1);
+        SetText(hwLcdLine2, lcd2);
+        hwPowerLed.FillColor = LedGreen;
+        hwPilotLed.FillColor = pilotLit ? LedAmber : LedOff;
+        hwFlameLed.FillColor = (pilotLit || running) ? LedGreen : LedOff;
+        hwMainLed.FillColor = running ? LedGreen : LedOff;
+        hwAlarmLed.FillColor = step == Step.Lockout && (flickerCounter / 5) % 2 == 0 ? LedRed : LedOff;
+        if (step == Step.Lockout)
+            flickerCounter++; // keep the lockout blink running with no flame
     }
 
     private float RemainingSeconds(bool auto)

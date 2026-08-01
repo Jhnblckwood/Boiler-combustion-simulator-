@@ -1,12 +1,59 @@
 # Valve Proving Honeywell — FactoryTalk Optix Project
 
 A standalone, fully independent copy of the *valve proving with low and high gas
-pressure switch* project (own project GUID, own node Ids), running identically:
-the base valve proving project (`optix/`) extended with gas supply pressure
-supervision. Open `ValveProvingHoneywell.optix` in FactoryTalk Optix Studio. All
-pressures are in **inches of water column (in. H2O)**.
+pressure switch* project (own project GUID, own node Ids), extended with a
+**4-20 mA firing-rate actuator with HIGH FIRE / LOW FIRE switch proving** and a
+**Honeywell 7800 SERIES faceplate** with live lights and phase messages. Open
+`ValveProvingHoneywell.optix` in FactoryTalk Optix Studio. All pressures are in
+**inches of water column (in. H2O)**.
 
-## What was added
+## Firing rate actuator — 4-20 mA with high/low fire switches
+
+The mod motor's position feedback is a 4-20 mA loop on `Model/FiringRateMA`:
+**4 mA = LOW FIRE** (`Model/LowFireSwitch` made at/below 4.5 mA) and
+**20 mA = HIGH FIRE** (`Model/HighFireSwitch` made at/above 19.5 mA). The
+bottom-left panel shows the live mA bar and readout plus the LOW FIRE and HIGH
+FIRE switch lights.
+
+The BMS drives the actuator itself in both AUTO and MANUAL (the mod motor is a
+relay-module output on a real 7800, not an operator control):
+
+- **Prepurge at high fire** — after the valves prove, the actuator drives to
+  20 mA. The purge timer **only runs while the HIGH FIRE switch is proven**; if
+  the switch does not prove inside the 15 s prove window → **safety lockout**
+  (`HIGH FIRE SWITCH NOT PROVEN`).
+- **Low fire start** — after purge the actuator drives back to 4 mA. The pilot
+  trial **waits for the LOW FIRE switch**; no prove inside the window →
+  **safety lockout** (`LOW FIRE SWITCH NOT PROVEN`).
+- **RUN: released to modulation** — the **RATE − / RATE +** buttons (enabled
+  only in RUN) move the target in 2 mA steps between low and high fire.
+- **SIM ACTUATOR FAULT** freezes the mA feedback where it is (a seized mod
+  motor) so you can demonstrate both prove-failure lockouts.
+
+On a real train, wire `FiringRateMA` to the 4-20 mA analog input and the two
+switch tags to the physical end switches, and delete `SimulateActuator()` in
+the NetLogic.
+
+## Honeywell 7800 SERIES faceplate (bottom middle)
+
+A vector rendition of the relay-module faceplate — red *Honeywell* wordmark,
+"7800 SERIES", a two-line green message display, and the five LEDs:
+
+| LED | Lights when |
+|-----|-------------|
+| POWER | always (module powered) |
+| PILOT | pilot valve energized (amber) |
+| FLAME | any flame proven — pilot or main |
+| MAIN | main valves open, burner firing |
+| ALARM | safety lockout (blinks red) |
+
+The message display tracks every phase like the real keyboard display module:
+`STANDBY / SYSTEM READY`, `VALVE PROVE / TEST V1 T-08`, `DRIVE HI FIRE / AWAIT
+HF SW 12.4 MA`, `PREPURGE HI-FIRE / T-07 20.0 MA`, `DRIVE LO FIRE`, `PILOT IGN
+T-04 / FLAME 4.2 VDC`, `RUN / RATE 045% FLAME 4.2V`, and a blinking `LOCKOUT` +
+short reason. The flame signal publishes to `Model/FlameSignal` (VDC).
+
+## What was carried over from the gas-pressure project
 
 - **Inlet pressure gauge — gauge only, no switch** — at the very beginning of the
   piping. It is the **only adjustable gauge**: drag its needle or use the
@@ -55,6 +102,11 @@ pressures are in **inches of water column (in. H2O)**.
 | `LGPSetpoint` | Float | LGP trip point, set with its numeric input (0–80 in. H2O, default 4) |
 | `HGPSetpoint` | Float | HGP trip point, set with its numeric input (0–80 in. H2O, default 70) |
 | `VPSSetpoint` | Float | VPS allowed differential per hold test, set with its numeric input (0–80 in. H2O, default 14) |
+| `FiringRateMA` | Float | Firing-rate actuator position feedback, 4–20 mA (wire to the analog input on a real train) |
+| `LowFireSwitch` | Boolean | LOW FIRE end switch — made at/below 4.5 mA; ignition waits on it |
+| `HighFireSwitch` | Boolean | HIGH FIRE end switch — made at/above 19.5 mA; purge timer waits on it |
+| `ActuatorFault` | Boolean | Simulation: freeze the mA feedback (seized mod motor) |
+| `FlameSignal` | Float | Flame amplifier signal, VDC, shown on the faceplate display |
 
 In simulation the logic computes `LGP` from `SupplyPressure` and `HGP` from
 `DownstreamPressure` against the spin-box settings; for a real train, bind the two

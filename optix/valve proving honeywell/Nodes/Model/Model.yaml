@@ -57,6 +57,23 @@ Children:
   Type: BaseDataVariableType
   DataType: Float
   Value: 27.7
+- Name: FiringRateMA
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 4.0
+- Name: LowFireSwitch
+  Type: BaseDataVariableType
+  DataType: Boolean
+  Value: true
+- Name: HighFireSwitch
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: ActuatorFault
+  Type: BaseDataVariableType
+  DataType: Boolean
+- Name: FlameSignal
+  Type: BaseDataVariableType
+  DataType: Float
 - Name: State
   Type: BaseDataVariableType
   DataType: Int32

@@ -11,8 +11,15 @@ editing any `.optix` project so the expensive mistakes don't repeat.
 - `optix/valve proving with low and high gas pressure switch/` — **ValveProvingGasPressure**:
   the base project plus inlet gauge and supervised `LGP`/`HGP` gas-pressure switches,
   adjustable `LGPSetpoint`/`HGPSetpoint`/`VPSSetpoint`, `SupplyPressure`/`DownstreamPressure`.
+- `optix/valve proving honeywell/` — **ValveProvingHoneywell**: independent copy of the
+  gas-pressure project plus a 4-20 mA firing-rate actuator (`FiringRateMA`, 4 mA = low
+  fire / 20 mA = high fire) with supervised `LowFireSwitch`/`HighFireSwitch` proving
+  (purge at proven high fire, ignition at proven low fire, prove-window lockouts,
+  RATE +/- modulation in RUN, `ActuatorFault` sim) and a Honeywell 7800 SERIES
+  faceplate (POWER/PILOT/FLAME/MAIN/ALARM LEDs + 2-line phase message display,
+  `FlameSignal`).
 
-The two projects are independent Studio projects (own GUIDs). All screen animation
+All projects are independent Studio projects (own GUIDs). All screen animation
 and the proving sequence live in `ProjectFiles/NetSolution/ValveProvingLogic.cs`,
 which drives widgets **by name** — keep widget names stable and the logic reconnects.
 
