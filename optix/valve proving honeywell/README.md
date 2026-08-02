@@ -34,24 +34,46 @@ On a real train, wire `FiringRateMA` to the 4-20 mA analog input and the two
 switch tags to the physical end switches, and delete `SimulateActuator()` in
 the NetLogic.
 
-## Honeywell 7800 SERIES faceplate (bottom middle)
+## Honeywell RM7838 faceplate (bottom middle)
 
-A vector rendition of the relay-module faceplate — red *Honeywell* wordmark,
-"7800 SERIES", a two-line green message display, and the five LEDs:
+Drawn from the **RM7838B,C 7800 SERIES manual (66-1094-08, Fig. 10)** and the
+supplied layout sketch: a blue module face with the red *Honeywell* logo block
+and **BURNER CONTROL** header, a **full-width two-line VFD display window**, the
+**sequence-status LED panel bottom-left**, and the KDM keys (SCROLL `v ^`,
+MODE `-SAVE`, `<>`) with a **working RESET pushbutton** (wired to STOP/RESET)
+bottom-right.
+
+LEDs follow the real module (POWER green; PILOT, FLAME, MAIN amber; ALARM red):
 
 | LED | Lights when |
 |-----|-------------|
 | POWER | always (module powered) |
-| PILOT | pilot valve energized (amber) |
-| FLAME | any flame proven — pilot or main |
+| PILOT | pilot valve energized |
+| FLAME | flame proven — pilot or main |
 | MAIN | main valves open, burner firing |
-| ALARM | safety lockout (blinks red) |
+| ALARM | safety lockout (blinks) |
 
-The message display tracks every phase like the real keyboard display module:
-`STANDBY / SYSTEM READY`, `VALVE PROVE / TEST V1 T-08`, `DRIVE HI FIRE / AWAIT
-HF SW 12.4 MA`, `PREPURGE HI-FIRE / T-07 20.0 MA`, `DRIVE LO FIRE`, `PILOT IGN
-T-04 / FLAME 4.2 VDC`, `RUN / RATE 045% FLAME 4.2V`, and a blinking `LOCKOUT` +
-short reason. The flame signal publishes to `Model/FlameSignal` (VDC).
+The display follows the KDM message grammar from the manual — line 1 is the
+sequence status with `mm:ss` timing, line 2 is a `*selectable` message (flame
+signal, firing rate) or a `(preemptive)` message:
+
+| Phase | Line 1 | Line 2 |
+|-------|--------|--------|
+| Standby | `STANDBY` | `*Flame Signal  0.0V` (or `(LGP NOT MADE)`) |
+| Valve proving | `VALVE PROVE  00:08` | `(TEST V1 HOLD)` etc. |
+| Drive to high fire | `PURGE  00:10` | `(DRIVE HI FIRE 12.4MA)` |
+| Purge running | `PURGE  00:07` | `(HI FIRE PROVEN 20.0MA)` |
+| Drive to low fire | `PURGE  00:00` | `(DRIVE LO FIRE 8.6MA)` |
+| Pilot trial | `PILOT IGN  00:04` | `*Flame Signal  4.2V` |
+| Run | `RUN` | alternates `*Flame Signal 4.2V` / `*Firing Rate 045%` |
+| Lockout | `LOCKOUT   95` | `(HIGH FIRE SWITCH NOT PROV)` |
+
+Fault codes: 17 low gas pressure · 18 high gas pressure · 25 pilot outside
+trial · 28 pilot flame fail · 55 invalid control · 56 control changed in run ·
+57 action not in time · 91 V1 leak · 92 V2 leak · 95 HF switch not proven ·
+96 LF switch not proven. The flame signal publishes to `Model/FlameSignal`
+(VDC). (The real RM7838 allows 4 min 15 s for the HF/LF switch to close; the
+sim uses a 15 s prove window so drills stay quick.)
 
 ## What was carried over from the gas-pressure project
 

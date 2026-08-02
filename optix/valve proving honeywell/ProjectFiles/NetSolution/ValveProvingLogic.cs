@@ -84,10 +84,15 @@ using FTOptix.UI;
 ///   train, wire FiringRateMA to the 4-20 mA analog input and the two
 ///   switch tags to the physical end switches (delete SimulateActuator).
 ///
-/// The Honeywell 7800 SERIES faceplate (bottom middle) mirrors the relay
-/// module: POWER / PILOT / FLAME / MAIN / ALARM LEDs and a two-line
-/// message display with the phase, countdown, firing rate, and flame
-/// signal (Model/FlameSignal, VDC), blinking LOCKOUT + reason on a trip.
+/// The Honeywell faceplate (bottom middle) is drawn from the RM7838B,C
+/// manual (66-1094-08, Fig. 10) and the user's layout sketch: blue module
+/// face, red Honeywell logo block + BURNER CONTROL header, a full-width
+/// two-line VFD (line 1 = phase + mm:ss like "PILOT IGN 00:04"; line 2 =
+/// "*selectable" messages - flame signal / firing rate - or "(preemptive)"
+/// messages like "(DRIVE HI FIRE 12.4MA)"), the sequence-status LED stack
+/// bottom-left (POWER green; PILOT/FLAME/MAIN amber; ALARM red, blinking
+/// on lockout), SCROLL/MODE/<> keys, and a working RESET pushbutton
+/// (wired to StopReset). Lockouts show "LOCKOUT <fault code>" + reason.
 /// </summary>
 public class ValveProvingLogic : BaseNetLogic
 {
@@ -176,6 +181,7 @@ public class ValveProvingLogic : BaseNetLogic
     private float lgpSet = 4.0f, hgpSet = 70.0f, vpsSet = 14.0f;
     private bool runEstablished;
     private string lockoutReason = "";
+    private int lockoutCode;                // fault code shown on the KDM display
     private int failedStepIndex = -1;
     private int flickerCounter;
     private float firingRateMA = LowFireMA; // actuator position feedback, mA
@@ -206,7 +212,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v7 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v8 started OK");
         }
         catch (Exception ex)
         {
@@ -366,7 +372,7 @@ public class ValveProvingLogic : BaseNetLogic
         // Trying to start before the LGP has made is a safety lockout.
         if (!ReadBool(lgpVar))
         {
-            Lockout("LOW GAS PRESSURE - START ATTEMPTED BEFORE LGP MADE (NEEDS " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
+            Lockout("LOW GAS PRESSURE - START ATTEMPTED BEFORE LGP MADE (NEEDS " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false, code: 17);
             return;
         }
 
@@ -445,11 +451,11 @@ public class ValveProvingLogic : BaseNetLogic
         }
         else if (step == Step.Standby)
         {
-            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false);
+            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false, code: 25);
         }
         else
         {
-            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP (PILOT)");
+            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP (PILOT)", code: 55);
         }
     }
 
@@ -526,14 +532,14 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (step == Step.Run && runEstablished)
         {
-            VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN");
+            VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN", code: 56);
             return;
         }
 
         bool turningOn = !ReadBool(valveVar);
         if (turningOn && InSequence(step) && !targetOn)
         {
-            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP");
+            VpsFailLockout("VPS FAIL - INVALID CONTROL FOR CURRENT STEP", code: 55);
             return;
         }
 
@@ -706,7 +712,7 @@ public class ValveProvingLogic : BaseNetLogic
         // The HGP switch must never break: any trip is an immediate lockout.
         if (ReadBool(hgpVar))
         {
-            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE " + hgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
+            Lockout("HIGH GAS PRESSURE - HGP TRIPPED (ABOVE " + hgpSet.ToString("0.#") + " IN. H2O)", assertVps: false, code: 18);
             return;
         }
 
@@ -720,7 +726,7 @@ public class ValveProvingLogic : BaseNetLogic
             // Pilot supervision applies in standby too (stuck pilot valve
             // on real I/O, or an operator forcing it in manual mode).
             if (ReadBool(pilotVar))
-                Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false);
+                Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: false, code: 25);
             stateVar.Value = (int)step;
             return;
         }
@@ -728,7 +734,7 @@ public class ValveProvingLogic : BaseNetLogic
         // The LGP must stay made for the whole sequence and run.
         if (!ReadBool(lgpVar))
         {
-            Lockout("LOW GAS PRESSURE - LGP DROPPED OUT (BELOW " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false);
+            Lockout("LOW GAS PRESSURE - LGP DROPPED OUT (BELOW " + lgpSet.ToString("0.#") + " IN. H2O)", assertVps: false, code: 17);
             return;
         }
 
@@ -745,9 +751,9 @@ public class ValveProvingLogic : BaseNetLogic
             if (proveElapsed >= ProveWindow)
             {
                 if (step == Step.Purge)
-                    Lockout("HIGH FIRE SWITCH NOT PROVEN - ACTUATOR NEVER REACHED HIGH FIRE (20 MA)", assertVps: false);
+                    Lockout("HIGH FIRE SWITCH NOT PROVEN - ACTUATOR NEVER REACHED HIGH FIRE (20 MA)", assertVps: false, code: 95);
                 else
-                    Lockout("LOW FIRE SWITCH NOT PROVEN - ACTUATOR NEVER RETURNED TO LOW FIRE (4 MA)", assertVps: false);
+                    Lockout("LOW FIRE SWITCH NOT PROVEN - ACTUATOR NEVER RETURNED TO LOW FIRE (4 MA)", assertVps: false, code: 96);
                 return;
             }
         }
@@ -774,7 +780,7 @@ public class ValveProvingLogic : BaseNetLogic
         // pilot button already blocks this, but real I/O could force it).
         if (pilot && !TargetPilot(step) && !(step == Step.Run && !runEstablished))
         {
-            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: !auto);
+            Lockout("PILOT ENABLED OUTSIDE IGNITION TRIAL", assertVps: !auto, code: 25);
             return;
         }
 
@@ -785,7 +791,7 @@ public class ValveProvingLogic : BaseNetLogic
             vpsVar.Value = chamberPressure > vpsSet;
             if (ReadBool(vpsVar))
             {
-                VpsFailLockout("V1 LEAK DETECTED (PRESSURE ROSE DURING TEST)");
+                VpsFailLockout("V1 LEAK DETECTED (PRESSURE ROSE DURING TEST)", code: 91);
                 return;
             }
         }
@@ -795,7 +801,7 @@ public class ValveProvingLogic : BaseNetLogic
             vpsVar.Value = chamberPressure < SupplyPressure() - vpsSet;
             if (ReadBool(vpsVar))
             {
-                VpsFailLockout("V2 / DOWNSTREAM LEAK (PRESSURE DECAYED DURING TEST)");
+                VpsFailLockout("V2 / DOWNSTREAM LEAK (PRESSURE DECAYED DURING TEST)", code: 92);
                 return;
             }
         }
@@ -810,13 +816,13 @@ public class ValveProvingLogic : BaseNetLogic
                     runEstablished = true;
                 else
                 {
-                    VpsFailLockout("VPS FAIL - LIGHT-OFF NOT COMPLETED IN TIME");
+                    VpsFailLockout("VPS FAIL - LIGHT-OFF NOT COMPLETED IN TIME", code: 57);
                     return;
                 }
             }
             if (!auto && runEstablished && !(v1 && v2))
             {
-                VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN");
+                VpsFailLockout("VPS FAIL - CONTROL CHANGED DURING RUN", code: 56);
                 return;
             }
             stateVar.Value = (int)step;
@@ -835,11 +841,11 @@ public class ValveProvingLogic : BaseNetLogic
                 }
                 else if (auto)
                 {
-                    Lockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL", assertVps: false);
+                    Lockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL", assertVps: false, code: 28);
                 }
                 else
                 {
-                    VpsFailLockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL");
+                    VpsFailLockout("PILOT FAILED TO LIGHT DURING IGNITION TRIAL", code: 28);
                 }
             }
             else if (auto || StateMatchesTarget(v1, v2, pilot))
@@ -848,7 +854,7 @@ public class ValveProvingLogic : BaseNetLogic
             }
             else
             {
-                VpsFailLockout("VPS FAIL - REQUIRED ACTION NOT COMPLETED IN TIME");
+                VpsFailLockout("VPS FAIL - REQUIRED ACTION NOT COMPLETED IN TIME", code: 57);
             }
         }
 
@@ -888,9 +894,10 @@ public class ValveProvingLogic : BaseNetLogic
         }
     }
 
-    private void Lockout(string reason, bool assertVps)
+    private void Lockout(string reason, bool assertVps, int code = 0)
     {
         lockoutReason = reason;
+        lockoutCode = code;
         failedStepIndex = ChecklistIndex(step);
         vp1Var.Value = false;
         vp2Var.Value = false;
@@ -901,9 +908,9 @@ public class ValveProvingLogic : BaseNetLogic
         EnterStep(Step.Lockout);
     }
 
-    private void VpsFailLockout(string reason)
+    private void VpsFailLockout(string reason, int code = 0)
     {
-        Lockout(reason, assertVps: true);
+        Lockout(reason, assertVps: true, code: code);
     }
 
     private void EnterStep(Step next)
@@ -1019,7 +1026,7 @@ public class ValveProvingLogic : BaseNetLogic
         string lcd1 = "", lcd2 = "";
         float remaining = proveWait ? ProveWindow - proveElapsed : RemainingSeconds(auto);
         SetText(timerLabel, remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") + " S" : "T- --");
-        string tRem = remaining >= 0f ? "T-" + Math.Ceiling(remaining).ToString("00") : "";
+        string tRem = remaining >= 0f ? Mmss(remaining) : "--:--";
 
         switch (step)
         {
@@ -1029,40 +1036,40 @@ public class ValveProvingLogic : BaseNetLogic
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
                 lcd1 = "STANDBY";
-                lcd2 = "SYSTEM READY";
+                lcd2 = "*Flame Signal  " + flameSignal.ToString("0.0") + "V";
                 if (!ReadBool(lgpVar))
                 {
                     banner = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
-                    lcd2 = "LGP NOT MADE";
+                    lcd2 = "(LGP NOT MADE)";
                 }
                 PaintSteps(-1, false);
                 break;
             case Step.Evacuate:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
-                lcd1 = "VALVE PROVE";
-                lcd2 = "EVACUATE  " + tRem;
+                lcd1 = "VALVE PROVE  " + tRem;
+                lcd2 = "(EVACUATE - V2 OPEN)";
                 PaintSteps(0, false);
                 break;
             case Step.TestV1:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
-                lcd1 = "VALVE PROVE";
-                lcd2 = "TEST V1   " + tRem;
+                lcd1 = "VALVE PROVE  " + tRem;
+                lcd2 = "(TEST V1 HOLD)";
                 PaintSteps(1, false);
                 break;
             case Step.Fill:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
-                lcd1 = "VALVE PROVE";
-                lcd2 = "FILL      " + tRem;
+                lcd1 = "VALVE PROVE  " + tRem;
+                lcd2 = "(FILL - V1 OPEN)";
                 PaintSteps(2, false);
                 break;
             case Step.TestV2:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 4: TESTING V2 (ALL VALVES CLOSED) - PRESSURE MUST STAY HIGH";
-                lcd1 = "VALVE PROVE";
-                lcd2 = "TEST V2   " + tRem;
+                lcd1 = "VALVE PROVE  " + tRem;
+                lcd2 = "(TEST V2 HOLD)";
                 PaintSteps(3, false);
                 break;
             case Step.Purge:
@@ -1070,14 +1077,14 @@ public class ValveProvingLogic : BaseNetLogic
                 if (!hfMade)
                 {
                     banner = "VALVES PROVEN - DRIVING TO HIGH FIRE FOR PREPURGE (AWAITING HIGH FIRE SWITCH)";
-                    lcd1 = "DRIVE HI FIRE";
-                    lcd2 = "AWAIT HF SW  " + firingRateMA.ToString("0.0") + " MA";
+                    lcd1 = "PURGE  " + Mmss(PurgeTime);
+                    lcd2 = "(DRIVE HI FIRE " + firingRateMA.ToString("0.0") + "MA)";
                 }
                 else
                 {
                     banner = "VALVES PROVEN - PREPURGE AT HIGH FIRE (ALL VALVES CLOSED)";
-                    lcd1 = "PREPURGE HI-FIRE";
-                    lcd2 = tRem + "  " + firingRateMA.ToString("0.0") + " MA";
+                    lcd1 = "PURGE  " + tRem;
+                    lcd2 = "(HI FIRE PROVEN " + firingRateMA.ToString("0.0") + "MA)";
                 }
                 PaintSteps(4, false);
                 break;
@@ -1086,8 +1093,8 @@ public class ValveProvingLogic : BaseNetLogic
                 if (!lfMade)
                 {
                     banner = "PURGE COMPLETE - DRIVING TO LOW FIRE FOR IGNITION (AWAITING LOW FIRE SWITCH)";
-                    lcd1 = "DRIVE LO FIRE";
-                    lcd2 = "AWAIT LF SW  " + firingRateMA.ToString("0.0") + " MA";
+                    lcd1 = "PURGE  00:00";
+                    lcd2 = "(DRIVE LO FIRE " + firingRateMA.ToString("0.0") + "MA)";
                 }
                 else
                 {
@@ -1095,7 +1102,7 @@ public class ValveProvingLogic : BaseNetLogic
                         ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
                         : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
                     lcd1 = "PILOT IGN  " + tRem;
-                    lcd2 = "FLAME " + flameSignal.ToString("0.0") + " VDC";
+                    lcd2 = "*Flame Signal  " + flameSignal.ToString("0.0") + "V";
                 }
                 PaintSteps(4, false);
                 break;
@@ -1111,14 +1118,17 @@ public class ValveProvingLogic : BaseNetLogic
                     banner = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
                 }
                 lcd1 = "RUN";
-                lcd2 = "RATE " + ratePct.ToString("000") + "%  FLAME " + flameSignal.ToString("0.0") + "V";
+                // the KDM scrolls its selectable messages; alternate them
+                lcd2 = (flickerCounter / 40) % 2 == 0
+                    ? "*Flame Signal  " + flameSignal.ToString("0.0") + "V"
+                    : "*Firing Rate  " + ratePct.ToString("000") + "%";
                 PaintSteps(5, false);
                 break;
             case Step.Lockout:
                 bannerRect.FillColor = BannerAlarm;
                 banner = "SAFETY LOCKOUT - " + lockoutReason + " - PRESS STOP / RESET";
-                lcd1 = (flickerCounter / 5) % 2 == 0 ? "LOCKOUT" : "";
-                lcd2 = lockoutReason.Length > 26 ? lockoutReason.Substring(0, 26) : lockoutReason;
+                lcd1 = "LOCKOUT   " + lockoutCode.ToString();
+                lcd2 = "(" + (lockoutReason.Length > 24 ? lockoutReason.Substring(0, 24) : lockoutReason) + ")";
                 PaintSteps(failedStepIndex, true);
                 break;
         }
@@ -1133,8 +1143,8 @@ public class ValveProvingLogic : BaseNetLogic
         SetText(hwLcdLine2, lcd2);
         hwPowerLed.FillColor = LedGreen;
         hwPilotLed.FillColor = pilotLit ? LedAmber : LedOff;
-        hwFlameLed.FillColor = (pilotLit || running) ? LedGreen : LedOff;
-        hwMainLed.FillColor = running ? LedGreen : LedOff;
+        hwFlameLed.FillColor = (pilotLit || running) ? LedAmber : LedOff;
+        hwMainLed.FillColor = running ? LedAmber : LedOff;
         hwAlarmLed.FillColor = step == Step.Lockout && (flickerCounter / 5) % 2 == 0 ? LedRed : LedOff;
         if (step == Step.Lockout)
             flickerCounter++; // keep the lockout blink running with no flame
@@ -1201,6 +1211,14 @@ public class ValveProvingLogic : BaseNetLogic
     /// Rockwell's own template NetLogic - so the write always carries a
     /// real LocalizedText value.
     /// </summary>
+    /// <summary>Seconds to the KDM's mm:ss display format.</summary>
+    private static string Mmss(float seconds)
+    {
+        if (seconds < 0f) seconds = 0f;
+        int s = (int)Math.Ceiling(seconds);
+        return (s / 60).ToString("00") + ":" + (s % 60).ToString("00");
+    }
+
     private static void SetText(Label widget, string text)
     {
         widget.LocalizedText = new LocalizedText(string.Empty, text, "en-US");
