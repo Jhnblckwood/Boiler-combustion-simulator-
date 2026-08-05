@@ -308,7 +308,7 @@ Children:
     Type: BaseDataVariableType
     DataType: Size
     ModellingRule: Optional
-    Value: 800.0
+    Value: 680.0
   - Name: Caption
     Type: BaseDataVariableType
     DataType: String
@@ -329,7 +329,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 8.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -366,7 +366,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 50.0
+      Value: 42.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -399,7 +399,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 80.0
+      Value: 58.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -430,7 +430,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 90.0
+      Value: 68.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -467,7 +467,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 90.0
+      Value: 68.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -515,7 +515,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 132.0
+      Value: 106.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -542,7 +542,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 244.0
+      Value: 218.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -575,7 +575,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 272.0
+      Value: 246.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -606,7 +606,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 128.0
+      Value: 102.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -654,7 +654,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 150.0
+      Value: 124.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -681,7 +681,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 235.0
+      Value: 209.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -718,7 +718,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 128.0
+      Value: 102.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -766,7 +766,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 150.0
+      Value: 124.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -793,7 +793,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 128.0
+      Value: 102.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -841,7 +841,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 150.0
+      Value: 124.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -864,7 +864,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 260.0
+      Value: 234.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -891,7 +891,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 292.0
+      Value: 266.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -918,7 +918,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 292.0
+      Value: 266.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -945,7 +945,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 292.0
+      Value: 266.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -972,7 +972,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 261.0
+      Value: 235.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -999,7 +999,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 225.0
+      Value: 199.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1026,7 +1026,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 231.0
+      Value: 205.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1057,7 +1057,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 233.0
+      Value: 207.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1090,7 +1090,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 260.0
+      Value: 234.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1117,7 +1117,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 260.0
+      Value: 234.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1144,7 +1144,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 310.0
+      Value: 284.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1171,7 +1171,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 330.0
+      Value: 304.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1198,7 +1198,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 336.0
+      Value: 310.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1229,7 +1229,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 340.0
+      Value: 314.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1262,7 +1262,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 310.0
+      Value: 284.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1289,7 +1289,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 330.0
+      Value: 304.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1316,7 +1316,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 336.0
+      Value: 310.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1347,7 +1347,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 340.0
+      Value: 314.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1391,7 +1391,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 336.0
+      Value: 310.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1425,7 +1425,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 336.0
+      Value: 310.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1459,7 +1459,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 196.0
+      Value: 170.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1482,7 +1482,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 261.0
+      Value: 235.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1509,7 +1509,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 166.0
+      Value: 140.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1540,7 +1540,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 206.0
+      Value: 180.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1578,7 +1578,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 271.0
+      Value: 245.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1618,7 +1618,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 340.0
+      Value: 314.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1651,7 +1651,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 261.0
+      Value: 235.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1678,7 +1678,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 138.0
+      Value: 112.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1705,7 +1705,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 158.0
+      Value: 132.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1736,7 +1736,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 200.0
+      Value: 174.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1769,7 +1769,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 215.0
+      Value: 189.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1796,7 +1796,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 215.0
+      Value: 189.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1828,7 +1828,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 271.0
+      Value: 245.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1868,7 +1868,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 340.0
+      Value: 314.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1901,7 +1901,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 270.0
+      Value: 244.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1932,7 +1932,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 340.0
+      Value: 314.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -1970,7 +1970,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 190.0
+      Value: 164.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2015,7 +2015,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 230.0
+      Value: 204.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2059,7 +2059,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 318.0
+      Value: 292.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2096,7 +2096,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 316.0
+      Value: 290.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2129,7 +2129,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 384.0
+      Value: 352.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2160,7 +2160,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 386.0
+      Value: 354.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2193,7 +2193,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 418.0
+      Value: 378.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2224,7 +2224,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 420.0
+      Value: 380.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2257,7 +2257,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 452.0
+      Value: 404.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2288,7 +2288,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 454.0
+      Value: 406.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2321,7 +2321,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 486.0
+      Value: 430.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2352,7 +2352,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 488.0
+      Value: 432.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2385,7 +2385,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 520.0
+      Value: 456.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2416,7 +2416,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 522.0
+      Value: 458.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2449,7 +2449,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 554.0
+      Value: 482.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2480,7 +2480,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 556.0
+      Value: 484.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2517,7 +2517,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 508.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2554,7 +2554,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 622.0
+      Value: 524.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2587,7 +2587,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 656.0
+      Value: 540.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2618,7 +2618,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 660.0
+      Value: 544.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2651,7 +2651,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 656.0
+      Value: 540.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2682,7 +2682,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 660.0
+      Value: 544.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2715,7 +2715,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 656.0
+      Value: 540.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2746,7 +2746,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 660.0
+      Value: 544.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2779,7 +2779,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 690.0
+      Value: 574.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2810,7 +2810,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 696.0
+      Value: 580.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2843,7 +2843,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 714.0
+      Value: 598.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2870,7 +2870,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 714.0
+      Value: 598.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2901,7 +2901,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 712.0
+      Value: 596.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2934,7 +2934,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 738.0
+      Value: 622.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2965,7 +2965,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 739.0
+      Value: 623.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2998,7 +2998,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 738.0
+      Value: 622.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3029,7 +3029,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 739.0
+      Value: 623.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3066,7 +3066,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 734.0
+      Value: 618.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3159,7 +3159,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 734.0
+      Value: 618.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3252,7 +3252,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 760.0
+      Value: 644.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3341,7 +3341,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 644.0
+      Value: 528.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3368,7 +3368,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 650.0
+      Value: 534.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3399,7 +3399,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 653.0
+      Value: 537.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3436,7 +3436,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 654.0
+      Value: 538.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3473,7 +3473,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 654.0
+      Value: 538.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3506,7 +3506,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 674.0
+      Value: 558.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3537,7 +3537,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 680.0
+      Value: 564.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3574,7 +3574,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 702.0
+      Value: 586.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3607,7 +3607,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 734.0
+      Value: 618.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3634,7 +3634,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 737.0
+      Value: 621.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3665,7 +3665,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 737.0
+      Value: 621.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3698,7 +3698,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 747.0
+      Value: 631.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3729,7 +3729,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 747.0
+      Value: 631.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3762,7 +3762,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 757.0
+      Value: 641.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3793,7 +3793,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 757.0
+      Value: 641.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3826,7 +3826,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 767.0
+      Value: 651.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3857,7 +3857,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 767.0
+      Value: 651.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3890,7 +3890,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 777.0
+      Value: 661.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3921,7 +3921,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 777.0
+      Value: 661.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3954,7 +3954,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 740.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3985,7 +3985,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 741.0
+      Value: 625.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4018,7 +4018,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 740.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4049,7 +4049,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 741.0
+      Value: 625.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4086,7 +4086,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 757.0
+      Value: 641.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4119,7 +4119,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 740.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4150,7 +4150,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 741.0
+      Value: 625.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4187,7 +4187,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 757.0
+      Value: 641.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4220,7 +4220,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 740.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4251,7 +4251,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 741.0
+      Value: 625.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4288,7 +4288,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 768.0
+      Value: 652.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4377,7 +4377,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 380.0
+      Value: 352.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4387,7 +4387,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 390.0
+      Value: 324.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4408,7 +4408,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 392.0
+      Value: 364.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4446,7 +4446,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 420.0
+      Value: 388.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4456,7 +4456,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 38.0
+      Value: 32.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4540,7 +4540,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 468.0
+      Value: 426.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4550,7 +4550,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 44.0
+      Value: 36.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4634,7 +4634,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 468.0
+      Value: 426.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4644,7 +4644,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 44.0
+      Value: 36.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4727,7 +4727,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 522.0
+      Value: 468.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4765,7 +4765,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 540.0
+      Value: 484.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4775,7 +4775,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
+      Value: 30.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4859,7 +4859,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 540.0
+      Value: 484.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4869,7 +4869,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
+      Value: 30.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4953,7 +4953,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 582.0
+      Value: 518.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4963,7 +4963,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
+      Value: 30.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5046,7 +5046,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 628.0
+      Value: 554.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5084,7 +5084,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 646.0
+      Value: 570.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5094,7 +5094,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5178,7 +5178,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 646.0
+      Value: 570.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5188,7 +5188,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5272,7 +5272,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 690.0
+      Value: 602.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5282,7 +5282,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 32.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5366,7 +5366,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 730.0
+      Value: 634.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5376,7 +5376,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 32.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5460,7 +5460,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 730.0
+      Value: 634.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5470,7 +5470,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 32.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float

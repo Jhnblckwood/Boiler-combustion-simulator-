@@ -10,6 +10,12 @@ All pressures are in **inches of water column (in. H2O)**.
 available as SVG. Rendered from this project's layout, so this is what a
 working install looks like.)*
 
+The window is **1280x680** so the whole screen — including the Honeywell
+module and firing-rate panel at the bottom — fits on a 1366x768 laptop with
+the Windows taskbar visible. Native Optix windows do **not** scroll: if a
+screen is taller than the monitor, the bottom is simply cut off, which is why
+the window is sized to fit.
+
 ---
 
 ## Getting the project up and running from scratch
