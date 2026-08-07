@@ -140,37 +140,38 @@
 <text x="296.0" y="634.3846153846154" font-size="14.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">+</text>
 <rect x="52.0" y="644.0" width="256.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
 <text x="180.0" y="659.8461538461538" font-size="10.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">SIM ACTUATOR FAULT: OFF</text>
-<rect x="580.0" y="528.0" width="310.0" height="148.0" fill="#2050d0"/>
-<rect x="590.0" y="534.0" width="96.0" height="18.0" fill="#ee3524"/>
-<text x="597.0" y="548.0" font-size="11.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>
-<text x="696.0" y="547.0" font-size="9.0" fill="#ffffff" font-family="Arial, sans-serif">BURNER CONTROL</text>
-<text x="836.0" y="546.0" font-size="8.0" fill="#cfd8ff" font-family="Arial, sans-serif">RM7838</text>
-<rect x="590.0" y="558.0" width="292.0" height="54.0" fill="#0a1206"/>
-<text x="604.0" y="579.0" font-size="15.0" fill="#52d273" font-family="monospace">RUN</text>
-<text x="604.0" y="601.0" font-size="15.0" fill="#52d273" font-family="monospace">*Firing Rate  050%</text>
-<rect x="586.0" y="618.0" width="128.0" height="54.0" fill="#0d0d0d"/>
-<ellipse cx="596.0" cy="625.0" rx="4.0" ry="4.0" fill="#2ECC71"/>
-<text x="606.0" y="628.0" font-size="7.0" fill="#c9ced3" font-family="Arial, sans-serif">POWER</text>
-<ellipse cx="596.0" cy="635.0" rx="4.0" ry="4.0" fill="#3b4654"/>
-<text x="606.0" y="638.0" font-size="7.0" fill="#c9ced3" font-family="Arial, sans-serif">PILOT</text>
-<ellipse cx="596.0" cy="645.0" rx="4.0" ry="4.0" fill="#FFB000"/>
-<text x="606.0" y="648.0" font-size="7.0" fill="#c9ced3" font-family="Arial, sans-serif">FLAME</text>
-<ellipse cx="596.0" cy="655.0" rx="4.0" ry="4.0" fill="#FFB000"/>
-<text x="606.0" y="658.0" font-size="7.0" fill="#c9ced3" font-family="Arial, sans-serif">MAIN</text>
-<ellipse cx="596.0" cy="665.0" rx="4.0" ry="4.0" fill="#3b4654"/>
-<text x="606.0" y="668.0" font-size="7.0" fill="#c9ced3" font-family="Arial, sans-serif">ALARM</text>
-<rect x="726.0" y="624.0" width="24.0" height="14.0" fill="#101828"/>
-<text x="735.0" y="634.0" font-size="9.0" fill="#c9ced3" font-family="Arial, sans-serif">v</text>
-<rect x="754.0" y="624.0" width="24.0" height="14.0" fill="#101828"/>
-<text x="763.0" y="634.0" font-size="9.0" fill="#c9ced3" font-family="Arial, sans-serif">^</text>
-<text x="728.0" y="648.0" font-size="7.0" fill="#cfd8ff" font-family="Arial, sans-serif">SCROLL</text>
-<rect x="788.0" y="624.0" width="42.0" height="14.0" fill="#101828"/>
-<text x="795.0" y="633.0" font-size="8.0" fill="#c9ced3" font-family="Arial, sans-serif">MODE</text>
-<text x="792.0" y="648.0" font-size="7.0" fill="#cfd8ff" font-family="Arial, sans-serif">-SAVE</text>
-<rect x="836.0" y="624.0" width="24.0" height="14.0" fill="#101828"/>
-<text x="843.0" y="634.0" font-size="9.0" fill="#c9ced3" font-family="Arial, sans-serif">&lt;&gt;</text>
-<rect x="726.0" y="652.0" width="70.0" height="18.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="761.0" y="664.0769230769231" font-size="8.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
+<rect x="580.0" y="356.0" width="310.0" height="310.0" fill="#2050d0"/>
+<rect x="592.0" y="366.0" width="104.0" height="22.0" fill="#ee3524"/>
+<text x="600.0" y="382.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>
+<text x="706.0" y="381.0" font-size="10.0" fill="#ffffff" font-family="Arial, sans-serif">BURNER CONTROL</text>
+<text x="838.0" y="380.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">RM7838</text>
+<rect x="592.0" y="398.0" width="286.0" height="70.0" fill="#0a1206"/>
+<text x="606.0" y="425.0" font-size="17.0" fill="#52d273" font-family="monospace">RUN</text>
+<text x="606.0" y="453.0" font-size="17.0" fill="#52d273" font-family="monospace">*Firing Rate  050%</text>
+<rect x="592.0" y="482.0" width="150.0" height="140.0" fill="#0d0d0d"/>
+<ellipse cx="607.5" cy="501.5" rx="7.5" ry="7.5" fill="#2ECC71"/>
+<text x="624.0" y="507.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">POWER</text>
+<ellipse cx="607.5" cy="527.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="624.0" y="533.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">PILOT</text>
+<ellipse cx="607.5" cy="553.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="624.0" y="559.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">FLAME</text>
+<ellipse cx="607.5" cy="579.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="624.0" y="585.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">MAIN</text>
+<ellipse cx="607.5" cy="605.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="624.0" y="611.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">ALARM</text>
+<rect x="760.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="773.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">v</text>
+<rect x="800.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="813.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">^</text>
+<rect x="844.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="853.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">&lt;&gt;</text>
+<text x="762.0" y="533.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">SCROLL</text>
+<rect x="760.0" y="544.0" width="74.0" height="24.0" fill="#101828"/>
+<text x="776.0" y="560.0" font-size="10.0" fill="#c9ced3" font-family="Arial, sans-serif">MODE</text>
+<text x="764.0" y="583.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">-SAVE</text>
+<rect x="760.0" y="600.0" width="118.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="819.0" y="618.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
+<text x="592.0" y="646.0" font-size="10.0" fill="#cfd8ff" font-family="Arial, sans-serif">7800 SERIES</text>
 <rect x="900.0" y="352.0" width="340.0" height="324.0" fill="#212d3b"/>
 <text x="920.0" y="378.0" font-size="14.0" fill="#ffffff" font-family="Arial, sans-serif">CONTROLS</text>
 <rect x="920.0" y="388.0" width="300.0" height="32.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>

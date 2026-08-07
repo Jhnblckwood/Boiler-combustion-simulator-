@@ -3341,7 +3341,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 528.0
+      Value: 356.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3351,7 +3351,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 148.0
+      Value: 310.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3363,22 +3363,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 590.0
+      Value: 592.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 534.0
+      Value: 366.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 96.0
+      Value: 104.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 18.0
+      Value: 22.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3394,27 +3394,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 597.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 537.0
+      Value: 369.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 84.0
+      Value: 92.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 13.0
+      Value: 15.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 11.0
+      Value: 13.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3431,27 +3431,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 696.0
+      Value: 706.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 538.0
+      Value: 371.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 130.0
+      Value: 122.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 12.0
+      Value: 13.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 9.0
+      Value: 10.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3468,17 +3468,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 836.0
+      Value: 838.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 538.0
+      Value: 371.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 48.0
+      Value: 46.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
@@ -3488,7 +3488,7 @@ Children:
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 8.0
+      Value: 9.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3501,22 +3501,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 590.0
+      Value: 592.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 558.0
+      Value: 398.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 292.0
+      Value: 286.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 54.0
+      Value: 70.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3532,27 +3532,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 604.0
+      Value: 606.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 564.0
+      Value: 408.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 264.0
+      Value: 258.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 18.0
+      Value: 20.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 15.0
+      Value: 17.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3569,27 +3569,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 604.0
+      Value: 606.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 586.0
+      Value: 436.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 264.0
+      Value: 258.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 18.0
+      Value: 20.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 15.0
+      Value: 17.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3602,22 +3602,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 586.0
+      Value: 592.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 618.0
+      Value: 482.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 128.0
+      Value: 150.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 54.0
+      Value: 140.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3629,22 +3629,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 621.0
+      Value: 494.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3660,27 +3660,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 624.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 621.0
+      Value: 496.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 40.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3693,22 +3693,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 631.0
+      Value: 520.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3724,27 +3724,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 624.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 631.0
+      Value: 522.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 40.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3757,22 +3757,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 641.0
+      Value: 546.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3788,27 +3788,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 624.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 641.0
+      Value: 548.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 40.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3821,22 +3821,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 651.0
+      Value: 572.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3852,27 +3852,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 624.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 651.0
+      Value: 574.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 40.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3885,22 +3885,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 600.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 661.0
+      Value: 598.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 15.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3916,27 +3916,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 624.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 661.0
+      Value: 600.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 40.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3949,22 +3949,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 726.0
+      Value: 760.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 494.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 24.0
+      Value: 34.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 24.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3980,27 +3980,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 735.0
+      Value: 773.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 625.0
+      Value: 498.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 10.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 11.0
+      Value: 14.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 9.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4013,22 +4013,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 754.0
+      Value: 800.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 494.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 24.0
+      Value: 34.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 24.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4044,27 +4044,91 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 763.0
+      Value: 813.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 625.0
+      Value: 498.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 8.0
+      Value: 10.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 11.0
+      Value: 14.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 9.0
+      Value: 11.0
+    - Name: TextColor
+      Type: BaseDataVariableType
+      DataType: Color
+      ModellingRule: Optional
+      Value: "#c9ced3"
+  - Name: HwKey4
+    Type: Rectangle
+    Children:
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 844.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 494.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 34.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+    - Name: FillColor
+      Type: BaseDataVariableType
+      DataType: Color
+      Value: "#101828"
+  - Name: HwKey4Label
+    Type: Label
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"<>"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 853.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 498.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 18.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 14.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4081,27 +4145,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 728.0
+      Value: 762.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 641.0
+      Value: 524.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 50.0
+      Value: 52.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 9.0
+      Value: 11.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 7.0
+      Value: 9.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4114,22 +4178,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 788.0
+      Value: 760.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 544.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 42.0
+      Value: 74.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 24.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4145,27 +4209,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 795.0
+      Value: 776.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 625.0
+      Value: 550.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 30.0
+      Value: 42.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 11.0
+      Value: 13.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 8.0
+      Value: 10.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -4182,81 +4246,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 792.0
+      Value: 764.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 641.0
+      Value: 574.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 36.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 9.0
-    - Name: FontSize
-      Type: BaseDataVariableType
-      DataType: Float
-      ModellingRule: Optional
-      Value: 7.0
-    - Name: TextColor
-      Type: BaseDataVariableType
-      DataType: Color
-      ModellingRule: Optional
-      Value: "#cfd8ff"
-  - Name: HwKey4
-    Type: Rectangle
-    Children:
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 836.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 624.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 24.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 14.0
-    - Name: FillColor
-      Type: BaseDataVariableType
-      DataType: Color
-      Value: "#101828"
-  - Name: HwKey4Label
-    Type: Label
-    Children:
-    - Name: Text
-      Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"<>"}
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 843.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 625.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 14.0
+      Value: 42.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
@@ -4271,7 +4271,7 @@ Children:
       Type: BaseDataVariableType
       DataType: Color
       ModellingRule: Optional
-      Value: "#c9ced3"
+      Value: "#cfd8ff"
   - Name: HwResetButton
     Type: Button
     Children:
@@ -4283,27 +4283,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 726.0
+      Value: 760.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 652.0
+      Value: 600.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 70.0
+      Value: 118.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 18.0
+      Value: 28.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 8.0
+      Value: 11.0
     - Name: EventHandler1
       Type: EventHandler
       Children:
@@ -4365,6 +4365,43 @@ Children:
         - Name: Severity
           Type: PropertyType
           DataType: UInt16
+  - Name: HwFooterLabel
+    Type: Label
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"7800 SERIES"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 592.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 636.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 120.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 13.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 10.0
+    - Name: TextColor
+      Type: BaseDataVariableType
+      DataType: Color
+      ModellingRule: Optional
+      Value: "#cfd8ff"
   - Name: PanelRect
     Type: Rectangle
     Children:
