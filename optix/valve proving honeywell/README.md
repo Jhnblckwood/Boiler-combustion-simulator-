@@ -1,9 +1,10 @@
 # Valve Proving Honeywell — FactoryTalk Optix Project
 
 Honeywell 7800 SERIES valve proving trainer on a Siemens SKP gas train, with a
-**4-20 mA firing-rate actuator (high/low fire switch proving)** and an
-**RM7838-style Honeywell faceplate** with live lights and phase messages.
-All pressures are in **inches of water column (in. H2O)**.
+**Modutrol mod motor on Series 90 control (135 ohm R-W-B potentiometer) with
+high/low fire end-switch proving** and an **RM7838-style Honeywell faceplate**
+with live lights and phase messages. All pressures are in **inches of water
+column (in. H2O)**.
 
 ![Screen in RUN](docs/screen-sample.png)
 *(docs/screen-sample.png — the screen in RUN at 50% firing rate; also
@@ -75,7 +76,7 @@ optix/valve proving honeywell/
    (`FTOptixRuntime.log`, shown in Studio’s output/log pane) and confirm:
 
    ```
-   ValveProvingLogic BUILD v8 started OK
+   ValveProvingLogic BUILD v9 started OK
    ```
 
    If the marker is missing or shows an older version, the runtime is running
@@ -96,14 +97,16 @@ Everything is simulated — just press buttons and watch:
    - **Steps 1–4** — valve proving: evacuate, V1 hold test, fill, V2 hold
      test. The test-volume gauge and the checklist track each step; the
      Honeywell display reads `VALVE PROVE mm:ss` with `(TEST V1 HOLD)` etc.
-   - **Purge** — the firing-rate bar ramps 4 → 20 mA
-     (`(DRIVE HI FIRE 12.4MA)`), the **HIGH FIRE** light makes at 19.5 mA,
-     and only then does the purge timer count (`PURGE 00:07`).
-   - **Ignition** — the actuator ramps back to 4 mA, **LOW FIRE** makes, the
-     pilot lights (`PILOT IGN 00:04`, PILOT LED amber, flame signal ~4.2 V).
+   - **Purge** — the mod motor drives toward high fire (watch the ohms climb
+     to 135 and the 10 s countdown on the display: `(HI FIRE T-09  67 OHM)`);
+     the **HIGH FIRE** switch makes at 130 Ω and only then does the purge
+     timer count (`PURGE 00:07`).
+   - **Ignition** — the motor drives back to low fire on its own 10 s
+     countdown; **LOW FIRE** makes at 5 Ω, the pilot lights (`PILOT IGN
+     00:04`, PILOT LED amber, flame signal ~4.2 V).
    - **RUN** — main valves open, burner fires, Honeywell shows `RUN` with
      FLAME + MAIN amber and PILOT off (interrupted pilot, like the real
-     RM7838). Use **RATE − / RATE +** to modulate 4–20 mA.
+     RM7838). Use **RATE − / RATE +** to modulate (10% per press).
 4. Press **STOP / RESET** (or the faceplate **RESET** button) to shut down.
 
 ### 7. Things to try
@@ -113,7 +116,7 @@ Everything is simulated — just press buttons and watch:
 | **SIM V1 LEAK: ON**, then start | V1 hold test fails → `LOCKOUT 91` |
 | **SIM V2 LEAK: ON**, then start | V2 hold test fails → `LOCKOUT 92` |
 | **SIM PILOT FAIL: ON**, then start | Pilot trial fails → `LOCKOUT 28` |
-| **SIM ACTUATOR FAULT: ON**, then start | Actuator freezes, high-fire never proves → `LOCKOUT 95` (turn it on during ignition drive-down instead → `LOCKOUT 96`) |
+| **SIM MOD MOTOR FAULT: ON**, then start | Motor seizes, the 10 s high-fire countdown expires → `LOCKOUT 95` (turn it on during the drive to low fire instead → `LOCKOUT 96`) |
 | Drag the **inlet gauge** below the LGP setting mid-run | LGP dropout → `LOCKOUT 17` |
 | Raise **inlet + setpoints** so downstream exceeds the HGP setting in run | HGP trip → `LOCKOUT 18` |
 | **TOGGLE MODE** → MANUAL, press START BURNER | Training drill: YOU work VP1/VP2/PILOT at each step; a wrong button or a missed window fails the VPS and locks out |
@@ -128,29 +131,43 @@ blinks. **STOP/RESET** (or faceplate RESET) clears it.
 | Symptom | Cause / fix |
 |---|---|
 | Every button dead, screen frozen | `Start()` threw — check the log for the full stack trace under `Start FAILED` |
-| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v8` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
+| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v9` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
 | Gauges stuck at defaults in the designer | Normal — values only move at **runtime** (press Play) |
 | `Unable to cast System.String to LocalizedText` in the log | A widget Text property was re-typed as String — see `../CLAUDE.md` (all texts must be LocalizedText) |
 | Log error count climbing every 100 ms | A widget property has the wrong DataType; the stack trace names the widget |
 
 ---
 
-## How the firing-rate supervision works (4-20 mA)
+## How the mod motor works (Series 90, 135 ohm R-W-B)
 
-`Model/FiringRateMA` is the mod-motor position feedback: **4 mA = LOW FIRE**
-(`Model/LowFireSwitch` made at/below 4.5 mA), **20 mA = HIGH FIRE**
-(`Model/HighFireSwitch` made at/above 19.5 mA). The BMS drives the actuator
-itself in both modes, like the RM7838 does through its firing-rate terminals:
+The firing-rate motor is a **Honeywell Modutrol on Series 90 control**: a
+135 ohm potentiometer across the three field wires **R, W, B**. The controller
+varies the two legs — **reducing the R-to-W resistance drives the motor
+CLOSED (low fire); reducing R-to-B drives it OPEN (high fire)** — and the
+motor's feedback wiper reports its actual position in ohms.
 
-- **Prepurge at high fire** — after the valves prove, the actuator drives to
-  20 mA; the purge timer **only runs while HIGH FIRE is proven**. No prove
-  inside the window → lockout 95.
-- **Low fire start** — after purge the actuator returns to 4 mA; the pilot
-  trial **waits on LOW FIRE**. No prove → lockout 96.
-- **RUN** — released to modulation; **RATE − / +** move the target in 2 mA
-  steps (enabled only in RUN).
-- The real RM7838 allows **4 min 15 s** for each switch to close; the sim
-  uses **15 s** (`ProveWindow` in `ValveProvingLogic.cs`) so drills stay quick.
+| Tag | Meaning |
+|-----|---------|
+| `Model/ModMotorW` | Resistance R↔W, ohms (command leg — reduced = drive closed) |
+| `Model/ModMotorB` | Resistance R↔B, ohms (= 135 − R-W — reduced = drive open) |
+| `Model/ModMotorR` | Feedback wiper: actual position, **0 ohm = low fire, 135 ohm = high fire** |
+| `Model/LowFireSwitch` | End-switch INPUT — made at/below **5 ohms** |
+| `Model/HighFireSwitch` | End-switch INPUT — made at/above **130 ohms** |
+
+The BMS drives the motor itself in both modes:
+
+- **Prepurge at high fire** — after the valves prove, the controller drops
+  R-B to 0 (commands 135 ohms) and a **10 second countdown starts**. If the
+  HIGH FIRE switch has not proven when it hits zero → **lockout 95**. The
+  purge timer only runs at proven high fire.
+- **Low fire start** — after purge the controller drops R-W to 0 (commands
+  0 ohms) and another **10 second countdown** runs. LOW FIRE switch not
+  proven in time → **lockout 96**. The pilot trial waits on low fire.
+- **RUN** — released to modulation; **RATE − / +** move the commanded
+  position in 10% steps. The screen shows **firing rate %** (position /
+  135 ohms) plus the live ohm readings on all three terminals.
+- **SIM MOD MOTOR FAULT** freezes the feedback wiper (a seized motor) so
+  both countdown lockouts can be demonstrated.
 
 ## The Honeywell RM7838 faceplate
 
@@ -170,9 +187,9 @@ Display grammar (line 1 = phase + `mm:ss`; line 2 = `*selectable` or
 |-------|--------|--------|
 | Standby | `STANDBY` | `*Flame Signal  0.0V` (or `(LGP NOT MADE)`) |
 | Valve proving | `VALVE PROVE  00:08` | `(TEST V1 HOLD)` etc. |
-| Drive to high fire | `PURGE  00:10` | `(DRIVE HI FIRE 12.4MA)` |
-| Purge running | `PURGE  00:07` | `(HI FIRE PROVEN 20.0MA)` |
-| Drive to low fire | `PURGE  00:00` | `(DRIVE LO FIRE 8.6MA)` |
+| Drive to high fire | `PURGE  00:10` | `(HI FIRE T-09  67 OHM)` |
+| Purge running | `PURGE  00:07` | `(HI FIRE PROVEN 135 OHM)` |
+| Drive to low fire | `PURGE  00:00` | `(LO FIRE T-08  23 OHM)` |
 | Pilot trial | `PILOT IGN  00:04` | `*Flame Signal  4.2V` |
 | Run | `RUN` | alternates `*Flame Signal 4.2V` / `*Firing Rate 045%` |
 | Lockout | `LOCKOUT   95` | `(HIGH FIRE SWITCH NOT PROV)` |
@@ -212,9 +229,11 @@ trial · 28 pilot flame fail · 55 invalid control · 56 control changed in run 
 | `DownstreamPressure` | Float | Pressure after V2, in. H2O |
 | `ChamberPressure` | Float | Test-volume pressure, in. H2O |
 | `LGPSetpoint` / `HGPSetpoint` / `VPSSetpoint` | Float | Trip settings (0–80, defaults 4 / 70 / 14) |
-| `FiringRateMA` | Float | Firing-rate actuator feedback, 4–20 mA |
-| `LowFireSwitch` / `HighFireSwitch` | Boolean | Firing-rate end switches |
-| `ActuatorFault` | Boolean | Sim: freeze the mA feedback |
+| `ModMotorR` | Float | Mod motor feedback wiper, ohms (0 = low fire, 135 = high fire) |
+| `ModMotorW` | Float | Resistance R↔W, ohms — reduced = drive closed |
+| `ModMotorB` | Float | Resistance R↔B, ohms — reduced = drive open (135 − R-W) |
+| `LowFireSwitch` / `HighFireSwitch` | Boolean | End-switch inputs (≤ 5 Ω / ≥ 130 Ω) |
+| `ActuatorFault` | Boolean | Sim: freeze the feedback wiper (seized motor) |
 | `FlameSignal` | Float | Flame amplifier signal, VDC |
 | `State` / `StateText` | Int32 / String | Sequence state + banner text |
 | `AutoMode`, `LeakV1`, `LeakV2`, `PilotFail` | Boolean | Mode + simulation toggles |
@@ -224,9 +243,9 @@ trial · 28 pilot flame fail · 55 invalid control · 56 control changed in run 
 All simulation lives in `ProjectFiles/NetSolution/ValveProvingLogic.cs`:
 
 1. Bind `SupplyPressure` (transmitter), `LGP`, `HGP` (switches),
-   `FiringRateMA` (4-20 mA analog input) and `LowFireSwitch` /
-   `HighFireSwitch` (end switches) to your controller tags via an Optix
-   CommDriver.
+   `ModMotorR` / `ModMotorW` / `ModMotorB` (135 ohm Series 90 bus) and
+   `LowFireSwitch` / `HighFireSwitch` (end switches) to your controller
+   tags via an Optix CommDriver.
 2. Delete `SimulateActuator()` and the two lines in
    `UpdateGasPressureSwitches()` that compute `LGP`/`HGP` from pressure.
 3. `VP1`, `VP2`, `Pilot`, `Lockout` are outputs — wire them out the same way.
@@ -242,7 +261,7 @@ Nodes/                               the information model (YAML)
   Model/Model.yaml                   the tag table above
   NetLogic/, Alarms/, ...            remaining categories
 ProjectFiles/NetSolution/            C# solution
-  ValveProvingLogic.cs               sequence + all animation (BUILD v8)
+  ValveProvingLogic.cs               sequence + all animation (BUILD v9)
 docs/screen-sample.png|.svg          what the running screen looks like
 ```
 

@@ -71,28 +71,35 @@ using FTOptix.UI;
 ///            VPS. Either way the result is a safety lockout that only
 ///            STOP/RESET clears (mirrors 7800 SERIES lockout behavior).
 ///
-/// Firing rate actuator (4-20 mA) with HIGH FIRE / LOW FIRE switches:
-///   Model/FiringRateMA is the mod-motor position feedback: 4 mA = LOW
-///   FIRE (Model/LowFireSwitch made), 20 mA = HIGH FIRE
-///   (Model/HighFireSwitch made). The BMS drives the actuator itself in
-///   both modes: high fire for the prepurge (the purge timer only runs
-///   once the HF switch proves), back to low fire for the pilot trial
-///   (ignition waits on the LF switch). Failing to prove a switch inside
-///   the prove window is a safety lockout. In RUN the rate is released
-///   to modulation with the RATE +/- buttons. SIM ACTUATOR FAULT freezes
-///   the feedback to demonstrate both prove-failure lockouts. On a real
-///   train, wire FiringRateMA to the 4-20 mA analog input and the two
-///   switch tags to the physical end switches (delete SimulateActuator).
+/// Mod motor (Honeywell Modutrol, Series 90 / 135 ohm potentiometer)
+/// with HIGH FIRE / LOW FIRE end-switch inputs:
+///   The controller commands the motor over the R-W-B bus: reducing the
+///   R-to-W resistance (Model/ModMotorW) drives the motor CLOSED toward
+///   low fire; reducing R-to-B (Model/ModMotorB) drives it OPEN toward
+///   high fire (the two legs always sum to 135 ohms). Model/ModMotorR is
+///   the feedback wiper - actual position in ohms, 0 = low fire, 135 =
+///   high fire. Model/LowFireSwitch (made at/below 5 ohms) and
+///   Model/HighFireSwitch (made at/above 130 ohms) are switch INPUTS -
+///   simulated here, wired to the physical end switches on a real train.
+///   The BMS drives the motor itself in both modes: high fire for the
+///   prepurge, back to low fire for the pilot trial. Each drive runs a
+///   10 SECOND COUNTDOWN - if the end switch has not proven when it
+///   expires, the burner locks out (codes 95/96). In RUN the rate is
+///   released to modulation with the RATE +/- buttons (shown as firing
+///   rate % of stroke). SIM MOD MOTOR FAULT freezes the wiper to
+///   demonstrate both prove-failure lockouts. On a real train, wire
+///   ModMotorR/W/B and the two switch inputs (delete SimulateActuator).
 ///
 /// The Honeywell faceplate (bottom middle) is drawn from the RM7838B,C
 /// manual (66-1094-08, Fig. 10) and the user's layout sketch: blue module
 /// face, red Honeywell logo block + BURNER CONTROL header, a full-width
 /// two-line VFD (line 1 = phase + mm:ss like "PILOT IGN 00:04"; line 2 =
-/// "*selectable" messages - flame signal / firing rate - or "(preemptive)"
-/// messages like "(DRIVE HI FIRE 12.4MA)"), the sequence-status LED stack
-/// bottom-left (POWER green; PILOT/FLAME/MAIN amber; ALARM red, blinking
-/// on lockout), SCROLL/MODE/<> keys, and a working RESET pushbutton
-/// (wired to StopReset). Lockouts show "LOCKOUT <fault code>" + reason.
+/// "*selectable" messages - flame signal / firing rate % - or
+/// "(preemptive)" messages like "(HI FIRE T-09  67 OHM)"), the
+/// sequence-status LED stack (POWER green; PILOT/FLAME/MAIN amber; ALARM
+/// red, blinking on lockout), SCROLL/MODE/<> keys, and a working RESET
+/// pushbutton (wired to StopReset). Lockouts show "LOCKOUT <fault code>"
+/// + reason.
 /// </summary>
 public class ValveProvingLogic : BaseNetLogic
 {
@@ -117,19 +124,23 @@ public class ValveProvingLogic : BaseNetLogic
     private const float LeakRate = 2.2f;       // simulated seat leak, "w.c. per second
     private const float TickSeconds = 0.1f;
 
-    // --- Firing rate actuator, 4-20 mA ---------------------------------
-    // The mod motor position feedback is a 4-20 mA loop: 4 mA = LOW FIRE
-    // (low fire switch made), 20 mA = HIGH FIRE (high fire switch made).
-    // Purge must prove HIGH FIRE before its timer runs; ignition must
-    // prove LOW FIRE before the pilot trial runs. Failing to prove either
-    // switch inside the prove window is a safety lockout.
-    private const float LowFireMA = 4.0f;
-    private const float HighFireMA = 20.0f;
-    private const float LfMakeMA = 4.5f;       // LF switch made at/below this
-    private const float HfMakeMA = 19.5f;      // HF switch made at/above this
-    private const float ModMotorRate = 2.0f;   // mA per second of actuator travel
-    private const float ProveWindow = 15.0f;   // seconds to prove HF/LF switch
-    private const float RateStep = 2.0f;       // RATE +/- button increment, mA
+    // --- Mod motor: Honeywell Modutrol, Series 90 (135 ohm pot) ---------
+    // The firing-rate motor is commanded over the three-wire R-W-B bus of
+    // a 135 ohm potentiometer. REDUCING the R-to-W resistance drives the
+    // motor CLOSED (low fire); reducing R-to-B drives it OPEN (high fire).
+    // Model/ModMotorW and Model/ModMotorB are the two command legs (they
+    // always sum to 135); Model/ModMotorR is the feedback wiper - the
+    // motor's actual position in ohms, 0 = low fire, 135 = high fire.
+    // The LOW FIRE switch input makes at/below 5 ohms and the HIGH FIRE
+    // switch input at/above 130 ohms. Driving to high fire (purge) and
+    // back to low fire (ignition) each run a 10 second countdown - if the
+    // switch has not proven when it expires, the burner locks out.
+    private const float PotOhms = 135.0f;
+    private const float LowFireMakeOhms = 5.0f;    // LF switch made at/below
+    private const float HighFireMakeOhms = 130.0f; // HF switch made at/above
+    private const float MotorOhmsPerSec = 17.0f;   // ~8 s full stroke
+    private const float ProveWindow = 10.0f;       // 10 s HF/LF countdown
+    private const float RateStepOhms = 13.5f;      // RATE +/- = 10% per press
 
     private enum Step
     {
@@ -151,7 +162,8 @@ public class ValveProvingLogic : BaseNetLogic
     private IUAVariable autoModeVar, leakV1Var, leakV2Var, pilotFailVar;
     private IUAVariable chamberPressureVar, supplyPressureVar, downstreamPressureVar;
     private IUAVariable stateVar, stateTextVar;
-    private IUAVariable firingRateVar, lowFireVar, highFireVar, actuatorFaultVar, flameSignalVar;
+    private IUAVariable modMotorRVar, modMotorWVar, modMotorBVar;
+    private IUAVariable lowFireVar, highFireVar, actuatorFaultVar, flameSignalVar;
 
     // Widgets
     private Rectangle bannerRect, pipeSupply, pipeChamber, pipeDownstream;
@@ -167,7 +179,7 @@ public class ValveProvingLogic : BaseNetLogic
 
     // Firing rate panel + Honeywell faceplate widgets
     private Rectangle frBarFill;
-    private Label frReadout;
+    private Label frReadout, frTermLabel;
     private Ellipse loFireLed, hiFireLed;
     private Button frUpButton, frDownButton, frFaultButton;
     private Label hwLcdLine1, hwLcdLine2;
@@ -184,9 +196,9 @@ public class ValveProvingLogic : BaseNetLogic
     private int lockoutCode;                // fault code shown on the KDM display
     private int failedStepIndex = -1;
     private int flickerCounter;
-    private float firingRateMA = LowFireMA; // actuator position feedback, mA
-    private float modTarget = LowFireMA;    // operator modulation target in RUN
-    private float proveElapsed;             // time spent waiting on the HF/LF switch
+    private float motorOhms;                // mod motor position feedback, ohms (0-135)
+    private float modTarget;                // operator modulation target in RUN, ohms
+    private float proveElapsed;             // time on the 10 s HF/LF prove countdown
 
     // Palette
     private static readonly Color GasYellow = new Color(0xFFFFC400u);
@@ -212,7 +224,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v8 started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v9 started OK");
         }
         catch (Exception ex)
         {
@@ -242,7 +254,9 @@ public class ValveProvingLogic : BaseNetLogic
         downstreamPressureVar = Project.Current.GetVariable("Model/DownstreamPressure");
         stateVar = Project.Current.GetVariable("Model/State");
         stateTextVar = Project.Current.GetVariable("Model/StateText");
-        firingRateVar = Project.Current.GetVariable("Model/FiringRateMA");
+        modMotorRVar = Project.Current.GetVariable("Model/ModMotorR");
+        modMotorWVar = Project.Current.GetVariable("Model/ModMotorW");
+        modMotorBVar = Project.Current.GetVariable("Model/ModMotorB");
         lowFireVar = Project.Current.GetVariable("Model/LowFireSwitch");
         highFireVar = Project.Current.GetVariable("Model/HighFireSwitch");
         actuatorFaultVar = Project.Current.GetVariable("Model/ActuatorFault");
@@ -284,6 +298,7 @@ public class ValveProvingLogic : BaseNetLogic
 
         frBarFill = Owner.Get<Rectangle>("FrBarFill");
         frReadout = Owner.Get<Label>("FrReadout");
+        frTermLabel = Owner.Get<Label>("FrTermLabel");
         loFireLed = Owner.Get<Ellipse>("LoFireLed");
         hiFireLed = Owner.Get<Ellipse>("HiFireLed");
         frUpButton = Owner.Get<Button>("FrUpButton");
@@ -316,8 +331,8 @@ public class ValveProvingLogic : BaseNetLogic
         step = Step.Standby;
         stepElapsed = 0f;
         runEstablished = false;
-        firingRateMA = LowFireMA;
-        modTarget = LowFireMA;
+        motorOhms = 0f;
+        modTarget = 0f;
         proveElapsed = 0f;
 
         periodicTask = new PeriodicTask(Tick, 100, LogicObject);
@@ -487,7 +502,7 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (step != Step.Run)
             return;
-        modTarget = Math.Min(modTarget + RateStep, HighFireMA);
+        modTarget = Math.Min(modTarget + RateStepOhms, PotOhms);
     }
 
     [ExportMethod]
@@ -495,13 +510,13 @@ public class ValveProvingLogic : BaseNetLogic
     {
         if (step != Step.Run)
             return;
-        modTarget = Math.Max(modTarget - RateStep, LowFireMA);
+        modTarget = Math.Max(modTarget - RateStepOhms, 0f);
     }
 
     /// <summary>
-    /// Simulates a seized mod motor: the 4-20 mA feedback freezes where it
-    /// is, so the HF/LF switch cannot prove and the prove window elapses
-    /// into a safety lockout (purge or ignition).
+    /// Simulates a seized mod motor: the feedback wiper freezes where it
+    /// is, so the HF/LF switch cannot prove and the 10 second countdown
+    /// expires into a safety lockout (purge or ignition).
     /// </summary>
     [ExportMethod]
     public void ToggleActuatorFault()
@@ -614,44 +629,52 @@ public class ValveProvingLogic : BaseNetLogic
     }
 
     /// <summary>
-    /// Where the BMS commands the mod motor for the current phase.
+    /// Where the BMS commands the mod motor for the current phase, as the
+    /// R-W resistance it presents on the Series 90 bus (0 = closed / low
+    /// fire, 135 = open / high fire).
     /// </summary>
-    private float TargetMA()
+    private float TargetOhms()
     {
         switch (step)
         {
-            case Step.Purge: return HighFireMA;      // purge at high fire
+            case Step.Purge: return PotOhms;         // purge at high fire
             case Step.Run: return modTarget;         // released to modulation
-            default: return LowFireMA;               // at rest / drive to low fire
+            default: return 0f;                      // at rest / drive to low fire
         }
     }
 
     /// <summary>
-    /// 4-20 mA firing rate actuator simulation. The feedback ramps toward
-    /// the commanded position at mod-motor speed (frozen by the actuator
-    /// fault sim); the LOW FIRE switch is made at/below 4.5 mA and the
-    /// HIGH FIRE switch at/above 19.5 mA. On a real train, delete this
-    /// and wire FiringRateMA to the analog input and the two switch tags
-    /// to the physical HF/LF end switches.
+    /// Series 90 mod motor simulation. The controller sets the two command
+    /// legs (ModMotorW = R-W ohms, ModMotorB = R-B ohms, always summing to
+    /// 135): reducing R-W drives the motor CLOSED, reducing R-B drives it
+    /// OPEN. The motor travels toward the commanded position at mod-motor
+    /// speed (frozen by the fault sim) and its feedback wiper publishes to
+    /// ModMotorR. The LOW FIRE switch input makes at/below 5 ohms, the
+    /// HIGH FIRE switch input at/above 130 ohms. On a real train, delete
+    /// this and wire ModMotorR/W/B and the two end-switch inputs to the
+    /// field devices.
     /// </summary>
     private void SimulateActuator()
     {
+        float command = TargetOhms();
+        modMotorWVar.Value = command;           // R-W leg: reduced -> drive closed
+        modMotorBVar.Value = PotOhms - command; // R-B leg: reduced -> drive open
+
         if (!ReadBool(actuatorFaultVar))
         {
-            float target = TargetMA();
-            float delta = ModMotorRate * TickSeconds;
-            if (firingRateMA < target)
-                firingRateMA = Math.Min(firingRateMA + delta, target);
-            else if (firingRateMA > target)
-                firingRateMA = Math.Max(firingRateMA - delta, target);
+            float delta = MotorOhmsPerSec * TickSeconds;
+            if (motorOhms < command)
+                motorOhms = Math.Min(motorOhms + delta, command);
+            else if (motorOhms > command)
+                motorOhms = Math.Max(motorOhms - delta, command);
         }
 
-        if (firingRateMA < LowFireMA) firingRateMA = LowFireMA;
-        if (firingRateMA > HighFireMA) firingRateMA = HighFireMA;
+        if (motorOhms < 0f) motorOhms = 0f;
+        if (motorOhms > PotOhms) motorOhms = PotOhms;
 
-        firingRateVar.Value = firingRateMA;
-        lowFireVar.Value = firingRateMA <= LfMakeMA;
-        highFireVar.Value = firingRateMA >= HfMakeMA;
+        modMotorRVar.Value = motorOhms;         // feedback wiper position
+        lowFireVar.Value = motorOhms <= LowFireMakeOhms;
+        highFireVar.Value = motorOhms >= HighFireMakeOhms;
     }
 
     private void UpdateGasPressureSwitches()
@@ -739,9 +762,9 @@ public class ValveProvingLogic : BaseNetLogic
         }
 
         // High/low fire switch proving. The purge timer only runs at proven
-        // HIGH FIRE; the ignition trial only runs at proven LOW FIRE. Not
-        // proving the switch inside the prove window is a safety lockout,
-        // like a 7800 SERIES that never sees its firing rate end switch.
+        // HIGH FIRE; the ignition trial only runs at proven LOW FIRE. Each
+        // drive runs a 10 second countdown - if the end switch input has
+        // not proven when it expires, the burner locks out.
         bool lfMade = ReadBool(lowFireVar);
         bool hfMade = ReadBool(highFireVar);
         bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
@@ -751,9 +774,9 @@ public class ValveProvingLogic : BaseNetLogic
             if (proveElapsed >= ProveWindow)
             {
                 if (step == Step.Purge)
-                    Lockout("HIGH FIRE SWITCH NOT PROVEN - ACTUATOR NEVER REACHED HIGH FIRE (20 MA)", assertVps: false, code: 95);
+                    Lockout("HIGH FIRE SWITCH NOT PROVEN IN 10 S - MOD MOTOR NEVER REACHED HIGH FIRE (135 OHM)", assertVps: false, code: 95);
                 else
-                    Lockout("LOW FIRE SWITCH NOT PROVEN - ACTUATOR NEVER RETURNED TO LOW FIRE (4 MA)", assertVps: false, code: 96);
+                    Lockout("LOW FIRE SWITCH NOT PROVEN IN 10 S - MOD MOTOR NEVER RETURNED TO LOW FIRE (0 OHM)", assertVps: false, code: 96);
                 return;
             }
         }
@@ -921,7 +944,7 @@ public class ValveProvingLogic : BaseNetLogic
         if (next == Step.Run)
         {
             runEstablished = false;
-            modTarget = LowFireMA; // released to modulation from low fire
+            modTarget = 0f; // released to modulation from low fire
         }
         stateVar.Value = (int)step;
     }
@@ -1005,14 +1028,16 @@ public class ValveProvingLogic : BaseNetLogic
         bool hfMade = ReadBool(highFireVar);
         bool actFault = ReadBool(actuatorFaultVar);
         bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
-        float ratePct = (firingRateMA - LowFireMA) / (HighFireMA - LowFireMA) * 100f;
-        frBarFill.Width = 4f + (firingRateMA - LowFireMA) / (HighFireMA - LowFireMA) * 176f;
-        SetText(frReadout, firingRateMA.ToString("0.0") + " MA");
+        float ratePct = motorOhms / PotOhms * 100f;
+        frBarFill.Width = 2f + motorOhms / PotOhms * 178f;
+        SetText(frReadout, ratePct.ToString("0") + "%  " + motorOhms.ToString("0") + " OHM");
+        SetText(frTermLabel, "R-W " + ReadFloat(modMotorWVar).ToString("0")
+            + " OHM   R-B " + ReadFloat(modMotorBVar).ToString("0") + " OHM");
         loFireLed.FillColor = lfMade ? LedGreen : LedOff;
         hiFireLed.FillColor = hfMade ? LedGreen : LedOff;
         frUpButton.Enabled = step == Step.Run;
         frDownButton.Enabled = step == Step.Run;
-        SetText(frFaultButton, actFault ? "SIM ACTUATOR FAULT: ON" : "SIM ACTUATOR FAULT: OFF");
+        SetText(frFaultButton, actFault ? "SIM MOD MOTOR FAULT: ON" : "SIM MOD MOTOR FAULT: OFF");
 
         // Flame signal, volts DC, like a 7800 flame amplifier readout.
         float flameSignal = (pilotLit || running)
@@ -1076,15 +1101,15 @@ public class ValveProvingLogic : BaseNetLogic
                 bannerRect.FillColor = BannerTest;
                 if (!hfMade)
                 {
-                    banner = "VALVES PROVEN - DRIVING TO HIGH FIRE FOR PREPURGE (AWAITING HIGH FIRE SWITCH)";
+                    banner = "VALVES PROVEN - DRIVING TO HIGH FIRE - HIGH FIRE SWITCH MUST PROVE BEFORE T-0";
                     lcd1 = "PURGE  " + Mmss(PurgeTime);
-                    lcd2 = "(DRIVE HI FIRE " + firingRateMA.ToString("0.0") + "MA)";
+                    lcd2 = "(HI FIRE T-" + Math.Ceiling(remaining).ToString("00") + "  " + motorOhms.ToString("0") + " OHM)";
                 }
                 else
                 {
                     banner = "VALVES PROVEN - PREPURGE AT HIGH FIRE (ALL VALVES CLOSED)";
                     lcd1 = "PURGE  " + tRem;
-                    lcd2 = "(HI FIRE PROVEN " + firingRateMA.ToString("0.0") + "MA)";
+                    lcd2 = "(HI FIRE PROVEN 135 OHM)";
                 }
                 PaintSteps(4, false);
                 break;
@@ -1092,9 +1117,9 @@ public class ValveProvingLogic : BaseNetLogic
                 bannerRect.FillColor = BannerTest;
                 if (!lfMade)
                 {
-                    banner = "PURGE COMPLETE - DRIVING TO LOW FIRE FOR IGNITION (AWAITING LOW FIRE SWITCH)";
+                    banner = "PURGE COMPLETE - DRIVING TO LOW FIRE - LOW FIRE SWITCH MUST PROVE BEFORE T-0";
                     lcd1 = "PURGE  00:00";
-                    lcd2 = "(DRIVE LO FIRE " + firingRateMA.ToString("0.0") + "MA)";
+                    lcd2 = "(LO FIRE T-" + Math.Ceiling(remaining).ToString("00") + "  " + motorOhms.ToString("0") + " OHM)";
                 }
                 else
                 {

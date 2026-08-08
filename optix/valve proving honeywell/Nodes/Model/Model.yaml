@@ -57,10 +57,16 @@ Children:
   Type: BaseDataVariableType
   DataType: Float
   Value: 27.7
-- Name: FiringRateMA
+- Name: ModMotorR
   Type: BaseDataVariableType
   DataType: Float
-  Value: 4.0
+- Name: ModMotorW
+  Type: BaseDataVariableType
+  DataType: Float
+- Name: ModMotorB
+  Type: BaseDataVariableType
+  DataType: Float
+  Value: 135.0
 - Name: LowFireSwitch
   Type: BaseDataVariableType
   DataType: Boolean

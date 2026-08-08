@@ -126,20 +126,21 @@
 <ellipse cx="391.0" cy="551.0" rx="11.0" ry="11.0" fill="#3b4654"/>
 <text x="412.0" y="556.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">VPS - TEST FAIL</text>
 <rect x="40.0" y="574.0" width="280.0" height="102.0" fill="#212d3b"/>
-<text x="52.0" y="591.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">FIRING RATE ACTUATOR - 4-20 MA</text>
-<rect x="52.0" y="598.0" width="180.0" height="14.0" fill="#101820"/>
-<rect x="52.0" y="598.0" width="92.0" height="14.0" fill="#ffc400"/>
-<text x="240.0" y="609.0" font-size="13.0" fill="#e8eef4" font-family="Arial, sans-serif">12.0 MA</text>
-<ellipse cx="59.0" cy="629.0" rx="7.0" ry="7.0" fill="#3b4654"/>
-<text x="72.0" y="633.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">LOW FIRE</text>
-<ellipse cx="147.0" cy="629.0" rx="7.0" ry="7.0" fill="#3b4654"/>
-<text x="160.0" y="633.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">HIGH FIRE</text>
-<rect x="232.0" y="618.0" width="40.0" height="22.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="252.0" y="634.3846153846154" font-size="14.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">-</text>
-<rect x="276.0" y="618.0" width="40.0" height="22.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="296.0" y="634.3846153846154" font-size="14.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">+</text>
-<rect x="52.0" y="644.0" width="256.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="180.0" y="659.8461538461538" font-size="10.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">SIM ACTUATOR FAULT: OFF</text>
+<text x="52.0" y="590.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">MOD MOTOR - SERIES 90 (135 OHM POT)</text>
+<rect x="52.0" y="596.0" width="180.0" height="12.0" fill="#101820"/>
+<rect x="52.0" y="596.0" width="91.65925925925924" height="12.0" fill="#ffc400"/>
+<text x="238.0" y="605.0" font-size="11.0" fill="#e8eef4" font-family="Arial, sans-serif">50%  68 OHM</text>
+<text x="52.0" y="621.0" font-size="9.0" fill="#9fb3c8" font-family="Arial, sans-serif">R-W 68 OHM   R-B 67 OHM</text>
+<ellipse cx="58.0" cy="634.0" rx="6.0" ry="6.0" fill="#3b4654"/>
+<text x="70.0" y="638.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">LOW FIRE</text>
+<ellipse cx="142.0" cy="634.0" rx="6.0" ry="6.0" fill="#3b4654"/>
+<text x="154.0" y="638.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">HIGH FIRE</text>
+<rect x="232.0" y="624.0" width="40.0" height="20.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="252.0" y="639.0" font-size="13.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">-</text>
+<rect x="276.0" y="624.0" width="40.0" height="20.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="296.0" y="639.0" font-size="13.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">+</text>
+<rect x="52.0" y="650.0" width="256.0" height="22.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="180.0" y="664.4615384615385" font-size="9.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">SIM MOD MOTOR FAULT: OFF</text>
 <rect x="580.0" y="356.0" width="310.0" height="310.0" fill="#2050d0"/>
 <rect x="592.0" y="366.0" width="104.0" height="22.0" fill="#ee3524"/>
 <text x="600.0" y="382.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>

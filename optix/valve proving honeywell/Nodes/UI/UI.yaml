@@ -2800,7 +2800,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"FIRING RATE ACTUATOR - 4-20 MA"}
+      Value: {"LocaleId":"en-US","Text":"MOD MOTOR - SERIES 90 (135 OHM POT)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2820,12 +2820,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 12.0
+      Value: 11.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 11.0
+      Value: 10.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -2843,7 +2843,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 598.0
+      Value: 596.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -2853,7 +2853,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -2870,17 +2870,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 598.0
+      Value: 596.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 4.0
+      Value: 2.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -2891,37 +2891,74 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"4.0 MA"}
+      Value: {"LocaleId":"en-US","Text":"0%  0 OHM"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 240.0
+      Value: 238.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 596.0
+      Value: 594.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 70.0
+      Value: 78.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 16.0
+      Value: 14.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 13.0
+      Value: 11.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
       ModellingRule: Optional
       Value: "#e8eef4"
+  - Name: FrTermLabel
+    Type: Label
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"R-W 0 OHM   R-B 135 OHM"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 52.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 612.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 264.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 11.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 9.0
+    - Name: TextColor
+      Type: BaseDataVariableType
+      DataType: Color
+      ModellingRule: Optional
+      Value: "#9fb3c8"
   - Name: LoFireLed
     Type: Ellipse
     Children:
@@ -2934,17 +2971,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 622.0
+      Value: 628.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -2960,27 +2997,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 72.0
+      Value: 70.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 623.0
+      Value: 629.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 58.0
+      Value: 56.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 12.0
+      Value: 11.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 10.0
+      Value: 9.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -2993,22 +3030,22 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 140.0
+      Value: 136.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 622.0
+      Value: 628.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 14.0
+      Value: 12.0
     - Name: FillColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3024,27 +3061,27 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 160.0
+      Value: 154.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 623.0
+      Value: 629.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 64.0
+      Value: 60.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 12.0
+      Value: 11.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 10.0
+      Value: 9.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
@@ -3066,7 +3103,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 618.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3076,12 +3113,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 22.0
+      Value: 20.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 14.0
+      Value: 13.0
     - Name: EventHandler1
       Type: EventHandler
       Children:
@@ -3159,7 +3196,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 618.0
+      Value: 624.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3169,12 +3206,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 22.0
+      Value: 20.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 14.0
+      Value: 13.0
     - Name: EventHandler1
       Type: EventHandler
       Children:
@@ -3242,7 +3279,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"SIM ACTUATOR FAULT: OFF"}
+      Value: {"LocaleId":"en-US","Text":"SIM MOD MOTOR FAULT: OFF"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -3252,7 +3289,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 644.0
+      Value: 650.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -3262,12 +3299,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 24.0
+      Value: 22.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 10.0
+      Value: 9.0
     - Name: EventHandler1
       Type: EventHandler
       Children:
