@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="680" viewBox="0 0 1280 680">
+<rect width="1280" height="680" fill="#101722"/>
+<text x="40.0" y="32.0" font-size="24.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">VALVE PROVING SYSTEM</text>
+<text x="40.0" y="55.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">HONEYWELL 7800 SERIES BMS - SIEMENS VGD / SKP GAS TRAIN - TAGS: VP1 / VP2 / VPS / LGP / HGP</text>
+<rect x="40.0" y="58.0" width="1200.0" height="42.0" fill="#14532D"/>
+<text x="60.0" y="83.0" font-size="15.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE</text>
+<text x="1040.0" y="83.0" font-size="15.0" fill="#65b2ef" font-family="Arial, sans-serif">T- --</text>
+<circle cx="630.0" cy="176.0" r="70.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="583.3" y1="222.7" x2="587.6" y2="218.4" stroke="#7f93ab" stroke-width="2"/>
+<line x1="565.3" y1="188.9" x2="571.2" y2="187.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="569.0" y1="150.7" x2="574.6" y2="153.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="593.3" y1="121.1" x2="596.7" y2="126.1" stroke="#7f93ab" stroke-width="2"/>
+<line x1="630.0" y1="110.0" x2="630.0" y2="116.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="666.7" y1="121.1" x2="663.3" y2="126.1" stroke="#7f93ab" stroke-width="2"/>
+<line x1="691.0" y1="150.7" x2="685.4" y2="153.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="694.7" y1="188.9" x2="688.8" y2="187.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="676.7" y1="222.7" x2="672.4" y2="218.4" stroke="#7f93ab" stroke-width="2"/>
+<line x1="630.0" y1="176.0" x2="591.6" y2="132.6" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="630.0" cy="176.0" r="4" fill="#e8eef4"/>
+<text x="630.0" y="214.5" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">27.7</text>
+<text x="610.0" y="231.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif">27.7</text>
+<rect x="627.0" y="246.0" width="4.0" height="20.0" fill="#55606c"/>
+<text x="40.0" y="113.0" font-size="11.0" fill="#c8d3de" font-family="Arial, sans-serif">INLET (IN. H2O)</text>
+<circle cx="95.0" cy="179.0" r="55.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="58.9" y1="215.1" x2="63.2" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="45.0" y1="188.9" x2="50.9" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="47.9" y1="159.5" x2="53.4" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="66.7" y1="136.6" x2="70.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="95.0" y1="128.0" x2="95.0" y2="134.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="123.3" y1="136.6" x2="120.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="142.1" y1="159.5" x2="136.6" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="145.0" y1="188.9" x2="139.1" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="131.1" y1="215.1" x2="126.8" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="95.0" y1="179.0" x2="66.5" y2="146.8" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="95.0" cy="179.0" r="4" fill="#e8eef4"/>
+<text x="95.0" y="209.2" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">27.7</text>
+<text x="72.0" y="221.0" font-size="12.0" fill="#ffffff" font-family="Arial, sans-serif">27.7</text>
+<text x="190.0" y="113.0" font-size="11.0" fill="#c8d3de" font-family="Arial, sans-serif">LGP (IN. H2O)</text>
+<circle cx="245.0" cy="179.0" r="55.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="208.9" y1="215.1" x2="213.2" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="195.0" y1="188.9" x2="200.9" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="197.9" y1="159.5" x2="203.4" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="216.7" y1="136.6" x2="220.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="245.0" y1="128.0" x2="245.0" y2="134.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="273.3" y1="136.6" x2="270.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="292.1" y1="159.5" x2="286.6" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="295.0" y1="188.9" x2="289.1" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="281.1" y1="215.1" x2="276.8" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="245.0" y1="179.0" x2="216.5" y2="146.8" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="245.0" cy="179.0" r="4" fill="#e8eef4"/>
+<text x="245.0" y="209.2" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">27.7</text>
+<text x="1000.0" y="113.0" font-size="11.0" fill="#c8d3de" font-family="Arial, sans-serif">HGP (IN. H2O)</text>
+<circle cx="1055.0" cy="179.0" r="55.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="1018.9" y1="215.1" x2="1023.2" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1005.0" y1="188.9" x2="1010.9" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1007.9" y1="159.5" x2="1013.4" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1026.7" y1="136.6" x2="1030.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1055.0" y1="128.0" x2="1055.0" y2="134.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1083.3" y1="136.6" x2="1080.0" y2="141.6" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1102.1" y1="159.5" x2="1096.6" y2="161.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1105.0" y1="188.9" x2="1099.1" y2="187.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1091.1" y1="215.1" x2="1086.8" y2="210.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="1055.0" y1="179.0" x2="1026.5" y2="146.8" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="1055.0" cy="179.0" r="4" fill="#e8eef4"/>
+<text x="1055.0" y="209.2" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">27.7</text>
+<rect x="1050.0" y="234.0" width="4.0" height="32.0" fill="#55606c"/>
+<rect x="40.0" y="266.0" width="300.0" height="18.0" fill="#FFC400"/>
+<rect x="440.0" y="266.0" width="380.0" height="18.0" fill="#FFC400"/>
+<rect x="920.0" y="266.0" width="220.0" height="18.0" fill="#FFC400"/>
+<rect x="726.0" y="235.0" width="4.0" height="31.0" fill="#55606c"/>
+<rect x="700.0" y="199.0" width="56.0" height="36.0" fill="#333d49"/>
+<ellipse cx="720.0" cy="217.0" rx="12.0" ry="12.0" fill="#2ECC71"/>
+<text x="762.0" y="219.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">VPS</text>
+<rect x="92.0" y="234.0" width="4.0" height="32.0" fill="#55606c"/>
+<rect x="242.0" y="234.0" width="4.0" height="32.0" fill="#55606c"/>
+<rect x="232.0" y="284.0" width="4.0" height="20.0" fill="#55606c"/>
+<rect x="210.0" y="304.0" width="56.0" height="36.0" fill="#333d49"/>
+<ellipse cx="230.0" cy="322.0" rx="12.0" ry="12.0" fill="#2ECC71"/>
+<text x="272.0" y="326.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">LGP</text>
+<rect x="1052.0" y="284.0" width="4.0" height="20.0" fill="#55606c"/>
+<rect x="1030.0" y="304.0" width="56.0" height="36.0" fill="#333d49"/>
+<ellipse cx="1050.0" cy="322.0" rx="12.0" ry="12.0" fill="#3b4654"/>
+<text x="1092.0" y="326.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">HGP</text>
+<rect x="140.0" y="310.0" width="60.0" height="24.0" rx="3" fill="#0f1620" stroke="#4a5a6e"/>
+<text x="148.0" y="327.0" font-size="12" fill="#e8eef4" font-family="Arial">4.0</text>
+<rect x="966.0" y="310.0" width="60.0" height="24.0" rx="3" fill="#0f1620" stroke="#4a5a6e"/>
+<text x="974.0" y="327.0" font-size="12" fill="#e8eef4" font-family="Arial">70.0</text>
+<rect x="700.0" y="170.0" width="60.0" height="24.0" rx="3" fill="#0f1620" stroke="#4a5a6e"/>
+<text x="708.0" y="187.0" font-size="12" fill="#e8eef4" font-family="Arial">14.0</text>
+<rect x="382.0" y="235.0" width="16.0" height="12.0" fill="#55606c"/>
+<rect x="355.0" y="140.0" width="70.0" height="95.0" fill="#00707e"/>
+<text x="368.0" y="192.0" font-size="12.0" fill="#ffffff" font-family="Arial, sans-serif">SKP15</text>
+<g transform="translate(340.0,245.0)"><path d="M 0 0 L 50 30 L 100 0 L 100 60 L 50 30 L 0 60 Z" fill="#2ECC71" stroke="#0e141b" stroke-width="2.0"/></g>
+<text x="330.0" y="326.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">SSOV V1 - TAG VP1</text>
+<rect x="862.0" y="235.0" width="16.0" height="12.0" fill="#55606c"/>
+<ellipse cx="870.0" cy="125.0" rx="25.0" ry="13.0" fill="#00707e"/>
+<rect x="835.0" y="132.0" width="70.0" height="103.0" fill="#00707e"/>
+<text x="848.0" y="186.0" font-size="12.0" fill="#ffffff" font-family="Arial, sans-serif">SKP25</text>
+<rect x="905.0" y="189.0" width="73.0" height="4.0" fill="#55606c"/>
+<rect x="974.0" y="189.0" width="4.0" height="77.0" fill="#55606c"/>
+<g transform="translate(820.0,245.0)"><path d="M 0 0 L 50 30 L 100 0 L 100 60 L 50 30 L 0 60 Z" fill="#2ECC71" stroke="#0e141b" stroke-width="2.0"/></g>
+<text x="790.0" y="326.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">SSOV V2 + REG - TAG VP2</text>
+<rect x="1140.0" y="244.0" width="84.0" height="62.0" fill="#3b4654"/>
+<text x="1150.0" y="326.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">BURNER</text>
+<g transform="translate(1157.0,164.0)"><path d="M 25 0 C 40 22 50 36 50 52 C 50 68 39 78 25 78 C 11 78 0 68 0 52 C 0 36 10 22 25 0 Z" fill="#FF8C00" stroke="#ffb84d" stroke-width="1.0"/></g>
+<text x="40.0" y="302.0" font-size="10.0" fill="#c8d3de" font-family="Arial, sans-serif">GAS SUPPLY</text>
+<text x="470.0" y="302.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">TEST VOLUME - PRESSURE (IN. W.C.)</text>
+<ellipse cx="58.0" cy="362.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="367.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">1 - EVACUATE TEST VOLUME: V2 (VP2) OPENS TO BURNER</text>
+<ellipse cx="58.0" cy="388.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="393.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">2 - LEAK TEST SSOV V1: PRESSURE MUST STAY LOW</text>
+<ellipse cx="58.0" cy="414.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="419.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">3 - FILL TEST VOLUME: V1 (VP1) OPENS FROM SUPPLY</text>
+<ellipse cx="58.0" cy="440.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="445.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">4 - LEAK TEST SSOV V2: PRESSURE MUST STAY HIGH</text>
+<ellipse cx="58.0" cy="466.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="471.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">5 - VALVES PROVEN: PREPURGE + IGNITION TRIAL</text>
+<ellipse cx="58.0" cy="492.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
+<text x="82.0" y="497.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif">6 - RUN: VP1 + VP2 OPEN, FLAME ESTABLISHED</text>
+<text x="40.0" y="520.0" font-size="12.0" fill="#6e7f91" font-family="Arial, sans-serif">YELLOW PIPE = GAS PRESENT | GREEN VALVE = OPEN | RED VALVE = CLOSED</text>
+<text x="40.0" y="536.0" font-size="12.0" fill="#6e7f91" font-family="Arial, sans-serif">VPS INPUT TRUE = VALVE PROVING TEST FAILED (PRESSURE SWITCH)</text>
+<ellipse cx="49.0" cy="549.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
+<text x="66.0" y="553.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">VP1 - V1 OPEN</text>
+<ellipse cx="309.0" cy="549.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
+<text x="326.0" y="553.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">VP2 - V2 OPEN</text>
+<ellipse cx="49.0" cy="571.0" rx="9.0" ry="9.0" fill="#3b4654"/>
+<text x="66.0" y="575.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">VPS - TEST FAIL</text>
+<ellipse cx="309.0" cy="571.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
+<text x="326.0" y="575.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">INTERLOCK</text>
+<ellipse cx="49.0" cy="593.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
+<text x="66.0" y="597.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">RUNNING INTERLOCK</text>
+<ellipse cx="309.0" cy="593.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
+<text x="326.0" y="597.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">LOW FIRE SWITCH</text>
+<ellipse cx="49.0" cy="615.0" rx="9.0" ry="9.0" fill="#3b4654"/>
+<text x="66.0" y="619.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">HIGH FIRE SWITCH</text>
+<rect x="580.0" y="356.0" width="310.0" height="310.0" fill="#2050d0"/>
+<rect x="592.0" y="366.0" width="104.0" height="22.0" fill="#ee3524"/>
+<text x="600.0" y="382.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>
+<text x="706.0" y="381.0" font-size="10.0" fill="#ffffff" font-family="Arial, sans-serif">BURNER CONTROL</text>
+<text x="838.0" y="380.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">RM7838</text>
+<rect x="592.0" y="398.0" width="286.0" height="70.0" fill="#0a1206"/>
+<text x="606.0" y="425.0" font-size="17.0" fill="#52d273" font-family="monospace">RUN</text>
+<text x="606.0" y="453.0" font-size="17.0" fill="#52d273" font-family="monospace">*Firing Rate  050%</text>
+<rect x="592.0" y="482.0" width="150.0" height="140.0" fill="#0d0d0d"/>
+<ellipse cx="607.5" cy="501.5" rx="7.5" ry="7.5" fill="#2ECC71"/>
+<text x="624.0" y="507.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">POWER</text>
+<ellipse cx="607.5" cy="527.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="624.0" y="533.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">PILOT</text>
+<ellipse cx="607.5" cy="553.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="624.0" y="559.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">FLAME</text>
+<ellipse cx="607.5" cy="579.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="624.0" y="585.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">MAIN</text>
+<ellipse cx="607.5" cy="605.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="624.0" y="611.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">ALARM</text>
+<rect x="760.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="773.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">v</text>
+<rect x="800.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="813.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">^</text>
+<rect x="844.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="853.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">&lt;&gt;</text>
+<text x="762.0" y="533.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">SCROLL</text>
+<rect x="760.0" y="544.0" width="74.0" height="24.0" fill="#101828"/>
+<text x="776.0" y="560.0" font-size="10.0" fill="#c9ced3" font-family="Arial, sans-serif">MODE</text>
+<text x="764.0" y="583.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">-SAVE</text>
+<rect x="760.0" y="600.0" width="118.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="819.0" y="618.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
+<text x="592.0" y="646.0" font-size="10.0" fill="#cfd8ff" font-family="Arial, sans-serif">7800 SERIES</text>
+<rect x="900.0" y="352.0" width="340.0" height="310.0" fill="#212d3b"/>
+<text x="920.0" y="372.0" font-size="14.0" fill="#ffffff" font-family="Arial, sans-serif">CONTROLS</text>
+<rect x="920.0" y="376.0" width="300.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1070.0" y="394.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">MODE: AUTO (BMS SEQUENCE)</text>
+<rect x="920.0" y="408.0" width="145.0" height="32.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="428.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">START BURNER</text>
+<rect x="1075.0" y="408.0" width="145.0" height="32.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="428.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">STOP / RESET</text>
+<text x="920.0" y="454.0" font-size="10.0" fill="#6e7f91" font-family="Arial, sans-serif">MANUAL CONTROL (MANUAL MODE ONLY)</text>
+<rect x="920.0" y="458.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="475.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP1</text>
+<rect x="1075.0" y="458.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="475.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP2</text>
+<rect x="920.0" y="486.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="503.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">PILOT</text>
+<rect x="1075.0" y="486.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="503.2307692307692" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INTERLOCK</text>
+<rect x="920.0" y="514.0" width="300.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1070.0" y="531.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RUNNING INTERLOCK</text>
+<text x="920.0" y="556.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">FIRING RATE (POTENTIOMETER 0-100%)</text>
+<circle cx="951.0" cy="591.0" r="31.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="931.9" y1="610.1" x2="936.2" y2="605.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="924.5" y1="596.3" x2="930.4" y2="595.1" stroke="#7f93ab" stroke-width="2"/>
+<line x1="926.1" y1="580.7" x2="931.6" y2="583.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="936.0" y1="568.6" x2="939.3" y2="573.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="951.0" y1="564.0" x2="951.0" y2="570.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="966.0" y1="568.6" x2="962.7" y2="573.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="975.9" y1="580.7" x2="970.4" y2="583.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="977.5" y1="596.3" x2="971.6" y2="595.1" stroke="#7f93ab" stroke-width="2"/>
+<line x1="970.1" y1="610.1" x2="965.8" y2="605.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="951.0" y1="591.0" x2="951.0" y2="572.0" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="951.0" cy="591.0" r="4" fill="#e8eef4"/>
+<text x="951.0" y="608.0" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">50.0</text>
+<text x="992.0" y="578.0" font-size="16.0" fill="#e8eef4" font-family="Arial, sans-serif">50%</text>
+<text x="992.0" y="596.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">MOD MOTOR  68 OHM</text>
+<text x="992.0" y="612.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">R-W 68   R-B 67</text>
+<rect x="992.0" y="618.0" width="228.0" height="6.0" fill="#101820"/>
+<rect x="992.0" y="618.0" width="86.62222222222222" height="6.0" fill="#ffc400"/>
+<rect x="920.0" y="630.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="647.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INLET PRESSURE -</text>
+<rect x="1075.0" y="630.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="647.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INLET PRESSURE +</text>
+</svg>
