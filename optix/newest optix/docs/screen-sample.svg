@@ -106,17 +106,17 @@
 <text x="40.0" y="302.0" font-size="10.0" fill="#c8d3de" font-family="Arial, sans-serif">GAS SUPPLY</text>
 <text x="470.0" y="302.0" font-size="12.0" fill="#c8d3de" font-family="Arial, sans-serif">TEST VOLUME - PRESSURE (IN. W.C.)</text>
 <ellipse cx="58.0" cy="362.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="367.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">1 - EVACUATE TEST VOLUME: V2 (VP2) OPENS TO BURNER</text>
+<text x="82.0" y="367.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">1 - PURGE HOLD: DRIVE TO HIGH FIRE (HF SWITCH MUST MAKE)</text>
 <ellipse cx="58.0" cy="388.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="393.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">2 - LEAK TEST SSOV V1: PRESSURE MUST STAY LOW</text>
+<text x="82.0" y="393.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">2 - PREPURGE AT HIGH FIRE (10 S)</text>
 <ellipse cx="58.0" cy="414.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="419.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">3 - FILL TEST VOLUME: V1 (VP1) OPENS FROM SUPPLY</text>
+<text x="82.0" y="419.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">3 - VALVE PROVING: EVACUATE + TEST V1 (PRESSURE STAYS LOW)</text>
 <ellipse cx="58.0" cy="440.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="445.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">4 - LEAK TEST SSOV V2: PRESSURE MUST STAY HIGH</text>
+<text x="82.0" y="445.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">4 - VALVE PROVING: FILL + TEST V2 (PRESSURE STAYS HIGH)</text>
 <ellipse cx="58.0" cy="466.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="471.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">5 - VALVES PROVEN: PREPURGE + IGNITION TRIAL</text>
+<text x="82.0" y="471.0" font-size="13.0" fill="#8fa3b8" font-family="Arial, sans-serif">5 - PURGE HOLD: RETURN TO LOW FIRE (LF SWITCH MUST MAKE)</text>
 <ellipse cx="58.0" cy="492.0" rx="10.0" ry="10.0" fill="#2ECC71"/>
-<text x="82.0" y="497.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif">6 - RUN: VP1 + VP2 OPEN, FLAME ESTABLISHED</text>
+<text x="82.0" y="497.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif">6 - PILOT IGNITION, THEN RUN: VP1 + VP2 OPEN</text>
 <text x="40.0" y="520.0" font-size="12.0" fill="#6e7f91" font-family="Arial, sans-serif">YELLOW PIPE = GAS PRESENT | GREEN VALVE = OPEN | RED VALVE = CLOSED</text>
 <text x="40.0" y="536.0" font-size="12.0" fill="#6e7f91" font-family="Arial, sans-serif">VPS INPUT TRUE = VALVE PROVING TEST FAILED (PRESSURE SWITCH)</text>
 <ellipse cx="49.0" cy="549.0" rx="9.0" ry="9.0" fill="#2ECC71"/>
@@ -133,77 +133,77 @@
 <text x="326.0" y="597.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">LOW FIRE SWITCH</text>
 <ellipse cx="49.0" cy="615.0" rx="9.0" ry="9.0" fill="#3b4654"/>
 <text x="66.0" y="619.0" font-size="11.0" fill="#8fa3b8" font-family="Arial, sans-serif">HIGH FIRE SWITCH</text>
-<rect x="580.0" y="356.0" width="310.0" height="310.0" fill="#2050d0"/>
-<rect x="592.0" y="366.0" width="104.0" height="22.0" fill="#ee3524"/>
-<text x="600.0" y="382.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>
-<text x="706.0" y="381.0" font-size="10.0" fill="#ffffff" font-family="Arial, sans-serif">BURNER CONTROL</text>
-<text x="838.0" y="380.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">RM7838</text>
-<rect x="592.0" y="398.0" width="286.0" height="70.0" fill="#0a1206"/>
-<text x="606.0" y="425.0" font-size="17.0" fill="#52d273" font-family="monospace">RUN</text>
-<text x="606.0" y="453.0" font-size="17.0" fill="#52d273" font-family="monospace">*Firing Rate  050%</text>
-<rect x="592.0" y="482.0" width="150.0" height="140.0" fill="#0d0d0d"/>
-<ellipse cx="607.5" cy="501.5" rx="7.5" ry="7.5" fill="#2ECC71"/>
-<text x="624.0" y="507.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">POWER</text>
-<ellipse cx="607.5" cy="527.5" rx="7.5" ry="7.5" fill="#3b4654"/>
-<text x="624.0" y="533.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">PILOT</text>
-<ellipse cx="607.5" cy="553.5" rx="7.5" ry="7.5" fill="#FFB000"/>
-<text x="624.0" y="559.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">FLAME</text>
-<ellipse cx="607.5" cy="579.5" rx="7.5" ry="7.5" fill="#FFB000"/>
-<text x="624.0" y="585.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">MAIN</text>
-<ellipse cx="607.5" cy="605.5" rx="7.5" ry="7.5" fill="#3b4654"/>
-<text x="624.0" y="611.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">ALARM</text>
-<rect x="760.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
-<text x="773.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">v</text>
-<rect x="800.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
-<text x="813.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">^</text>
-<rect x="844.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
-<text x="853.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">&lt;&gt;</text>
-<text x="762.0" y="533.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">SCROLL</text>
-<rect x="760.0" y="544.0" width="74.0" height="24.0" fill="#101828"/>
-<text x="776.0" y="560.0" font-size="10.0" fill="#c9ced3" font-family="Arial, sans-serif">MODE</text>
-<text x="764.0" y="583.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">-SAVE</text>
-<rect x="760.0" y="600.0" width="118.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="819.0" y="618.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
-<text x="592.0" y="646.0" font-size="10.0" fill="#cfd8ff" font-family="Arial, sans-serif">7800 SERIES</text>
+<rect x="530.0" y="356.0" width="310.0" height="310.0" fill="#2050d0"/>
+<rect x="542.0" y="366.0" width="104.0" height="22.0" fill="#ee3524"/>
+<text x="550.0" y="382.0" font-size="13.0" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold">Honeywell</text>
+<text x="656.0" y="381.0" font-size="10.0" fill="#ffffff" font-family="Arial, sans-serif">BURNER CONTROL</text>
+<text x="788.0" y="380.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">RM7838</text>
+<rect x="542.0" y="398.0" width="286.0" height="70.0" fill="#0a1206"/>
+<text x="556.0" y="425.0" font-size="17.0" fill="#52d273" font-family="monospace">RUN</text>
+<text x="556.0" y="453.0" font-size="17.0" fill="#52d273" font-family="monospace">FLAME SIGNAL          5.0V</text>
+<rect x="542.0" y="482.0" width="150.0" height="140.0" fill="#0d0d0d"/>
+<ellipse cx="557.5" cy="501.5" rx="7.5" ry="7.5" fill="#2ECC71"/>
+<text x="574.0" y="507.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">POWER</text>
+<ellipse cx="557.5" cy="527.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="574.0" y="533.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">PILOT</text>
+<ellipse cx="557.5" cy="553.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="574.0" y="559.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">FLAME</text>
+<ellipse cx="557.5" cy="579.5" rx="7.5" ry="7.5" fill="#FFB000"/>
+<text x="574.0" y="585.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">MAIN</text>
+<ellipse cx="557.5" cy="605.5" rx="7.5" ry="7.5" fill="#3b4654"/>
+<text x="574.0" y="611.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">ALARM</text>
+<rect x="710.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="723.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">v</text>
+<rect x="750.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="763.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">^</text>
+<rect x="794.0" y="494.0" width="34.0" height="24.0" fill="#101828"/>
+<text x="803.0" y="509.0" font-size="11.0" fill="#c9ced3" font-family="Arial, sans-serif">&lt;&gt;</text>
+<text x="712.0" y="533.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">SCROLL</text>
+<rect x="710.0" y="544.0" width="74.0" height="24.0" fill="#101828"/>
+<text x="726.0" y="560.0" font-size="10.0" fill="#c9ced3" font-family="Arial, sans-serif">MODE</text>
+<text x="714.0" y="583.0" font-size="9.0" fill="#cfd8ff" font-family="Arial, sans-serif">-SAVE</text>
+<rect x="710.0" y="600.0" width="118.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="769.0" y="618.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
+<text x="542.0" y="646.0" font-size="10.0" fill="#cfd8ff" font-family="Arial, sans-serif">7800 SERIES</text>
 <rect x="900.0" y="352.0" width="340.0" height="316.0" fill="#212d3b"/>
 <text x="920.0" y="372.0" font-size="14.0" fill="#ffffff" font-family="Arial, sans-serif">CONTROLS</text>
 <rect x="920.0" y="376.0" width="300.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
 <text x="1070.0" y="394.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">MODE: AUTO (BMS SEQUENCE)</text>
-<rect x="920.0" y="408.0" width="145.0" height="32.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="992.5" y="428.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">START BURNER</text>
-<rect x="1075.0" y="408.0" width="145.0" height="32.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="1147.5" y="428.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">STOP / RESET</text>
-<text x="920.0" y="454.0" font-size="10.0" fill="#6e7f91" font-family="Arial, sans-serif">MANUAL CONTROL (MANUAL MODE ONLY)</text>
-<rect x="920.0" y="458.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="992.5" y="475.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP1</text>
-<rect x="1075.0" y="458.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="1147.5" y="475.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP2</text>
-<rect x="920.0" y="486.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="992.5" y="503.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">PILOT</text>
-<rect x="1075.0" y="486.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="1147.5" y="503.2307692307692" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INTERLOCK</text>
-<rect x="920.0" y="514.0" width="300.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="1070.0" y="531.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RUNNING INTERLOCK</text>
-<text x="920.0" y="556.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">FIRING RATE (POTENTIOMETER 0-100%)</text>
-<circle cx="959.0" cy="601.0" r="39.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
-<line x1="934.3" y1="625.7" x2="938.5" y2="621.5" stroke="#7f93ab" stroke-width="2"/>
-<line x1="924.7" y1="607.8" x2="930.6" y2="606.7" stroke="#7f93ab" stroke-width="2"/>
-<line x1="926.7" y1="587.6" x2="932.2" y2="589.9" stroke="#7f93ab" stroke-width="2"/>
-<line x1="939.6" y1="571.9" x2="942.9" y2="576.9" stroke="#7f93ab" stroke-width="2"/>
-<line x1="959.0" y1="566.0" x2="959.0" y2="572.0" stroke="#7f93ab" stroke-width="2"/>
-<line x1="978.4" y1="571.9" x2="975.1" y2="576.9" stroke="#7f93ab" stroke-width="2"/>
-<line x1="991.3" y1="587.6" x2="985.8" y2="589.9" stroke="#7f93ab" stroke-width="2"/>
-<line x1="993.3" y1="607.8" x2="987.4" y2="606.7" stroke="#7f93ab" stroke-width="2"/>
-<line x1="983.7" y1="625.7" x2="979.5" y2="621.5" stroke="#7f93ab" stroke-width="2"/>
-<line x1="959.0" y1="601.0" x2="959.0" y2="574.0" stroke="#e8eef4" stroke-width="3"/>
-<circle cx="959.0" cy="601.0" r="4" fill="#e8eef4"/>
-<text x="959.0" y="622.5" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">50.0</text>
-<text x="1008.0" y="571.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">POT SETPOINT</text>
-<text x="1008.0" y="596.0" font-size="21.0" fill="#ffc400" font-family="Arial, sans-serif">65%</text>
-<text x="1008.0" y="612.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">ACTUAL FIRING RATE</text>
-<text x="1008.0" y="631.0" font-size="16.0" fill="#e8eef4" font-family="Arial, sans-serif">50%</text>
-<text x="1008.0" y="645.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">MOD MOTOR  68 OHM</text>
-<text x="1008.0" y="659.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">R-W 68   R-B 67</text>
-<rect x="920.0" y="646.0" width="78.0" height="8.0" fill="#101820"/>
-<rect x="920.0" y="646.0" width="86.62222222222222" height="8.0" fill="#ffc400"/>
+<rect x="920.0" y="408.0" width="145.0" height="30.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="427.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">START BURNER</text>
+<rect x="1075.0" y="408.0" width="145.0" height="30.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="427.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">STOP / RESET</text>
+<text x="920.0" y="452.0" font-size="10.0" fill="#6e7f91" font-family="Arial, sans-serif">MANUAL CONTROL (MANUAL MODE ONLY)</text>
+<rect x="920.0" y="456.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="472.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP1</text>
+<rect x="1075.0" y="456.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="472.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">VP2</text>
+<rect x="920.0" y="483.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="499.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">PILOT</text>
+<rect x="1075.0" y="483.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="499.2307692307692" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INTERLOCK</text>
+<rect x="920.0" y="510.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="992.5" y="525.8461538461538" font-size="10.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">LOW FIRE SW</text>
+<rect x="1075.0" y="510.0" width="145.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1147.5" y="525.8461538461538" font-size="10.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">HIGH FIRE SW</text>
+<rect x="920.0" y="537.0" width="300.0" height="24.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
+<text x="1070.0" y="553.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RUNNING INTERLOCK</text>
+<text x="920.0" y="578.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">FIRING RATE (POTENTIOMETER 0-100%)</text>
+<circle cx="958.0" cy="620.0" r="38.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="934.0" y1="644.0" x2="938.2" y2="639.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="924.7" y1="626.6" x2="930.5" y2="625.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="926.6" y1="607.0" x2="932.1" y2="609.3" stroke="#7f93ab" stroke-width="2"/>
+<line x1="939.1" y1="591.7" x2="942.4" y2="596.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="958.0" y1="586.0" x2="958.0" y2="592.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="976.9" y1="591.7" x2="973.6" y2="596.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="989.4" y1="607.0" x2="983.9" y2="609.3" stroke="#7f93ab" stroke-width="2"/>
+<line x1="991.3" y1="626.6" x2="985.5" y2="625.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="982.0" y1="644.0" x2="977.8" y2="639.8" stroke="#7f93ab" stroke-width="2"/>
+<line x1="958.0" y1="620.0" x2="958.0" y2="594.0" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="958.0" cy="620.0" r="4" fill="#e8eef4"/>
+<text x="958.0" y="640.9" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">50.0</text>
+<text x="1010.0" y="597.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">ACTUAL FIRING RATE</text>
+<text x="1010.0" y="628.0" font-size="26.0" fill="#e8eef4" font-family="Arial, sans-serif">50%</text>
+<rect x="1010.0" y="640.0" width="210.0" height="8.0" fill="#101820"/>
+<rect x="1010.0" y="640.0" width="86.62222222222222" height="8.0" fill="#ffc400"/>
 </svg>

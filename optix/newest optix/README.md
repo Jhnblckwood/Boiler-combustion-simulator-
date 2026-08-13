@@ -14,23 +14,19 @@ Independent project (own GUID and node Ids) — open `ValveProvingNewest.optix`.
   instead. (Failing to drive the mod motor to high/low fire in time in
   MANUAL produces the same prove lockouts the old sim buttons demonstrated.)
 - **Manual controls are two per line**: `VP1 | VP2`, `PILOT | INTERLOCK`,
-  and the odd one out — **RUNNING INTERLOCK** — spans the full width on the
-  bottom row.
+  `LOW FIRE SW | HIGH FIRE SW`, and the odd one out — **RUNNING
+  INTERLOCK** — spans the full width on the bottom row. In MANUAL mode the
+  operator IS the end switches: the purge holds wait for the LOW/HIGH FIRE
+  SW buttons to be made (within their 4-minute windows).
 - **Input status lights are one aligned grid** of green circles: VP1, VP2,
   VPS, INTERLOCK, RUNNING INTERLOCK, LOW FIRE SWITCH, HIGH FIRE SWITCH.
   The word "CLOSED" is gone — **the green light itself signifies closed**.
-- **Firing rate is a potentiometer knob (0–100%)** in the CONTROLS panel,
-  where the simulation box used to be, with clean non-overlapping readouts
-  beside it:
-  - **POT SETPOINT** — where the knob itself is sitting (amber).
-  - **ACTUAL FIRING RATE** — where the mod motor really is, plus its
-    position in ohms and the R-W / R-B leg resistances.
-
+- **Firing rate is a potentiometer knob (0–100%)** in the CONTROLS panel
+  with a single big **ACTUAL FIRING RATE** readout beside it (the ohm and
+  setpoint texts are gone — the ohms still live on the `ModMotor*` tags).
   The knob responds **live while you drag it** — the rate follows the
   movement immediately rather than waiting for the mouse button to be
-  released (the logic subscribes to the widget's value change instead of
-  polling). The logic never writes back to the knob, so a drag is never
-  fought or snapped back.
+  released. The logic never writes back to the knob.
 - **INLET PRESSURE + / − buttons removed** to make room for the pot. Set
   the supply pressure by **dragging the inlet gauge needle** — it is still
   the one adjustable gauge on the screen.
@@ -147,7 +143,7 @@ optix/newest optix/
    (`FTOptixRuntime.log`, shown in Studio’s output/log pane) and confirm:
 
    ```
-   ValveProvingLogic BUILD v12 started OK
+   ValveProvingLogic BUILD v13 started OK
    ```
 
    If the marker is missing or shows an older version, the runtime is running
@@ -167,20 +163,25 @@ Everything is simulated — just press buttons and watch:
 3. The inlet gauge starts at 27.7 in. H2O, so the **LGP is already made**
    (green light, ≥ 4.0 setting). If you drag the inlet gauge below 4, the LGP
    light goes out and starting locks out — that is the point.
-4. Press **START BURNER** and watch the sequence:
-   - **Steps 1–4** — valve proving: evacuate, V1 hold test, fill, V2 hold
-     test. The test-volume gauge and the checklist track each step; the
-     Honeywell display reads `VALVE PROVE mm:ss` with `(TEST V1 HOLD)` etc.
-   - **Purge** — the mod motor drives toward high fire (watch the ohms climb
-     to 135 and the 10 s countdown on the display: `(HI FIRE T-09  67 OHM)`);
-     the **HIGH FIRE** switch makes at 130 Ω and only then does the purge
-     timer count (`PURGE 00:07`).
-   - **Ignition** — the motor drives back to low fire on its own 10 s
-     countdown; **LOW FIRE** makes at 5 Ω, the pilot lights (`PILOT IGN
-     00:04`, PILOT LED amber, flame signal ~4.2 V).
-   - **RUN** — main valves open, burner fires, Honeywell shows `RUN` with
-     FLAME + MAIN amber and PILOT off (interrupted pilot, like the real
-     RM7838). Drag the **firing-rate pot** to modulate 0–100%.
+4. Press **START BURNER** and watch the sequence (purge comes FIRST, then
+   valve proving):
+   - **PURGE HOLD (high fire)** — display shows `PURGE HOLD:` /
+     `(HIGH FIRE SWITCH)` while the mod motor drives open. The HIGH FIRE
+     switch must make **within 4 minutes** or the burner locks out (95).
+   - **PURGE** — once high fire is made: `PURGE  00:07` **counting up to
+     10 s**, with `FLAME SIGNAL  0.0V` on line 2.
+   - **Valve proving** — evacuate, V1 hold test, fill, V2 hold test
+     (`VALVE PROVE mm:ss` / `(TEST V1 HOLD)` etc).
+   - **PURGE HOLD (low fire)** — `PURGE HOLD` / `(LOW FIRE SWITCH)` while
+     the motor returns; the LOW FIRE switch must make **within 4 minutes**
+     or lockout (96).
+   - **Ignition** — pilot lights (`PILOT IGN 00:04`), then **RUN** — main
+     valves open, `FLAME SIGNAL  5.0V` on the display. Drag the
+     **firing-rate pot** to modulate 0–100%.
+
+   The flame signal sits at a steady **5.0 V** whenever flame is proven and
+   **dips for half a second to a random value ≥ 3.5 V every 2 minutes**,
+   then returns to 5.0 V — like a real flame amplifier breathing.
 5. Press **STOP / RESET** (or the faceplate **RESET** button) to shut down.
 
 ### 7. Things to try
@@ -205,7 +206,7 @@ blinks. **STOP/RESET** (or faceplate RESET) clears it.
 | Symptom | Cause / fix |
 |---|---|
 | Every button dead, screen frozen | `Start()` threw — check the log for the full stack trace under `Start FAILED` |
-| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v12` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
+| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v13` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
 | Gauges stuck at defaults in the designer | Normal — values only move at **runtime** (press Play) |
 | `Unable to cast System.String to LocalizedText` in the log | A widget Text property was re-typed as String — see `../CLAUDE.md` (all texts must be LocalizedText) |
 | Log error count climbing every 100 ms | A widget property has the wrong DataType; the stack trace names the widget |
@@ -230,13 +231,13 @@ motor's feedback wiper reports its actual position in ohms.
 
 The BMS drives the motor itself in both modes:
 
-- **Prepurge at high fire** — after the valves prove, the controller drops
-  R-B to 0 (commands 135 ohms) and a **10 second countdown starts**. If the
-  HIGH FIRE switch has not proven when it hits zero → **lockout 95**. The
-  purge timer only runs at proven high fire.
-- **Low fire start** — after purge the controller drops R-W to 0 (commands
-  0 ohms) and another **10 second countdown** runs. LOW FIRE switch not
-  proven in time → **lockout 96**. The pilot trial waits on low fire.
+- **Purge hold, high fire** — at start the controller drops R-B to 0
+  (commands 135 ohms) and a **4 minute window** runs. HIGH FIRE switch not
+  made in time → **lockout 95**. Then the 10 s purge counts up, and only
+  after purge does valve proving begin.
+- **Purge hold, low fire** — after valve proving the controller drops R-W
+  to 0 and another **4 minute window** runs. LOW FIRE switch not made in
+  time → **lockout 96**. Then the pilot trial and light-off proceed.
 - **RUN** — released to modulation; the **firing-rate potentiometer**
   (0–100% knob in the CONTROLS panel) commands the position. The panel
   shows firing rate %, mod motor ohms, and the R-W / R-B legs.
@@ -337,7 +338,7 @@ Nodes/                               the information model (YAML)
   Model/Model.yaml                   the tag table above
   NetLogic/, Alarms/, ...            remaining categories
 ProjectFiles/NetSolution/            C# solution
-  ValveProvingLogic.cs               sequence + all animation (BUILD v12)
+  ValveProvingLogic.cs               sequence + all animation (BUILD v13)
 docs/screen-sample.png|.svg          what the running screen looks like
 ```
 

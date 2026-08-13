@@ -2150,7 +2150,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"1 - EVACUATE TEST VOLUME: V2 (VP2) OPENS TO BURNER"}
+      Value: {"LocaleId":"en-US","Text":"1 - PURGE HOLD: DRIVE TO HIGH FIRE (HF SWITCH MUST MAKE)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2214,7 +2214,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"2 - LEAK TEST SSOV V1: PRESSURE MUST STAY LOW"}
+      Value: {"LocaleId":"en-US","Text":"2 - PREPURGE AT HIGH FIRE (10 S)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2278,7 +2278,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"3 - FILL TEST VOLUME: V1 (VP1) OPENS FROM SUPPLY"}
+      Value: {"LocaleId":"en-US","Text":"3 - VALVE PROVING: EVACUATE + TEST V1 (PRESSURE STAYS LOW)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2342,7 +2342,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"4 - LEAK TEST SSOV V2: PRESSURE MUST STAY HIGH"}
+      Value: {"LocaleId":"en-US","Text":"4 - VALVE PROVING: FILL + TEST V2 (PRESSURE STAYS HIGH)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2406,7 +2406,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"5 - VALVES PROVEN: PREPURGE + IGNITION TRIAL"}
+      Value: {"LocaleId":"en-US","Text":"5 - PURGE HOLD: RETURN TO LOW FIRE (LF SWITCH MUST MAKE)"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -2470,7 +2470,7 @@ Children:
     - Name: Text
       Type: BaseDataVariableType
       DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"6 - RUN: VP1 + VP2 OPEN, FLAME ESTABLISHED"}
+      Value: {"LocaleId":"en-US","Text":"6 - PILOT IGNITION, THEN RUN: VP1 + VP2 OPEN"}
     - Name: LeftMargin
       Type: BaseVariableType
       DataType: Size
@@ -3030,7 +3030,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 580.0
+      Value: 530.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3057,7 +3057,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 542.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3088,7 +3088,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3125,7 +3125,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 706.0
+      Value: 656.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3162,7 +3162,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 838.0
+      Value: 788.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3195,7 +3195,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 542.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3226,7 +3226,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 556.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3263,7 +3263,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 606.0
+      Value: 556.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3296,7 +3296,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 542.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3323,7 +3323,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3354,7 +3354,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 574.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3387,7 +3387,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3418,7 +3418,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 574.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3451,7 +3451,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3482,7 +3482,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 574.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3515,7 +3515,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3546,7 +3546,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 574.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3579,7 +3579,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 600.0
+      Value: 550.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3610,7 +3610,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 624.0
+      Value: 574.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3643,7 +3643,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 760.0
+      Value: 710.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3674,7 +3674,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 773.0
+      Value: 723.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3707,7 +3707,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 800.0
+      Value: 750.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3738,7 +3738,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 813.0
+      Value: 763.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3771,7 +3771,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 844.0
+      Value: 794.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3802,7 +3802,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 853.0
+      Value: 803.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3839,7 +3839,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 762.0
+      Value: 712.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3872,7 +3872,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 760.0
+      Value: 710.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3903,7 +3903,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 776.0
+      Value: 726.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3940,7 +3940,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 764.0
+      Value: 714.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -3977,7 +3977,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 760.0
+      Value: 710.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -4070,7 +4070,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 592.0
+      Value: 542.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
@@ -4281,7 +4281,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 32.0
+      Value: 30.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4375,7 +4375,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 32.0
+      Value: 30.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4458,7 +4458,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 444.0
+      Value: 442.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4496,7 +4496,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 458.0
+      Value: 456.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4506,7 +4506,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 26.0
+      Value: 24.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4590,7 +4590,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 458.0
+      Value: 456.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4600,7 +4600,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 26.0
+      Value: 24.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4684,7 +4684,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 486.0
+      Value: 483.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4694,7 +4694,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 26.0
+      Value: 24.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4777,7 +4777,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 486.0
+      Value: 483.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4787,7 +4787,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 26.0
+      Value: 24.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4854,6 +4854,192 @@ Children:
         - Name: Severity
           Type: PropertyType
           DataType: UInt16
+  - Name: LowFireSwButton
+    Type: Button
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"LOW FIRE SW"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 920.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 510.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 145.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 10.0
+    - Name: EventHandler1
+      Type: EventHandler
+      Children:
+      - Name: ListenEventType
+        Type: PropertyType
+        DataType: NodeId
+        Value: "/Types/EventTypes/BaseEventType/MouseEvent/MouseClickEvent"
+      - Name: MethodsToCall
+        Type: BaseObjectType
+        Children:
+        - Name: MethodContainer1
+          Type: BaseObjectType
+          Children:
+          - Name: ObjectPointer
+            Type: NodePointer
+            DataType: NodeId
+            Children:
+            - Name: Kind
+              Type: PropertyType
+              DataType: NodeId
+              Value: "/Types/ObjectTypes/BaseObjectType"
+            - Name: NodeClass
+              Type: PropertyType
+              DataType: NodePointerNodeClass
+              ModellingRule: Optional
+              Value: 2
+            - Name: DynamicLink
+              Type: DynamicLink
+              DataType: NodePath
+              Value: "../../../../../ValveProvingLogic@NodeId"
+          - Name: Method
+            Type: BaseDataVariableType
+            DataType: String
+            Value: "ToggleLowFireSw"
+      - Name: EventArguments
+        Type: MouseClickEvent
+        Children:
+        - Name: EventId
+          Type: PropertyType
+          DataType: ByteString
+        - Name: EventType
+          Type: PropertyType
+          DataType: NodeId
+        - Name: SourceNode
+          Type: PropertyType
+          DataType: NodeId
+        - Name: SourceName
+          Type: PropertyType
+          DataType: String
+        - Name: Time
+          Type: PropertyType
+          DataType: UtcTime
+        - Name: ReceiveTime
+          Type: PropertyType
+          DataType: UtcTime
+        - Name: Message
+          Type: PropertyType
+          DataType: LocalizedText
+        - Name: Severity
+          Type: PropertyType
+          DataType: UInt16
+  - Name: HighFireSwButton
+    Type: Button
+    Children:
+    - Name: Text
+      Type: BaseDataVariableType
+      DataType: LocalizedText
+      Value: {"LocaleId":"en-US","Text":"HIGH FIRE SW"}
+    - Name: LeftMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 1075.0
+    - Name: TopMargin
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 510.0
+    - Name: Width
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 145.0
+    - Name: Height
+      Type: BaseVariableType
+      DataType: Size
+      ModellingRule: Optional
+      Value: 24.0
+    - Name: FontSize
+      Type: BaseDataVariableType
+      DataType: Float
+      ModellingRule: Optional
+      Value: 10.0
+    - Name: EventHandler1
+      Type: EventHandler
+      Children:
+      - Name: ListenEventType
+        Type: PropertyType
+        DataType: NodeId
+        Value: "/Types/EventTypes/BaseEventType/MouseEvent/MouseClickEvent"
+      - Name: MethodsToCall
+        Type: BaseObjectType
+        Children:
+        - Name: MethodContainer1
+          Type: BaseObjectType
+          Children:
+          - Name: ObjectPointer
+            Type: NodePointer
+            DataType: NodeId
+            Children:
+            - Name: Kind
+              Type: PropertyType
+              DataType: NodeId
+              Value: "/Types/ObjectTypes/BaseObjectType"
+            - Name: NodeClass
+              Type: PropertyType
+              DataType: NodePointerNodeClass
+              ModellingRule: Optional
+              Value: 2
+            - Name: DynamicLink
+              Type: DynamicLink
+              DataType: NodePath
+              Value: "../../../../../ValveProvingLogic@NodeId"
+          - Name: Method
+            Type: BaseDataVariableType
+            DataType: String
+            Value: "ToggleHighFireSw"
+      - Name: EventArguments
+        Type: MouseClickEvent
+        Children:
+        - Name: EventId
+          Type: PropertyType
+          DataType: ByteString
+        - Name: EventType
+          Type: PropertyType
+          DataType: NodeId
+        - Name: SourceNode
+          Type: PropertyType
+          DataType: NodeId
+        - Name: SourceName
+          Type: PropertyType
+          DataType: String
+        - Name: Time
+          Type: PropertyType
+          DataType: UtcTime
+        - Name: ReceiveTime
+          Type: PropertyType
+          DataType: UtcTime
+        - Name: Message
+          Type: PropertyType
+          DataType: LocalizedText
+        - Name: Severity
+          Type: PropertyType
+          DataType: UInt16
   - Name: RunInterlockButton
     Type: Button
     Children:
@@ -4870,7 +5056,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 514.0
+      Value: 537.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4880,7 +5066,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 26.0
+      Value: 24.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -4963,7 +5149,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 546.0
+      Value: 568.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -4996,17 +5182,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 562.0
+      Value: 582.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 78.0
+      Value: 76.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 78.0
+      Value: 76.0
     - Name: Value
       Type: BaseDataVariableType
       DataType: Float
@@ -5021,80 +5207,6 @@ Children:
       DataType: Float
       ModellingRule: Optional
       Value: 100.0
-  - Name: FrSetLabel
-    Type: Label
-    Children:
-    - Name: Text
-      Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"POT SETPOINT"}
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 1008.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 562.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 210.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 11.0
-    - Name: FontSize
-      Type: BaseDataVariableType
-      DataType: Float
-      ModellingRule: Optional
-      Value: 9.0
-    - Name: TextColor
-      Type: BaseDataVariableType
-      DataType: Color
-      ModellingRule: Optional
-      Value: "#8fa3b8"
-  - Name: FrSetReadout
-    Type: Label
-    Children:
-    - Name: Text
-      Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"0%"}
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 1008.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 575.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 210.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 26.0
-    - Name: FontSize
-      Type: BaseDataVariableType
-      DataType: Float
-      ModellingRule: Optional
-      Value: 21.0
-    - Name: TextColor
-      Type: BaseDataVariableType
-      DataType: Color
-      ModellingRule: Optional
-      Value: "#ffc400"
   - Name: FrRateLabel
     Type: Label
     Children:
@@ -5106,12 +5218,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 1008.0
+      Value: 1010.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 603.0
+      Value: 588.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5121,7 +5233,7 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 11.0
+      Value: 12.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
@@ -5143,12 +5255,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 1008.0
+      Value: 1010.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 615.0
+      Value: 602.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5158,91 +5270,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 18.0
+      Value: 34.0
     - Name: FontSize
       Type: BaseDataVariableType
       DataType: Float
       ModellingRule: Optional
-      Value: 16.0
+      Value: 26.0
     - Name: TextColor
       Type: BaseDataVariableType
       DataType: Color
       ModellingRule: Optional
       Value: "#e8eef4"
-  - Name: FrOhmLabel
-    Type: Label
-    Children:
-    - Name: Text
-      Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"MOD MOTOR  0 OHM"}
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 1008.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 635.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 210.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 12.0
-    - Name: FontSize
-      Type: BaseDataVariableType
-      DataType: Float
-      ModellingRule: Optional
-      Value: 10.0
-    - Name: TextColor
-      Type: BaseDataVariableType
-      DataType: Color
-      ModellingRule: Optional
-      Value: "#9fb3c8"
-  - Name: FrTermLabel
-    Type: Label
-    Children:
-    - Name: Text
-      Type: BaseDataVariableType
-      DataType: LocalizedText
-      Value: {"LocaleId":"en-US","Text":"R-W 0   R-B 135"}
-    - Name: LeftMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 1008.0
-    - Name: TopMargin
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 649.0
-    - Name: Width
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 210.0
-    - Name: Height
-      Type: BaseVariableType
-      DataType: Size
-      ModellingRule: Optional
-      Value: 12.0
-    - Name: FontSize
-      Type: BaseDataVariableType
-      DataType: Float
-      ModellingRule: Optional
-      Value: 10.0
-    - Name: TextColor
-      Type: BaseDataVariableType
-      DataType: Color
-      ModellingRule: Optional
-      Value: "#9fb3c8"
   - Name: FrBarBack
     Type: Rectangle
     Children:
@@ -5250,17 +5288,17 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 920.0
+      Value: 1010.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 646.0
+      Value: 640.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 78.0
+      Value: 210.0
     - Name: Height
       Type: BaseVariableType
       DataType: Size
@@ -5277,12 +5315,12 @@ Children:
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 920.0
+      Value: 1010.0
     - Name: TopMargin
       Type: BaseVariableType
       DataType: Size
       ModellingRule: Optional
-      Value: 646.0
+      Value: 640.0
     - Name: Width
       Type: BaseVariableType
       DataType: Size
@@ -5316,6 +5354,10 @@ Children:
       Name: ToggleInterlock
     - Class: Method
       Name: ToggleRunInterlock
+    - Class: Method
+      Name: ToggleLowFireSw
+    - Class: Method
+      Name: ToggleHighFireSw
 - Name: WebPresentationEngine
   Type: ns=19;PresentationEngine
   Children:

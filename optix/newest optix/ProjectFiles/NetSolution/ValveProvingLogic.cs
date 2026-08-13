@@ -142,19 +142,29 @@ public class ValveProvingLogic : BaseNetLogic
     private const float LowFireMakeOhms = 5.0f;    // LF switch made at/below
     private const float HighFireMakeOhms = 130.0f; // HF switch made at/above
     private const float MotorOhmsPerSec = 17.0f;   // ~8 s full stroke
-    private const float ProveWindow = 10.0f;       // 10 s HF/LF countdown
+    private const float ProveWindow = 240.0f;      // 4 minutes to prove HF/LF
+
+    // --- Flame amplifier signal, VDC -----------------------------------
+    // Steady 5.0 V with flame proven; every 2 minutes it dips to a random
+    // value at/above 3.5 V for half a second, then returns to 5.0 V.
+    private const float FlameNominal = 5.0f;
+    private const float FlameDipMin = 3.5f;
+    private const float FlameDipInterval = 120.0f;
+    private const float FlameDipLength = 0.5f;
 
     private enum Step
     {
         Standby = 0,
-        Evacuate = 1,
-        TestV1 = 2,
-        Fill = 3,
-        TestV2 = 4,
-        Purge = 5,
-        Ignition = 6,
-        Run = 7,
-        Lockout = 8
+        PurgeHoldHigh = 1,   // drive to high fire, waiting on the HF switch
+        Purge = 2,           // purge at high fire, timer counts UP to 10 s
+        Evacuate = 3,        // valve proving starts here
+        TestV1 = 4,
+        Fill = 5,
+        TestV2 = 6,
+        PurgeHoldLow = 7,    // drive back to low fire, waiting on the LF switch
+        Ignition = 8,        // pilot trial
+        Run = 9,
+        Lockout = 10
     }
 
     // Model variables
@@ -179,14 +189,16 @@ public class ValveProvingLogic : BaseNetLogic
     private Label stateLabel, timerLabel, pressureLabel, inletReadout;
     private Button modeButton, startButton, vp1Button, vp2Button, pilotButton;
     private Button interlockButton, runInterlockButton;
-    private Label tagLabel4, tagLabel5, frOhmLabel, frSetReadout;
+    private Button lowFireSwButton, highFireSwButton;
+    private bool manualLowFire, manualHighFire; // MANUAL-mode end switches
+    private Label tagLabel4, tagLabel5;
     private CircularGauge ratePot;
     private SpinBox lgpSetInput, hgpSetInput, vpsSetInput;
     private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
 
     // Firing rate panel + Honeywell faceplate widgets
     private Rectangle frBarFill;
-    private Label frReadout, frTermLabel;
+    private Label frReadout;
     private bool restartPending; // running-interlock fault: auto-restart when it recloses
     private Ellipse loFireLed, hiFireLed;
     private Label hwLcdLine1, hwLcdLine2;
@@ -205,7 +217,12 @@ public class ValveProvingLogic : BaseNetLogic
     private int flickerCounter;
     private float motorOhms;                // mod motor position feedback, ohms (0-135)
     private float modTarget;                // operator modulation target in RUN, ohms
-    private float proveElapsed;             // time on the 10 s HF/LF prove countdown
+    private float proveElapsed;             // time on the HF/LF prove countdown
+    private float flameSignal;              // flame amplifier signal, VDC
+    private float flameDipTimer;            // seconds since the last dip
+    private float flameDipRemaining;        // seconds left in the current dip
+    private float flameDipValue = 5.0f;     // the value being held during a dip
+    private readonly Random flameRandom = new Random();
 
     // Palette
     private static readonly Color GasYellow = new Color(0xFFFFC400u);
@@ -231,7 +248,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v12 (live rate pot) started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v13 (purge-first sequence) started OK");
         }
         catch (Exception ex)
         {
@@ -299,6 +316,8 @@ public class ValveProvingLogic : BaseNetLogic
         pilotButton = Owner.Get<Button>("PilotButton");
         interlockButton = Owner.Get<Button>("InterlockButton");
         runInterlockButton = Owner.Get<Button>("RunInterlockButton");
+        lowFireSwButton = Owner.Get<Button>("LowFireSwButton");
+        highFireSwButton = Owner.Get<Button>("HighFireSwButton");
         lgpSetInput = Owner.Get<SpinBox>("LgpSetInput");
         hgpSetInput = Owner.Get<SpinBox>("HgpSetInput");
         vpsSetInput = Owner.Get<SpinBox>("VpsSetInput");
@@ -309,10 +328,7 @@ public class ValveProvingLogic : BaseNetLogic
 
         frBarFill = Owner.Get<Rectangle>("FrBarFill");
         frReadout = Owner.Get<Label>("FrReadout");
-        frTermLabel = Owner.Get<Label>("FrTermLabel");
-        frOhmLabel = Owner.Get<Label>("FrOhmLabel");
         ratePot = Owner.Get<CircularGauge>("RatePot");
-        frSetReadout = Owner.Get<Label>("FrSetReadout");
         loFireLed = Owner.Get<Ellipse>("LoFireLed");
         hiFireLed = Owner.Get<Ellipse>("HiFireLed");
         hwLcdLine1 = Owner.Get<Label>("HwLcdLine1");
@@ -379,12 +395,14 @@ public class ValveProvingLogic : BaseNetLogic
     {
         switch (s)
         {
-            case Step.Evacuate: return 0;
-            case Step.TestV1: return 1;
-            case Step.Fill: return 2;
+            case Step.PurgeHoldHigh: return 0;
+            case Step.Purge: return 1;
+            case Step.Evacuate: return 2;
+            case Step.TestV1: return 2;
+            case Step.Fill: return 3;
             case Step.TestV2: return 3;
-            case Step.Purge: return 4;
-            case Step.Ignition: return 4;
+            case Step.PurgeHoldLow: return 4;
+            case Step.Ignition: return 5;
             case Step.Run: return 5;
             default: return -1;
         }
@@ -427,7 +445,7 @@ public class ValveProvingLogic : BaseNetLogic
         failedStepIndex = -1;
         runEstablished = false;
         vpsVar.Value = false;
-        EnterStep(Step.Evacuate);
+        EnterStep(Step.PurgeHoldHigh);
     }
 
     [ExportMethod]
@@ -443,6 +461,8 @@ public class ValveProvingLogic : BaseNetLogic
         runEstablished = false;
         restartPending = false;
         runIntlkFaultVar.Value = false;
+        manualLowFire = false;
+        manualHighFire = false;
         EnterStep(Step.Standby);
     }
 
@@ -460,6 +480,8 @@ public class ValveProvingLogic : BaseNetLogic
         lockoutReason = "";
         failedStepIndex = -1;
         runEstablished = false;
+        manualLowFire = false;
+        manualHighFire = false;
         EnterStep(Step.Standby);
     }
 
@@ -494,9 +516,9 @@ public class ValveProvingLogic : BaseNetLogic
 
         if (step == Step.Ignition)
         {
-            // Lights only once the motor has proven LOW FIRE (the trial
-            // countdown is not running before that).
-            pilotVar.Value = ReadBool(lowFireVar);
+            // Low fire was already proven by the PURGE HOLD step before
+            // the trial began, so the pilot may light.
+            pilotVar.Value = true;
         }
         else if (step == Step.Standby)
         {
@@ -530,6 +552,27 @@ public class ValveProvingLogic : BaseNetLogic
     public void ToggleRunInterlock()
     {
         runInterlockVar.Value = !ReadBool(runInterlockVar);
+    }
+
+    /// <summary>
+    /// MANUAL-mode end switches: in the drill the OPERATOR is the field
+    /// switch - the purge holds wait for these to be made (within the
+    /// 4 minute windows). In AUTO the motor position makes them instead.
+    /// </summary>
+    [ExportMethod]
+    public void ToggleLowFireSw()
+    {
+        if (ReadBool(autoModeVar) || step == Step.Lockout)
+            return;
+        manualLowFire = !manualLowFire;
+    }
+
+    [ExportMethod]
+    public void ToggleHighFireSw()
+    {
+        if (ReadBool(autoModeVar) || step == Step.Lockout)
+            return;
+        manualHighFire = !manualHighFire;
     }
 
     /// <summary>
@@ -570,6 +613,7 @@ public class ValveProvingLogic : BaseNetLogic
             SimulatePressure();
             UpdateGasPressureSwitches();
             SimulateActuator();
+            UpdateFlameSignal();
             RunSequence(auto);
             UpdateGraphics(auto);
         }
@@ -631,9 +675,10 @@ public class ValveProvingLogic : BaseNetLogic
     {
         switch (step)
         {
-            case Step.Purge: return PotOhms;         // purge at high fire
+            case Step.PurgeHoldHigh: return PotOhms; // drive open to high fire
+            case Step.Purge: return PotOhms;         // purge holds at high fire
             case Step.Run: return modTarget;         // released to modulation
-            default: return 0f;                      // at rest / drive to low fire
+            default: return 0f;                      // drive closed to low fire
         }
     }
 
@@ -695,8 +740,57 @@ public class ValveProvingLogic : BaseNetLogic
         if (motorOhms > PotOhms) motorOhms = PotOhms;
 
         modMotorRVar.Value = motorOhms;         // feedback wiper position
-        lowFireVar.Value = motorOhms <= LowFireMakeOhms;
-        highFireVar.Value = motorOhms >= HighFireMakeOhms;
+        if (ReadBool(autoModeVar))
+        {
+            lowFireVar.Value = motorOhms <= LowFireMakeOhms;
+            highFireVar.Value = motorOhms >= HighFireMakeOhms;
+        }
+        else
+        {
+            // MANUAL drill: the operator works the end switches.
+            lowFireVar.Value = manualLowFire;
+            highFireVar.Value = manualHighFire;
+        }
+    }
+
+    /// <summary>
+    /// Flame amplifier signal. With flame proven it sits at a steady 5.0 V;
+    /// every 2 minutes it dips for half a second to a random value at or
+    /// above 3.5 V, then returns to 5.0 V. No flame reads 0.0 V.
+    /// </summary>
+    private void UpdateFlameSignal()
+    {
+        bool flame = ReadBool(pilotVar) || (step == Step.Run && ReadBool(vp1Var) && ReadBool(vp2Var));
+        if (!flame)
+        {
+            flameSignal = 0f;
+            flameDipTimer = 0f;
+            flameDipRemaining = 0f;
+            return;
+        }
+
+        if (flameDipRemaining > 0f)
+        {
+            flameDipRemaining -= TickSeconds;
+            flameSignal = flameDipValue;
+            if (flameDipRemaining <= 0f)
+                flameSignal = FlameNominal;
+            return;
+        }
+
+        flameDipTimer += TickSeconds;
+        if (flameDipTimer >= FlameDipInterval)
+        {
+            flameDipTimer = 0f;
+            flameDipRemaining = FlameDipLength;
+            // a random value at/above 3.5 V, below the 5.0 V nominal
+            flameDipValue = FlameDipMin
+                + (float)flameRandom.NextDouble() * (FlameNominal - FlameDipMin - 0.1f);
+            flameSignal = flameDipValue;
+            return;
+        }
+
+        flameSignal = FlameNominal;
     }
 
     private void UpdateGasPressureSwitches()
@@ -815,22 +909,22 @@ public class ValveProvingLogic : BaseNetLogic
             return;
         }
 
-        // High/low fire switch proving. The purge timer only runs at proven
-        // HIGH FIRE; the ignition trial only runs at proven LOW FIRE. Each
-        // drive runs a 10 second countdown - if the end switch input has
-        // not proven when it expires, the burner locks out.
+        // High/low fire switch proving: the PURGE HOLD steps wait on their
+        // end switch. Each hold runs a 4 MINUTE window - if the switch has
+        // not made when it expires, the burner locks out (95/96).
         bool lfMade = ReadBool(lowFireVar);
         bool hfMade = ReadBool(highFireVar);
-        bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
+        bool proveWait = (step == Step.PurgeHoldHigh && !hfMade)
+                      || (step == Step.PurgeHoldLow && !lfMade);
         if (proveWait)
         {
             proveElapsed += TickSeconds;
             if (proveElapsed >= ProveWindow)
             {
-                if (step == Step.Purge)
-                    Lockout("HIGH FIRE SWITCH NOT PROVEN IN 10 S - MOD MOTOR NEVER REACHED HIGH FIRE (135 OHM)", assertVps: false, code: 95);
+                if (step == Step.PurgeHoldHigh)
+                    Lockout("HIGH FIRE SWITCH NOT PROVEN IN 4 MINUTES - MOD MOTOR NEVER REACHED HIGH FIRE", assertVps: false, code: 95);
                 else
-                    Lockout("LOW FIRE SWITCH NOT PROVEN IN 10 S - MOD MOTOR NEVER RETURNED TO LOW FIRE (0 OHM)", assertVps: false, code: 96);
+                    Lockout("LOW FIRE SWITCH NOT PROVEN IN 4 MINUTES - MOD MOTOR NEVER RETURNED TO LOW FIRE", assertVps: false, code: 96);
                 return;
             }
         }
@@ -838,6 +932,14 @@ public class ValveProvingLogic : BaseNetLogic
         {
             proveElapsed = 0f;
             stepElapsed += TickSeconds;
+
+            // A hold step is satisfied the moment its end switch proves.
+            if (step == Step.PurgeHoldHigh || step == Step.PurgeHoldLow)
+            {
+                EnterStep(NextStep(step));
+                stateVar.Value = (int)step;
+                return;
+            }
         }
 
         if (auto)
@@ -846,7 +948,7 @@ public class ValveProvingLogic : BaseNetLogic
             // pilot may only light once the actuator is proven at LOW FIRE.
             vp1Var.Value = TargetV1(step);
             vp2Var.Value = TargetV2(step);
-            pilotVar.Value = step == Step.Ignition && lfMade;
+            pilotVar.Value = step == Step.Ignition;
         }
 
         bool v1 = ReadBool(vp1Var);
@@ -947,11 +1049,13 @@ public class ValveProvingLogic : BaseNetLogic
     {
         switch (s)
         {
+            case Step.PurgeHoldHigh: return Step.Purge;
+            case Step.Purge: return Step.Evacuate;
             case Step.Evacuate: return Step.TestV1;
             case Step.TestV1: return Step.Fill;
             case Step.Fill: return Step.TestV2;
-            case Step.TestV2: return Step.Purge;
-            case Step.Purge: return Step.Ignition;
+            case Step.TestV2: return Step.PurgeHoldLow;
+            case Step.PurgeHoldLow: return Step.Ignition;
             case Step.Ignition: return Step.Run;
             default: return Step.Standby;
         }
@@ -967,6 +1071,8 @@ public class ValveProvingLogic : BaseNetLogic
             case Step.TestV2: return TestV2Time;
             case Step.Purge: return PurgeTime;
             case Step.Ignition: return IgnitionTime;
+            case Step.PurgeHoldHigh: return float.MaxValue;
+            case Step.PurgeHoldLow: return float.MaxValue;
             default: return float.MaxValue;
         }
     }
@@ -1082,29 +1188,24 @@ public class ValveProvingLogic : BaseNetLogic
         // Manual interlock controls follow the other manual controls.
         interlockButton.Enabled = !auto;
         runInterlockButton.Enabled = !auto;
+        lowFireSwButton.Enabled = !auto;
+        highFireSwButton.Enabled = !auto;
 
         // Mod motor panel: position bar, ohm readouts, HF/LF switch lights.
         bool lfMade = ReadBool(lowFireVar);
         bool hfMade = ReadBool(highFireVar);
-        bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
+        bool proveWait = (step == Step.PurgeHoldHigh && !hfMade)
+                      || (step == Step.PurgeHoldLow && !lfMade);
         float ratePct = motorOhms / PotOhms * 100f;
         frBarFill.Width = 2f + motorOhms / PotOhms * 168f;
-        SetText(frSetReadout, ((float)ratePot.Value).ToString("0") + "%");
         SetText(frReadout, ratePct.ToString("0") + "%");
-        SetText(frOhmLabel, "MOD MOTOR  " + motorOhms.ToString("0") + " OHM");
         firingRatePercentVar.Value = ratePct;
-        SetText(frTermLabel, "R-W " + ReadFloat(modMotorWVar).ToString("0")
-            + "   R-B " + ReadFloat(modMotorBVar).ToString("0"));
         loFireLed.FillColor = lfMade ? LedGreen : LedOff;
         hiFireLed.FillColor = hfMade ? LedGreen : LedOff;
         // The knob is the operator's setpoint and is never overwritten by
         // the logic - the ACTUAL FIRING RATE readout beside it shows where
         // the motor really is (the BMS owns it outside RUN).
 
-        // Flame signal, volts DC, like a 7800 flame amplifier readout.
-        float flameSignal = (pilotLit || running)
-            ? 3.9f + ((flickerCounter / 3) % 2 == 0 ? 0.3f : 0f)
-            : 0f;
         flameSignalVar.Value = flameSignal;
 
         // Banner, timer, and step list are the same in both modes; only
@@ -1123,7 +1224,7 @@ public class ValveProvingLogic : BaseNetLogic
                     ? "STANDBY - VALVES CLOSED - READY TO START"
                     : "MANUAL DRILL - PRESS START BURNER, THEN WORK THE CONTROLS AT EACH STEP";
                 lcd1 = "STANDBY";
-                lcd2 = "*Flame Signal  " + flameSignal.ToString("0.0") + "V";
+                lcd2 = "FLAME SIGNAL          " + flameSignal.ToString("0.0") + "V";
                 if (!ReadBool(lgpVar))
                 {
                     banner = "LOW GAS PRESSURE - LGP NOT MADE (BELOW " + lgpSet.ToString("0.#") + " IN. H2O) - STARTING NOW WILL LOCK OUT";
@@ -1144,26 +1245,40 @@ public class ValveProvingLogic : BaseNetLogic
                 }
                 PaintSteps(-1, false);
                 break;
+            case Step.PurgeHoldHigh:
+                bannerRect.FillColor = BannerTest;
+                banner = "PURGE HOLD - DRIVING TO HIGH FIRE - HIGH FIRE SWITCH MUST MAKE WITHIN 4 MINUTES";
+                lcd1 = "PURGE HOLD:";
+                lcd2 = "(HIGH FIRE SWITCH)";
+                PaintSteps(0, false);
+                break;
+            case Step.Purge:
+                bannerRect.FillColor = BannerTest;
+                banner = "PREPURGE AT HIGH FIRE (ALL VALVES CLOSED)";
+                lcd1 = "PURGE       " + Mmss(stepElapsed); // counts UP to 10
+                lcd2 = "FLAME SIGNAL          " + flameSignal.ToString("0.0") + "V";
+                PaintSteps(1, false);
+                break;
             case Step.Evacuate:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 1: EVACUATE TEST VOLUME (OPEN V2)";
                 lcd1 = "VALVE PROVE  " + tRem;
                 lcd2 = "(EVACUATE - V2 OPEN)";
-                PaintSteps(0, false);
+                PaintSteps(2, false);
                 break;
             case Step.TestV1:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 2: TESTING V1 (ALL VALVES CLOSED) - PRESSURE MUST STAY LOW";
                 lcd1 = "VALVE PROVE  " + tRem;
                 lcd2 = "(TEST V1 HOLD)";
-                PaintSteps(1, false);
+                PaintSteps(2, false);
                 break;
             case Step.Fill:
                 bannerRect.FillColor = BannerTest;
                 banner = "VALVE PROVING - STEP 3: FILL TEST VOLUME (OPEN V1)";
                 lcd1 = "VALVE PROVE  " + tRem;
                 lcd2 = "(FILL - V1 OPEN)";
-                PaintSteps(2, false);
+                PaintSteps(3, false);
                 break;
             case Step.TestV2:
                 bannerRect.FillColor = BannerTest;
@@ -1172,39 +1287,21 @@ public class ValveProvingLogic : BaseNetLogic
                 lcd2 = "(TEST V2 HOLD)";
                 PaintSteps(3, false);
                 break;
-            case Step.Purge:
+            case Step.PurgeHoldLow:
                 bannerRect.FillColor = BannerTest;
-                if (!hfMade)
-                {
-                    banner = "VALVES PROVEN - DRIVING TO HIGH FIRE - HIGH FIRE SWITCH MUST PROVE BEFORE T-0";
-                    lcd1 = "PURGE  " + Mmss(PurgeTime);
-                    lcd2 = "(HI FIRE T-" + Math.Ceiling(remaining).ToString("00") + "  " + motorOhms.ToString("0") + " OHM)";
-                }
-                else
-                {
-                    banner = "VALVES PROVEN - PREPURGE AT HIGH FIRE (ALL VALVES CLOSED)";
-                    lcd1 = "PURGE  " + tRem;
-                    lcd2 = "(HI FIRE PROVEN 135 OHM)";
-                }
+                banner = "PURGE HOLD - RETURNING TO LOW FIRE - LOW FIRE SWITCH MUST MAKE WITHIN 4 MINUTES";
+                lcd1 = "PURGE HOLD";
+                lcd2 = "(LOW FIRE SWITCH)";
                 PaintSteps(4, false);
                 break;
             case Step.Ignition:
                 bannerRect.FillColor = BannerTest;
-                if (!lfMade)
-                {
-                    banner = "PURGE COMPLETE - DRIVING TO LOW FIRE - LOW FIRE SWITCH MUST PROVE BEFORE T-0";
-                    lcd1 = "PURGE  00:00";
-                    lcd2 = "(LO FIRE T-" + Math.Ceiling(remaining).ToString("00") + "  " + motorOhms.ToString("0") + " OHM)";
-                }
-                else
-                {
-                    banner = pilotLit
-                        ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
-                        : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
-                    lcd1 = "PILOT IGN  " + tRem;
-                    lcd2 = "*Flame Signal  " + flameSignal.ToString("0.0") + "V";
-                }
-                PaintSteps(4, false);
+                banner = pilotLit
+                    ? "PILOT TRIAL FOR IGNITION (PTFI) - PILOT LIT, MAIN VALVES CLOSED"
+                    : "PILOT TRIAL FOR IGNITION (PTFI) - AWAITING PILOT FLAME";
+                lcd1 = "PILOT IGN  " + tRem;
+                lcd2 = "FLAME SIGNAL          " + flameSignal.ToString("0.0") + "V";
+                PaintSteps(5, false);
                 break;
             case Step.Run:
                 if (!auto && !runEstablished)
@@ -1218,10 +1315,7 @@ public class ValveProvingLogic : BaseNetLogic
                     banner = "BURNER FIRING - VP1 + VP2 OPEN - VALVE PROVING COMPLETE";
                 }
                 lcd1 = "RUN";
-                // the KDM scrolls its selectable messages; alternate them
-                lcd2 = (flickerCounter / 40) % 2 == 0
-                    ? "*Flame Signal  " + flameSignal.ToString("0.0") + "V"
-                    : "*Firing Rate  " + ratePct.ToString("000") + "%";
+                lcd2 = "FLAME SIGNAL          " + flameSignal.ToString("0.0") + "V";
                 PaintSteps(5, false);
                 break;
             case Step.Lockout:
