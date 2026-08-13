@@ -76,6 +76,12 @@ Children:
 - Name: HighFireSwitch
   Type: BaseDataVariableType
   DataType: Boolean
+- Name: RateSetpoint
+  Type: BaseDataVariableType
+  DataType: Float
+- Name: FiringRatePercent
+  Type: BaseDataVariableType
+  DataType: Float
 - Name: FlameSignal
   Type: BaseDataVariableType
   DataType: Float

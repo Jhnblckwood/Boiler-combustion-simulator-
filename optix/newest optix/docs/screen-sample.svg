@@ -165,7 +165,7 @@
 <rect x="760.0" y="600.0" width="118.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
 <text x="819.0" y="618.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RESET</text>
 <text x="592.0" y="646.0" font-size="10.0" fill="#cfd8ff" font-family="Arial, sans-serif">7800 SERIES</text>
-<rect x="900.0" y="352.0" width="340.0" height="310.0" fill="#212d3b"/>
+<rect x="900.0" y="352.0" width="340.0" height="316.0" fill="#212d3b"/>
 <text x="920.0" y="372.0" font-size="14.0" fill="#ffffff" font-family="Arial, sans-serif">CONTROLS</text>
 <rect x="920.0" y="376.0" width="300.0" height="28.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
 <text x="1070.0" y="394.61538461538464" font-size="12.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">MODE: AUTO (BMS SEQUENCE)</text>
@@ -185,26 +185,25 @@
 <rect x="920.0" y="514.0" width="300.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
 <text x="1070.0" y="531.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">RUNNING INTERLOCK</text>
 <text x="920.0" y="556.0" font-size="10.0" fill="#8fa3b8" font-family="Arial, sans-serif">FIRING RATE (POTENTIOMETER 0-100%)</text>
-<circle cx="951.0" cy="591.0" r="31.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
-<line x1="931.9" y1="610.1" x2="936.2" y2="605.8" stroke="#7f93ab" stroke-width="2"/>
-<line x1="924.5" y1="596.3" x2="930.4" y2="595.1" stroke="#7f93ab" stroke-width="2"/>
-<line x1="926.1" y1="580.7" x2="931.6" y2="583.0" stroke="#7f93ab" stroke-width="2"/>
-<line x1="936.0" y1="568.6" x2="939.3" y2="573.5" stroke="#7f93ab" stroke-width="2"/>
-<line x1="951.0" y1="564.0" x2="951.0" y2="570.0" stroke="#7f93ab" stroke-width="2"/>
-<line x1="966.0" y1="568.6" x2="962.7" y2="573.5" stroke="#7f93ab" stroke-width="2"/>
-<line x1="975.9" y1="580.7" x2="970.4" y2="583.0" stroke="#7f93ab" stroke-width="2"/>
-<line x1="977.5" y1="596.3" x2="971.6" y2="595.1" stroke="#7f93ab" stroke-width="2"/>
-<line x1="970.1" y1="610.1" x2="965.8" y2="605.8" stroke="#7f93ab" stroke-width="2"/>
-<line x1="951.0" y1="591.0" x2="951.0" y2="572.0" stroke="#e8eef4" stroke-width="3"/>
-<circle cx="951.0" cy="591.0" r="4" fill="#e8eef4"/>
-<text x="951.0" y="608.0" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">50.0</text>
-<text x="992.0" y="578.0" font-size="16.0" fill="#e8eef4" font-family="Arial, sans-serif">50%</text>
-<text x="992.0" y="596.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">MOD MOTOR  68 OHM</text>
-<text x="992.0" y="612.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">R-W 68   R-B 67</text>
-<rect x="992.0" y="618.0" width="228.0" height="6.0" fill="#101820"/>
-<rect x="992.0" y="618.0" width="86.62222222222222" height="6.0" fill="#ffc400"/>
-<rect x="920.0" y="630.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="992.5" y="647.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INLET PRESSURE -</text>
-<rect x="1075.0" y="630.0" width="145.0" height="26.0" rx="4" fill="#2b3a4e" stroke="#4a5a6e"/>
-<text x="1147.5" y="647.2307692307693" font-size="11.0" fill="#dbe4ee" font-family="Arial" text-anchor="middle">INLET PRESSURE +</text>
+<circle cx="959.0" cy="601.0" r="39.0" fill="#1b2430" stroke="#3a475a" stroke-width="3"/>
+<line x1="934.3" y1="625.7" x2="938.5" y2="621.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="924.7" y1="607.8" x2="930.6" y2="606.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="926.7" y1="587.6" x2="932.2" y2="589.9" stroke="#7f93ab" stroke-width="2"/>
+<line x1="939.6" y1="571.9" x2="942.9" y2="576.9" stroke="#7f93ab" stroke-width="2"/>
+<line x1="959.0" y1="566.0" x2="959.0" y2="572.0" stroke="#7f93ab" stroke-width="2"/>
+<line x1="978.4" y1="571.9" x2="975.1" y2="576.9" stroke="#7f93ab" stroke-width="2"/>
+<line x1="991.3" y1="587.6" x2="985.8" y2="589.9" stroke="#7f93ab" stroke-width="2"/>
+<line x1="993.3" y1="607.8" x2="987.4" y2="606.7" stroke="#7f93ab" stroke-width="2"/>
+<line x1="983.7" y1="625.7" x2="979.5" y2="621.5" stroke="#7f93ab" stroke-width="2"/>
+<line x1="959.0" y1="601.0" x2="959.0" y2="574.0" stroke="#e8eef4" stroke-width="3"/>
+<circle cx="959.0" cy="601.0" r="4" fill="#e8eef4"/>
+<text x="959.0" y="622.5" font-size="11" fill="#9fb3c8" font-family="Arial" text-anchor="middle">50.0</text>
+<text x="1008.0" y="571.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">POT SETPOINT</text>
+<text x="1008.0" y="596.0" font-size="21.0" fill="#ffc400" font-family="Arial, sans-serif">65%</text>
+<text x="1008.0" y="612.0" font-size="9.0" fill="#8fa3b8" font-family="Arial, sans-serif">ACTUAL FIRING RATE</text>
+<text x="1008.0" y="631.0" font-size="16.0" fill="#e8eef4" font-family="Arial, sans-serif">50%</text>
+<text x="1008.0" y="645.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">MOD MOTOR  68 OHM</text>
+<text x="1008.0" y="659.0" font-size="10.0" fill="#9fb3c8" font-family="Arial, sans-serif">R-W 68   R-B 67</text>
+<rect x="920.0" y="646.0" width="78.0" height="8.0" fill="#101820"/>
+<rect x="920.0" y="646.0" width="86.62222222222222" height="8.0" fill="#ffc400"/>
 </svg>

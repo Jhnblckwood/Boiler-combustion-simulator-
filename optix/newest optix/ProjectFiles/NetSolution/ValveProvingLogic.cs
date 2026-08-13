@@ -122,7 +122,6 @@ public class ValveProvingLogic : BaseNetLogic
     // next to each switch (defaults come from the Model setpoint tags).
     private const float SetpointMin = 0.0f;
     private const float SetpointMax = 80.0f; // entries outside 0-80 are rejected
-    private const float InletStep = 2.0f;    // INLET +/- button increment
     private const float InletMax = 80.0f;
 
     // --- Pressure model, inches w.c. ----------------------------------
@@ -167,6 +166,8 @@ public class ValveProvingLogic : BaseNetLogic
     private IUAVariable stateVar, stateTextVar;
     private IUAVariable modMotorRVar, modMotorWVar, modMotorBVar;
     private IUAVariable lowFireVar, highFireVar, flameSignalVar;
+    private IUAVariable rateSetpointVar, firingRatePercentVar;
+    private IUAVariable ratePotValueVar;   // the pot widget's own Value variable
 
     // Widgets
     private Rectangle bannerRect, pipeSupply, pipeChamber, pipeDownstream;
@@ -178,7 +179,7 @@ public class ValveProvingLogic : BaseNetLogic
     private Label stateLabel, timerLabel, pressureLabel, inletReadout;
     private Button modeButton, startButton, vp1Button, vp2Button, pilotButton;
     private Button interlockButton, runInterlockButton;
-    private Label tagLabel4, tagLabel5, frOhmLabel;
+    private Label tagLabel4, tagLabel5, frOhmLabel, frSetReadout;
     private CircularGauge ratePot;
     private SpinBox lgpSetInput, hgpSetInput, vpsSetInput;
     private CircularGauge inletGauge, lgpGauge, hgpGauge, pressGauge;
@@ -230,7 +231,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v11 (newest: run-interlock + rate pot) started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v12 (live rate pot) started OK");
         }
         catch (Exception ex)
         {
@@ -266,6 +267,8 @@ public class ValveProvingLogic : BaseNetLogic
         lowFireVar = Project.Current.GetVariable("Model/LowFireSwitch");
         highFireVar = Project.Current.GetVariable("Model/HighFireSwitch");
         flameSignalVar = Project.Current.GetVariable("Model/FlameSignal");
+        rateSetpointVar = Project.Current.GetVariable("Model/RateSetpoint");
+        firingRatePercentVar = Project.Current.GetVariable("Model/FiringRatePercent");
 
         bannerRect = Owner.Get<Rectangle>("BannerRect");
         pipeSupply = Owner.Get<Rectangle>("PipeSupply");
@@ -309,6 +312,7 @@ public class ValveProvingLogic : BaseNetLogic
         frTermLabel = Owner.Get<Label>("FrTermLabel");
         frOhmLabel = Owner.Get<Label>("FrOhmLabel");
         ratePot = Owner.Get<CircularGauge>("RatePot");
+        frSetReadout = Owner.Get<Label>("FrSetReadout");
         loFireLed = Owner.Get<Ellipse>("LoFireLed");
         hiFireLed = Owner.Get<Ellipse>("HiFireLed");
         hwLcdLine1 = Owner.Get<Label>("HwLcdLine1");
@@ -342,12 +346,21 @@ public class ValveProvingLogic : BaseNetLogic
         modTarget = 0f;
         proveElapsed = 0f;
 
+        // Track the pot LIVE: subscribing to the widget's Value variable
+        // fires on every movement of the knob, so the firing rate follows
+        // the drag immediately instead of waiting for the mouse release.
+        ratePotValueVar = ratePot.GetVariable("Value");
+        ratePotValueVar.VariableChange += RatePotChanged;
+        ApplyRatePot((float)ratePot.Value);
+
         periodicTask = new PeriodicTask(Tick, 100, LogicObject);
         periodicTask.Start();
     }
 
     public override void Stop()
     {
+        if (ratePotValueVar != null)
+            ratePotValueVar.VariableChange -= RatePotChanged;
         periodicTask?.Cancel();
         periodicTask = null;
     }
@@ -519,20 +532,6 @@ public class ValveProvingLogic : BaseNetLogic
         runInterlockVar.Value = !ReadBool(runInterlockVar);
     }
 
-    [ExportMethod]
-    public void InletUp()
-    {
-        inletGauge.Value = Math.Min((float)inletGauge.Value + InletStep, InletMax);
-        supplyPressureVar.Value = (float)inletGauge.Value;
-    }
-
-    [ExportMethod]
-    public void InletDown()
-    {
-        inletGauge.Value = Math.Max((float)inletGauge.Value - InletStep, 0f);
-        supplyPressureVar.Value = (float)inletGauge.Value;
-    }
-
     /// <summary>
     /// Manual VP1/VP2 press. Standby is free play (watch the gas move);
     /// once running established, any valve change is invalid; during the
@@ -567,7 +566,6 @@ public class ValveProvingLogic : BaseNetLogic
             bool auto = ReadBool(autoModeVar);
 
             ReadInletGauge();
-            ReadRatePot();
             SyncSetpoints();
             SimulatePressure();
             UpdateGasPressureSwitches();
@@ -651,18 +649,34 @@ public class ValveProvingLogic : BaseNetLogic
     /// field devices.
     /// </summary>
     /// <summary>
-    /// The firing-rate potentiometer (0-100%) is the operator's rate
-    /// command; it only takes effect in RUN, where the BMS has released
-    /// the motor to modulation.
+    /// Fires on every movement of the potentiometer, so the rate command
+    /// follows the knob live while it is being dragged.
     /// </summary>
-    private void ReadRatePot()
+    private void RatePotChanged(object sender, VariableChangeEventArgs e)
     {
-        float pct = (float)ratePot.Value;
+        try
+        {
+            ApplyRatePot((float)e.NewValue);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("ValveProvingLogic", ex.ToString());
+        }
+    }
+
+    /// <summary>
+    /// The firing-rate potentiometer (0-100%) is the operator's rate
+    /// command; it takes effect in RUN, where the BMS has released the
+    /// motor to modulation. The knob is never written back to from the
+    /// logic, so a drag is never fought or snapped back.
+    /// </summary>
+    private void ApplyRatePot(float pct)
+    {
         if (pct < 0f) pct = 0f;
         if (pct > 100f) pct = 100f;
-        if ((float)ratePot.Value != pct)
-            ratePot.Value = pct;
         modTarget = pct / 100f * PotOhms;
+        if (rateSetpointVar != null)
+            rateSetpointVar.Value = pct;
     }
 
     private void SimulateActuator()
@@ -1075,16 +1089,17 @@ public class ValveProvingLogic : BaseNetLogic
         bool proveWait = (step == Step.Purge && !hfMade) || (step == Step.Ignition && !lfMade);
         float ratePct = motorOhms / PotOhms * 100f;
         frBarFill.Width = 2f + motorOhms / PotOhms * 168f;
+        SetText(frSetReadout, ((float)ratePot.Value).ToString("0") + "%");
         SetText(frReadout, ratePct.ToString("0") + "%");
         SetText(frOhmLabel, "MOD MOTOR  " + motorOhms.ToString("0") + " OHM");
+        firingRatePercentVar.Value = ratePct;
         SetText(frTermLabel, "R-W " + ReadFloat(modMotorWVar).ToString("0")
             + "   R-B " + ReadFloat(modMotorBVar).ToString("0"));
         loFireLed.FillColor = lfMade ? LedGreen : LedOff;
         hiFireLed.FillColor = hfMade ? LedGreen : LedOff;
-        // The pot only commands the rate in RUN; elsewhere the BMS owns the
-        // motor, so park the knob on the actual position for a live readout.
-        if (step != Step.Run)
-            ratePot.Value = ratePct;
+        // The knob is the operator's setpoint and is never overwritten by
+        // the logic - the ACTUAL FIRING RATE readout beside it shows where
+        // the motor really is (the BMS owns it outside RUN).
 
         // Flame signal, volts DC, like a 7800 flame amplifier readout.
         float flameSignal = (pilotLit || running)

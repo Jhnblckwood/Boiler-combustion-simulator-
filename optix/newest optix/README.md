@@ -106,7 +106,7 @@ optix/newest optix/
    (`FTOptixRuntime.log`, shown in Studio’s output/log pane) and confirm:
 
    ```
-   ValveProvingLogic BUILD v11 started OK
+   ValveProvingLogic BUILD v12 started OK
    ```
 
    If the marker is missing or shows an older version, the runtime is running
@@ -151,7 +151,8 @@ Everything is simulated — just press buttons and watch:
 | **INTERLOCK** (manual) opened in standby, press START | Start refused; forcing it → `LOCKOUT 19` |
 | **RUNNING INTERLOCK** (manual) opened while firing | Burner faults out; **recloses → restarts by itself**, no reset |
 | **TOGGLE MODE** → MANUAL, press START BURNER | Training drill: YOU work VP1/VP2/PILOT at each step; a wrong button or a missed window fails the VPS and locks out |
-| Drag the **firing-rate pot** in RUN | Modulates the mod motor 0–100% (ohms track it live) |
+| Drag the **firing-rate pot** in RUN | Modulates the mod motor 0–100%; POT SETPOINT tracks the knob live while dragging, ACTUAL FIRING RATE follows as the motor strokes |
+| Drag the **inlet gauge** needle | Sets supply pressure 0–80 in. H2O (replaces the old +/− buttons) |
 | Type in the **LGP / HGP / VPS spin boxes** | Numeric-only entry, clamped 0–80 in. H2O |
 
 Every lockout shows the reason in the red banner and as
@@ -163,7 +164,7 @@ blinks. **STOP/RESET** (or faceplate RESET) clears it.
 | Symptom | Cause / fix |
 |---|---|
 | Every button dead, screen frozen | `Start()` threw — check the log for the full stack trace under `Start FAILED` |
-| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v11` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
+| Same error persists after a “fix” | Stale DLL — confirm the `BUILD v12` marker; if old: close Studio, delete `bin/ obj/ .vs/`, rebuild |
 | Gauges stuck at defaults in the designer | Normal — values only move at **runtime** (press Play) |
 | `Unable to cast System.String to LocalizedText` in the log | A widget Text property was re-typed as String — see `../CLAUDE.md` (all texts must be LocalizedText) |
 | Log error count climbing every 100 ms | A widget property has the wrong DataType; the stack trace names the widget |
@@ -232,9 +233,8 @@ control · 56 control changed in run · 57 action not in time · 91 V1 leak ·
 
 ## Gas train and pressure switches
 
-- **Inlet gauge — the only adjustable gauge**: drag its needle or use
-  **INLET PRESSURE + / −** (2 in. steps, 0–80). Publishes to
-  `Model/SupplyPressure`.
+- **Inlet gauge — the only adjustable gauge**: drag its needle (0–80
+  in. H2O). Publishes to `Model/SupplyPressure`.
 - **LGP gauge + switch** (before SKP15/V1): makes at/above its setting
   (default 4). Start attempt before it makes, or a dropout during the
   sequence/run → lockout.
@@ -267,6 +267,8 @@ control · 56 control changed in run · 57 action not in time · 91 V1 leak ·
 | `ModMotorW` | Float | Resistance R↔W, ohms — reduced = drive closed |
 | `ModMotorB` | Float | Resistance R↔B, ohms — reduced = drive open (135 − R-W) |
 | `LowFireSwitch` / `HighFireSwitch` | Boolean | End-switch inputs (≤ 5 Ω / ≥ 130 Ω) |
+| `RateSetpoint` | Float | Output — firing-rate potentiometer position, 0–100% |
+| `FiringRatePercent` | Float | Output — actual firing rate (mod motor position), 0–100% |
 | `FlameSignal` | Float | Flame amplifier signal, VDC |
 | `State` / `StateText` | Int32 / String | Sequence state + banner text |
 | `AutoMode` | Boolean | AUTO (BMS sequence) / MANUAL (operator drill) |
@@ -294,7 +296,7 @@ Nodes/                               the information model (YAML)
   Model/Model.yaml                   the tag table above
   NetLogic/, Alarms/, ...            remaining categories
 ProjectFiles/NetSolution/            C# solution
-  ValveProvingLogic.cs               sequence + all animation (BUILD v11)
+  ValveProvingLogic.cs               sequence + all animation (BUILD v12)
 docs/screen-sample.png|.svg          what the running screen looks like
 ```
 
