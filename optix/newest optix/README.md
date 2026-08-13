@@ -6,9 +6,51 @@ Honeywell 7800 SERIES valve proving trainer on a Siemens SKP gas train, with a
 **RM7838-style Honeywell faceplate** with live lights and phase messages.
 All pressures are in **inches of water column (in. H2O)**.
 
-This is an independent copy of `../valve proving honeywell/` (own project
-GUID and node Ids) with the interlock added — open
-`ValveProvingNewest.optix`.
+Independent project (own GUID and node Ids) — open `ValveProvingNewest.optix`.
+
+## What is different in this version
+
+- **No SIMULATION section** — every drill is done through **MANUAL mode**
+  instead. (Failing to drive the mod motor to high/low fire in time in
+  MANUAL produces the same prove lockouts the old sim buttons demonstrated.)
+- **Manual controls are two per line**: `VP1 | VP2`, `PILOT | INTERLOCK`,
+  and the odd one out — **RUNNING INTERLOCK** — spans the full width on the
+  bottom row.
+- **Input status lights are one aligned grid** of green circles: VP1, VP2,
+  VPS, INTERLOCK, RUNNING INTERLOCK, LOW FIRE SWITCH, HIGH FIRE SWITCH.
+  The word "CLOSED" is gone — **the green light itself signifies closed**.
+- **Firing rate is a potentiometer knob (0–100%)** in the CONTROLS panel,
+  where the simulation box used to be, with clean non-overlapping readouts
+  beside it:
+  - **POT SETPOINT** — where the knob itself is sitting (amber).
+  - **ACTUAL FIRING RATE** — where the mod motor really is, plus its
+    position in ohms and the R-W / R-B leg resistances.
+
+  The knob responds **live while you drag it** — the rate follows the
+  movement immediately rather than waiting for the mouse button to be
+  released (the logic subscribes to the widget's value change instead of
+  polling). The logic never writes back to the knob, so a drag is never
+  fought or snapped back.
+- **INLET PRESSURE + / − buttons removed** to make room for the pot. Set
+  the supply pressure by **dragging the inlet gauge needle** — it is still
+  the one adjustable gauge on the screen.
+
+## Running interlock
+
+`Model/RunningInterlock` is a Boolean input, separate from the safety
+interlock string:
+
+- It must be **closed to start** (the START button stays disabled otherwise).
+- **If it opens while running, the burner faults**: valves and pilot drop
+  out immediately and the banner shows the running-interlock fault.
+- **No reset is needed.** It is *not* a latching lockout — the moment the
+  running interlock **recloses, the burner restarts by itself** from valve
+  proving. No STOP/RESET press, no START press.
+- `Model/RunIntlkFault` is a Boolean output that is high while the fault is
+  active, for wiring to an alarm.
+
+Contrast with the **safety interlock** (`Model/Interlock`) below, which is a
+latching lockout (fault code 19) and *does* require STOP/RESET.
 
 ## Burner interlock string
 
@@ -24,9 +66,9 @@ times:
   or run, the burner **locks out immediately** (`INTERLOCK OPENED - BURNER
   INTERLOCK STRING BROKE`, code 19) — valves and pilot drop out and only
   STOP/RESET clears it.
-- **Status light**: a dedicated LED left of the Honeywell module —
-  **green = CLOSED** (permissive made), **red = OPEN** — with the caption
-  switching between `INTERLOCK - CLOSED` and `INTERLOCK - OPEN`.
+- **Status light**: a green circle in the input grid — **green = closed**
+  (permissive made), **red = open**. No caption text: the light itself
+  signifies closed.
 - **Two controls**, as requested:
   - **MANUAL CONTROL ▸ INTERLOCK** — the operator's interlock control,
     enabled in MANUAL mode like VP1/VP2/PILOT.
@@ -57,7 +99,7 @@ the window is sized to fit.
 |---|---|
 | Windows 10/11 PC | Optix Studio is Windows-only |
 | **FactoryTalk Optix Studio** (version 1.4 or newer) | Free from the Rockwell FactoryTalk Hub — create a free account at <https://hub.factorytalk.com>, then install Optix Studio via the FactoryTalk Hub / download page |
-| This repository | Branch `claude/optix-valve-proving-screen-o9nh80` |
+| This repository | `main` branch (this project lives at `optix/newest optix/`) |
 
 No PLC, no license dongle, and no separate .NET install are needed — the
 built-in emulator runs everything and Studio builds the C# logic itself.
@@ -69,12 +111,11 @@ Either clone with git:
 ```
 git clone https://github.com/Jhnblckwood/Boiler-combustion-simulator.git
 cd Boiler-combustion-simulator
-git checkout claude/optix-valve-proving-screen-o9nh80
 ```
 
-…or on the GitHub page pick the branch `claude/optix-valve-proving-screen-o9nh80`
-→ **Code ▸ Download ZIP** and extract it. Keep the folder structure intact —
-the project is everything under:
+…or on the GitHub page just click **Code ▸ Download ZIP** (this project is on
+the default `main` branch — no branch picking needed) and extract it. Keep the
+folder structure intact — the project is everything under:
 
 ```
 optix/newest optix/
@@ -300,5 +341,19 @@ ProjectFiles/NetSolution/            C# solution
 docs/screen-sample.png|.svg          what the running screen looks like
 ```
 
-See `../CLAUDE.md` for the hand-authoring rules this project follows
-(LocalizedText, SpinBox datatypes, stale-DLL playbook, validation checklist).
+### Notes for editing the project files by hand
+
+These projects are hand-authored YAML, so a few rules matter:
+
+- Label / Button / TextBox text is **`LocalizedText`**, never `String` —
+  from C# assign `widget.LocalizedText = new LocalizedText(string.Empty,
+  text, "en-US")`. A raw string assignment throws on every 100 ms scan and
+  makes the whole screen look frozen.
+- SpinBox `Value` / `MinValue` / `MaxValue` must be **`Double`** (not
+  Float), and `CircularGauge.Value` is **`Float`**. Gauges are draggable
+  unless you set `Editable: false`.
+- Widgets are driven **by name** from `ValveProvingLogic.cs`, so keep
+  widget names stable when rearranging the screen.
+- If a fix does not seem to take effect, check the `BUILD vN` marker in the
+  log — Studio keeps running the previously compiled assembly when a build
+  fails (delete `bin/ obj/ .vs/` and rebuild).
