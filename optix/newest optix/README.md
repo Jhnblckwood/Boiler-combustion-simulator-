@@ -234,7 +234,9 @@ The BMS drives the motor itself in both modes:
 - **Purge hold, high fire** — at start the controller drops R-B to 0
   (commands 135 ohms) and a **4 minute window** runs. HIGH FIRE switch not
   made in time → **lockout 95**. Then the 10 s purge counts up, and only
-  after purge does valve proving begin.
+  after purge does valve proving begin. The motor **stays at high fire
+  through the entire valve-proving procedure** — it only comes down at the
+  low-fire hold.
 - **Purge hold, low fire** — after valve proving the controller drops R-W
   to 0 and another **4 minute window** runs. LOW FIRE switch not made in
   time → **lockout 96**. Then the pilot trial and light-off proceed.

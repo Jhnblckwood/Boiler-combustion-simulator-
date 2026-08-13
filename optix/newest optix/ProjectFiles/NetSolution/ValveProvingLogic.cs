@@ -248,7 +248,7 @@ public class ValveProvingLogic : BaseNetLogic
         try
         {
             StartInternal();
-            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v13 (purge-first sequence) started OK");
+            Log.Info("ValveProvingLogic", "ValveProvingLogic BUILD v14 (high fire held thru proving) started OK");
         }
         catch (Exception ex)
         {
@@ -677,6 +677,10 @@ public class ValveProvingLogic : BaseNetLogic
         {
             case Step.PurgeHoldHigh: return PotOhms; // drive open to high fire
             case Step.Purge: return PotOhms;         // purge holds at high fire
+            case Step.Evacuate:                      // stay at HIGH FIRE through
+            case Step.TestV1:                        // the whole valve proving
+            case Step.Fill:                          // procedure; only come down
+            case Step.TestV2: return PotOhms;        // at the low-fire hold
             case Step.Run: return modTarget;         // released to modulation
             default: return 0f;                      // drive closed to low fire
         }
