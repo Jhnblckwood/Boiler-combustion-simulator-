@@ -317,6 +317,14 @@ control · 56 control changed in run · 57 action not in time · 91 V1 leak ·
 | `State` / `StateText` | Int32 / String | Sequence state + banner text |
 | `AutoMode` | Boolean | AUTO (BMS sequence) / MANUAL (operator drill) |
 
+## Running against a real PLC (EtherNet/IP)
+
+See **[docs/ethernetip-setup.md](docs/ethernetip-setup.md)** for the full
+procedure: adding the RA EtherNet/IP driver and station, the Route format, the
+tag-import step, the complete Model-tag ➜ Logix-tag binding map (with Studio
+5000 tag types), the `State` enum the PLC must match, which simulation methods
+to delete for full real I/O, and the runtime-token inventory for this project.
+
 ## Connecting a real gas train instead of the simulation
 
 All simulation lives in `ProjectFiles/NetSolution/ValveProvingLogic.cs`:
