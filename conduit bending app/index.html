@@ -157,7 +157,7 @@
     </div>
 
     <div data-f="dist">
-      <label for="dist" id="distLabel">Distance to obstacle</label>
+      <label for="dist" id="distLabel">Distance to obstruction</label>
       <input id="dist" value="30" />
     </div>
 
@@ -550,7 +550,7 @@ function calc(v) {
       'Roll the conduit 180&deg;. <b>Arrow</b> on mark #B, bend ' + row.outer + '&deg; on the ' + row.outer + '&deg; line. Roll and repeat on mark #C.',
       'Set it over the obstruction &mdash; the saddle should clear by ' + frac(rise) + ' and both ends lie flat.'
     ];
-    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' (obstacle ' + frac(v.rise) + ' + ' + frac(v.clear) + ' clearance).']);
+    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' (obstruction ' + frac(v.rise) + ' + ' + frac(v.clear) + ' clearance).']);
     if (mark1 <= 0) out.alerts.push(['bad', 'Mark #B lands ' + frac(-mark1) + ' off the end of the conduit. The obstruction is too close to the end even for a 60&deg; center bend &mdash; start farther back.']);
     out.profile = { kind: 'saddle3', dist: v.dist, rise: rise, run: rise * (mult - shrinkPer), tail: v.tail, obs: v.rise };
 
@@ -670,7 +670,7 @@ function drawProfile(p) {
     s += '<rect x="' + X(obs.x0) + '" y="' + Y(obs.h) + '" width="' + Math.max(X(obs.x1) - X(obs.x0), 3) +
          '" height="' + (base - Y(obs.h)) + '" fill="rgba(239,68,68,0.16)" stroke="rgba(239,68,68,0.55)"/>';
     s += '<text x="' + ((X(obs.x0) + X(obs.x1)) / 2) + '" y="' + (Y(obs.h) - 7) +
-         '" fill="#fca5a5" font-size="11" text-anchor="middle">obstacle ' + frac(obs.h) + '</text>';
+         '" fill="#fca5a5" font-size="11" text-anchor="middle">obstruction ' + frac(obs.h) + '</text>';
   }
   if (mark) {
     s += '<line x1="' + X(mark.x) + '" y1="' + Y(spanY * 1.15) + '" x2="' + X(mark.x) + '" y2="' + base +
@@ -802,7 +802,7 @@ function syncFields() {
   document.querySelectorAll('[data-f]').forEach(d => d.classList.toggle('hidden', !show.includes(d.dataset.f)));
   const lab = LABELS[type] || {};
   el('riseLabel').innerHTML = lab.rise || 'Rise';
-  el('distLabel').innerHTML = lab.dist || 'Distance to obstacle';
+  el('distLabel').innerHTML = lab.dist || 'Distance to obstruction';
   el('tailLabel').innerHTML = type === 'stub90'
     ? 'Tail length <span class="hint">Straight run past the 90</span>'
     : 'Tail length <span class="hint">Conduit left past the last bend</span>';
