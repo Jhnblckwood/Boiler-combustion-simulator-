@@ -9,10 +9,9 @@ end of the conduit, the center punch, the overall cut length, and a
 step-by-step bending sequence naming the bender symbol to line up on each mark.
 
 Built from the Electrical Construction Course handout — 90° bends, offset
-bends, box offset, 3-point saddle, and the 3-point saddle bend table. The
-back-to-back 90 and the 4-point saddle are not in that handout; they follow
-standard practice and the handout's own offset chart, and are marked as such
-below.
+bends, box offset, 3-point saddle and its bend table, and 4-point saddles. The
+back-to-back 90 is not in that handout; it follows standard practice and is
+marked as such below.
 
 ## Bend types
 
@@ -23,7 +22,7 @@ below.
 | Offset | rise, distance to obstruction, tail, space available | best angle, multiplier, marks #1–#2, shrinkage, cut length |
 | Box offset | rise, mark #1 distance, tail | marks #1–#2, cut length; defaults to 10° and 3/8" |
 | 3-point saddle | obstruction rise, distance to center, clearance, tail | center + return angles, marks #A/#B/#C, shrinkage, cut length |
-| 4-point saddle * | rise, obstruction length, distance to near edge, clearance, tail | best angle, marks #1–#4, shrinkage, cut length |
+| 4-point saddle | rise, length of obstruction, distance to obstruction, clearance, tail | best angle, marks #A–#D, shrinkage, cut length |
 
 \* not from the handout — see "Beyond the handout" below.
 
@@ -65,6 +64,19 @@ Shrinkage at 10° is under 1/16" here, which is why the handout ignores it.
 Return bend angle is half the center bend. Use the **center notch** for the
 center bend and the **arrow** for the return bends.
 
+**4-point saddle**
+
+    SHRINKAGE        = RISE × TABLE VALUE
+    MARK #A          = DIST + SHRINKAGE
+    MARK #A → MARK #C = LENGTH OF OBSTRUCTION
+    MARK #A → MARK #B = RISE × MULTIPLIER
+    MARK #C → MARK #D = RISE × MULTIPLIER
+
+Marks run #B, #A, #C, #D along the pipe from the reference end. Align all four
+with the bender arrow, hook facing the obstruction. Mark #A lands on the near
+edge of the obstruction and mark #C on the far edge; the run loses twice the
+shrinkage overall, which the cut length carries.
+
 ## Charts used
 
 All editable in the app under **Charts & constants**; every change
@@ -80,6 +92,8 @@ Offset multipliers and shrinkage per inch of rise:
 |---|---|---|---|---|---|---|
 | Multiplier | 6.0 | 3.9 | 2.6 | 2.0 | 1.4 | 1.2 |
 | Shrink/in | 1/16" | 1/8" | 3/16" | 1/4" | 3/8" | 1/2" |
+
+The 4-point saddle page carries the same multiplier and shrinkage table.
 
 3-point saddle, per inch of obstruction height: 45° center (22.5° returns) →
 2-1/2" off center mark, 3/16" shrink. 60° center (30° returns) → 2" off center
@@ -105,10 +119,9 @@ overwrite it with what you measure off your bender.
 `mark #2 = mark #1 + back-to-back` bent with the star/tee, which puts the
 *back* of the second bend on the mark. `cut = stub1 + B + stub2 − 2 × gain`.
 
-**4-point saddle** — two matching offsets off the handout's offset chart.
-`mark #2 = near edge + shrinkage` lands the crest on the near edge,
-`mark #1 = mark #2 − X`, `mark #3 = mark #2 + obstruction length`,
-`mark #4 = mark #3 + X`. Total shrinkage is twice a single offset's.
+**Clearance** — an optional extra gap added around the obstruction on either
+saddle, not in the handout. Leave it at 0 to work the handout's numbers
+exactly.
 
 **Exact mode** swaps every chart multiplier for `1/sin θ` and every shrinkage
 for `tan(θ/2)` — the pure geometry, before the rounding the chart carries.

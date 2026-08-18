@@ -152,7 +152,7 @@
     </div>
 
     <div data-f="obsLen">
-      <label for="obsLen">Length of obstacle <span class="hint">Measured along the run</span></label>
+      <label for="obsLen">Length of obstruction <span class="hint">Measured along the run</span></label>
       <input id="obsLen" value="8" />
     </div>
 
@@ -162,7 +162,7 @@
     </div>
 
     <div data-f="clear">
-      <label for="clear">Clearance <span class="hint">Extra gap added around the obstacle</span></label>
+      <label for="clear">Clearance <span class="hint">Extra gap added around the obstruction</span></label>
       <input id="clear" value="0" />
     </div>
 
@@ -564,36 +564,43 @@ function calc(v) {
     const between = rise * a.mult;
     const shrink = rise * a.shrink;
     const run = between - shrink;
+    // Handout: MARK A = DIST + SHRINKAGE, A to C = length of obstruction,
+    // A to B and C to D = RISE * MULTIPLIER. Marks run B, A, C, D along the pipe.
     const near = v.dist - v.clear;
-    const mark2 = near + shrink;            // crest lands exactly on the near edge
-    const mark1 = mark2 - between;
-    const mark3 = mark2 + width;
-    const mark4 = mark3 + between;
-    const cut = mark4 + v.tail;
+    const markA = near + shrink;
+    const markB = markA - between;
+    const markC = markA + width;
+    const markD = markC + between;
+    const cut = markD + v.tail;
     out.kpis = [
       ['Best angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
-      ['Between marks', frac(between), 'accent'], ['Across the top', frac(width)],
-      ['Total shrink', frac(2 * shrink)], ['Cut length', frac(cut), 'accent']
+      ['Shrinkage', frac(shrink)], ['Dist between bends', frac(between), 'accent'],
+      ['Length of obst', frac(width)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark #1', mark1, 'arrow', 'Offset up &mdash; first bend'],
-      ['Mark #2', mark2, 'arrow', 'Offset up &mdash; second bend, conduit now level on top'],
-      ['Mark #3', mark3, 'arrow', 'Offset down &mdash; first bend'],
-      ['Mark #4', mark4, 'arrow', 'Offset down &mdash; second bend, back on the deck']
+      ['Mark #B', markB, 'arrow', 'Rise up &mdash; ' + frac(between) + ' back from mark #A'],
+      ['Mark #A', markA, 'arrow', 'Top of the rise &mdash; distance + shrinkage, lands on the near edge'],
+      ['Mark #C', markC, 'arrow', 'Far edge &mdash; mark #A + length of obstruction'],
+      ['Mark #D', markD, 'arrow', 'Back down &mdash; ' + frac(between) + ' past mark #C']
     ];
-    out.center = (mark2 + mark3) / 2;
+    out.center = (markA + markC) / 2;
     out.total = cut;
-    out.why = pick.why + ' Two matching offsets: ' + frac(between) + ' between the marks of each, and ' + frac(width) +
-      ' between mark 2 and mark 3 to span the obstacle. Both offsets together pull ' + frac(2 * shrink) + ' out of the run.';
+    out.why = pick.why + ' Mark #A = distance ' + frac(near) + ' + shrinkage ' + frac(shrink) + ' = ' + frac(markA) +
+      '. Mark #A to mark #C is the length of the obstruction, ' + frac(width) + '. Marks #B and #D sit ' +
+      frac(between) + ' (rise ' + frac(rise) + ' &times; multiplier ' + a.mult.toFixed(2) +
+      ') outside them. Both offsets together pull ' + frac(2 * shrink) + ' out of the run.';
     out.steps = [
       'Cut ' + frac(cut) + '.',
-      'Marks from the end: ' + frac(mark1) + ', ' + frac(mark2) + ', ' + frac(mark3) + ', ' + frac(mark4) + '.',
-      'Arrow on mark 1, bend ' + a.deg + '&deg;. Roll 180&deg;, arrow on mark 2, bend ' + a.deg + '&deg; &mdash; that is the first offset.',
-      'Keeping the conduit flat, arrow on mark 3, bend ' + a.deg + '&deg; the same way as mark 2 was rolled; roll 180&deg; and bend mark 4 to ' + a.deg + '&deg;.',
+      'Shrinkage = rise ' + frac(rise) + ' &times; ' + frac(a.shrink) + ' = ' + frac(shrink) + '.',
+      'Mark #A = distance to the obstruction ' + frac(near) + ' + shrinkage = <b>' + frac(markA) + '</b> from the reference end.',
+      'Mark #C = mark #A + length of obstruction ' + frac(width) + ' = <b>' + frac(markC) + '</b>.',
+      'Mark #B = ' + frac(between) + ' back from mark #A (<b>' + frac(markB) + '</b>); mark #D = ' + frac(between) +
+        ' past mark #C (<b>' + frac(markD) + '</b>).',
+      'Align <b>all four marks with the bender arrow</b> and bend each to ' + a.deg + '&deg;, <b>hook facing the obstruction</b>.',
       'The top section should sit level ' + frac(rise) + ' above the deck and span ' + frac(width) + ' &mdash; check that all four bends stay in one plane.'
     ];
-    if (mark1 <= 0) out.alerts.push(['bad', 'Mark #1 lands ' + frac(-mark1) + ' off the end. The obstacle is too close to the end of the conduit for a ' + a.deg + '&deg; offset &mdash; steepen the angle or start farther back.']);
-    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' rise and ' + frac(width) + ' width (obstacle plus ' + frac(v.clear) + ' clearance).']);
+    if (markB <= 0) out.alerts.push(['bad', 'Mark #B lands ' + frac(-markB) + ' off the end. The obstruction is too close to the end of the conduit for a ' + a.deg + '&deg; bend &mdash; steepen the angle or start farther back.']);
+    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' rise and ' + frac(width) + ' length (obstruction plus ' + frac(v.clear) + ' clearance).']);
     if (pick.tight) out.alerts.push(['bad', pick.why]);
     out.profile = { kind: 'saddle4', dist: near, rise: rise, run: run, width: width, tail: v.tail, obs: v.rise, obsLen: v.obsLen };
   }
