@@ -17,7 +17,7 @@ marked as such below.
 
 | Type | You enter | You get |
 |---|---|---|
-| 90° stub-up | stub height, tail | mark #1, take-up, gain, cut length |
+| 90° stub-up | take-up, and any two of stub height / tail / initial length | mark #1, the third value solved, gain |
 | Back-to-back 90° * | stub, back-to-back, second stub | mark #1 (arrow), mark #2 (star/tee), cut length |
 | Offset | rise, distance to obstruction, tail, space available | best angle, multiplier, marks #1–#2, shrinkage, cut length |
 | Box offset | rise, mark #1 distance, tail | marks #1–#2, cut length; defaults to 10° and 3/8" |
@@ -53,6 +53,22 @@ saddle. All bends in a set must finish in one plane.
     MARK #1    = STUB HEIGHT − STUB TAKE-UP
     CUT LENGTH = (STUB HEIGHT + TAIL) − GAIN
     GAIN       = (STUB HEIGHT + TAIL) − INITIAL LENGTH
+
+Stub height, tail and initial length are three boxes tied together by that last
+formula, so **leave one blank and it gets calculated**:
+
+| Left blank | Solved as |
+|---|---|
+| Initial length | `(stub + tail) − gain` — the usual case, your cut length |
+| Tail | `initial + gain − stub` |
+| Stub height | `initial + gain − tail` |
+
+Fill in **all three** and gain is what comes out — that is how you measure your
+own bender: bend a 90, measure the stub and the tail, and you already know the
+length you started with. The app then offers to keep that gain for the selected
+conduit size, so later blank-field calculations use your number instead of the
+default. Anything under 0" or over 12" is rejected as a mismeasurement rather
+than saved.
 
 Align your marks with the arrow to bend.
 
@@ -117,14 +133,14 @@ The 4-point saddle page carries the same multiplier and shrinkage table.
 2-1/2" off center mark, 3/16" shrink. 60° center (30° returns) → 2" off center
 mark, 1/4" shrink.
 
-**Take-up and gain are typed in, not assumed.** The handout lists them as
-bender info to read off your own tool, and they vary by brand, so both are
-input boxes on the measurements panel — take-up defaults to 5". Picking a
-conduit size prefills them from the table below; edit either and the math
-follows what you typed.
+**Take-up is typed in; gain is calculated.** The handout lists both as bender
+info to read off your own tool, and they vary by brand. Take-up is an input on
+the measurements panel defaulting to 5", prefilled when you pick a conduit
+size. Gain is never typed on the 90 screen — it either falls out of all three
+measurements or comes from the stored value for the size.
 
-The prefills come from take-up (the standard field value) and OD (the EMT
-spec), with radius and gain derived so the set stays self-consistent:
+Those stored defaults come from take-up (the standard field value) and OD (the
+EMT spec), with radius and gain derived so the set stays self-consistent:
 
     radius = take-up − OD/2
     gain   = OD + 2R − πR/2
@@ -142,9 +158,8 @@ of the bend, so the corner they imply sits one full diameter outside the
 centerline corner.
 
 **Gain is the value to verify on your own bender.** Published figures for it
-vary between sources, and it changes with the bender's radius. Measure it the
-way the handout defines it — bend a 90, then
-`gain = (stub + tail) − the length you started with` — and type it in.
+vary between sources, and it changes with the bender's radius. Measure it by
+filling in all three boxes on the 90 screen, then keep it for the size.
 
 ## Beyond the handout
 

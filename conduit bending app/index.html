@@ -98,6 +98,12 @@
   .alert.warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.35); color: #fcd34d; }
   .alert.bad  { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
   .alert.info { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3); color: #bae6fd; }
+  .alert button {
+    margin-left: 6px; padding: 3px 10px; border-radius: 7px; cursor: pointer;
+    border: 1px solid rgba(56,189,248,0.5); background: rgba(56,189,248,0.15);
+    color: #e0f2fe; font: inherit; font-size: 0.82rem;
+  }
+  .alert button:hover { background: rgba(56,189,248,0.3); }
 
   svg { width: 100%; height: auto; display: block; }
   .svgwrap { background: #060c18; border: 1px solid var(--line); border-radius: 11px; padding: 8px; margin-top: 10px; }
@@ -181,9 +187,9 @@
       <input id="tail" value="24" />
     </div>
 
-    <div data-f="gain">
-      <label for="gain">Gain (inches) <span class="hint">(stub + tail) &minus; the length you started with</span></label>
-      <input id="gain" value="2.70" />
+    <div data-f="initial">
+      <label for="initial">Initial length (inches) <span class="hint">The length of pipe you start with</span></label>
+      <input id="initial" value="" placeholder="leave blank to calculate" />
     </div>
 
     <div data-f="space">
@@ -408,32 +414,70 @@ function offsetValues(row, exact) {
 
 function calc(v) {
   const size = SIZES[v.sizeIdx];
-  const gain = v.gain;      // bender values, typed in rather than assumed
-  const takeup = v.takeup;
+  const takeup = v.takeup;  // bender value, typed in rather than assumed
+  let gain = size.gain;
   const exact = v.mode === 'exact';
   const out = { kpis: [], marks: [], steps: [], alerts: [], why: '', center: null, profile: null, total: 0 };
 
   if (v.type === 'stub90') {
-    const mark = v.stub - takeup;
-    const cut = v.stub + v.tail - gain;
+    // gain = (stub + tail) - initial length. Give all three and the gain falls
+    // out of it; leave one blank and that one is solved from the known gain.
+    let stub = v.stubRaw, tail = v.tailRaw, initial = v.initialRaw;
+    const has = [isFinite(stub), isFinite(tail), isFinite(initial)];
+    const given = has.filter(Boolean).length;
+    let solved = null, measured = false;
+
+    if (given === 3) {
+      gain = (stub + tail) - initial;
+      measured = true;
+    } else if (given === 2) {
+      if (!has[2])      { initial = stub + tail - gain; solved = 'Initial length'; }
+      else if (!has[1]) { tail = initial + gain - stub; solved = 'Tail'; }
+      else              { stub = initial + gain - tail; solved = 'Stub height'; }
+    } else {
+      out.kpis = [['Waiting on you', '&mdash;']];
+      out.alerts.push(['warn', 'Enter at least two of stub height, tail length and initial length. Leave the third blank and it will be calculated; fill all three in and you get the gain of your own bender instead.']);
+      out.why = 'gain = (stub + tail) &minus; initial length. Any one of the four can be found from the other three.';
+      out.marks = []; out.steps = []; out.total = 1; out.profile = null;
+      return out;
+    }
+
+    const mark = stub - takeup;
     out.kpis = [
       ['Mark from end', frac(mark), 'accent'], ['Take-up', frac(takeup)],
-      ['Gain', frac(gain)], ['Cut length', frac(cut), 'accent'],
-      ['Stub', frac(v.stub)], ['Tail', frac(v.tail)]
+      ['Gain', frac(gain), measured ? 'accent' : ''],
+      ['Initial length', frac(initial), solved === 'Initial length' ? 'accent' : ''],
+      ['Stub', frac(stub), solved === 'Stub height' ? 'accent' : ''],
+      ['Tail', frac(tail), solved === 'Tail' ? 'accent' : '']
     ];
     out.marks = [['Mark #1', mark, 'arrow', 'Bend 90&deg; &mdash; arrow on the mark, stub end toward the floor', 1]];
     out.center = mark;
-    out.total = Math.max(cut, mark + 4);
+    out.total = Math.max(initial, mark + 4);
     out.steps = [
-      'Cut ' + frac(cut) + '. That is stub ' + frac(v.stub) + ' + tail ' + frac(v.tail) + ' &minus; gain ' + frac(gain) + '.',
-      'From the stub end measure back ' + frac(mark) + ' (' + frac(v.stub) + ' &minus; take-up ' + frac(takeup) + ') and mark all the way around.',
+      (solved === 'Initial length' ? 'Cut ' + frac(initial) + '. That is stub ' + frac(stub) + ' + tail ' + frac(tail) + ' &minus; gain ' + frac(gain) + '.'
+        : 'Starting with ' + frac(initial) + ' of pipe.'),
+      'From the stub end measure back ' + frac(mark) + ' (' + frac(stub) + ' &minus; take-up ' + frac(takeup) + ') and mark all the way around.',
       'Line the <b>arrow</b> up with the mark, the stub end pointing away from the handle.',
-      'Foot pressure on the bender, pull to a full 90&deg;. Check it against a square.'
+      'Foot pressure on the bender, pull to a full 90&deg;. Check it against a square.',
+      'Finished, it should read ' + frac(stub) + ' of stub and ' + frac(tail) + ' of tail.'
     ];
-    out.why = 'Mark #1 = stub height &minus; stub take-up. With the ' + frac(takeup) +
-      ' take-up you entered, the arrow goes that far back from the finished stub height. Cut length = (stub + tail) &minus; gain ' + frac(gain) + '.';
-    if (mark <= 0) out.alerts.push(['bad', 'Stub of ' + frac(v.stub) + ' is shorter than the ' + frac(takeup) + ' take-up you entered. You cannot make this stub &mdash; use a bender with a shorter radius, or a different method.']);
-    out.profile = { kind: 'L', stub: v.stub, tail: v.tail };
+    if (measured) {
+      out.why = 'All three given, so this is <b>your bender\'s gain</b>: (stub ' + frac(stub) + ' + tail ' + frac(tail) +
+        ') &minus; initial length ' + frac(initial) + ' = <b>' + frac(gain) + '</b>. Mark #1 = stub &minus; take-up = ' + frac(mark) + '.';
+      // Only offer to keep a gain that could plausibly have come off a bender.
+      if (gain > 0 && gain <= 12) out.saveGain = gain;
+    } else {
+      out.why = solved + ' was blank, so it comes from the other two and the ' + frac(gain) + ' gain for ' + size.name +
+        ': ' + solved.toLowerCase() + ' = ' + frac(solved === 'Initial length' ? initial : solved === 'Tail' ? tail : stub) +
+        '. Mark #1 = stub &minus; take-up = ' + frac(mark) + '.';
+    }
+    if (mark <= 0) out.alerts.push(['bad', 'Stub of ' + frac(stub) + ' is shorter than the ' + frac(takeup) + ' take-up you entered. You cannot make this stub &mdash; use a bender with a shorter radius, or a different method.']);
+    if (tail < 0) out.alerts.push(['bad', 'That works out to a negative tail (' + frac(tail) + '). The initial length is too short for a ' + frac(stub) + ' stub.']);
+    if (measured && gain <= 0) out.alerts.push(['bad', 'That works out to a gain of ' + frac(gain) +
+      '. Stub + tail came out no longer than the pipe you started with, which cannot happen on a real bend &mdash; check the three measurements.']);
+    if (measured && gain > 12) out.alerts.push(['bad', 'That works out to a gain of ' + frac(gain) +
+      ', far more than any hand bender produces. Check the three measurements &mdash; the initial length is probably too short for that stub and tail.']);
+    out.profile = { kind: 'L', stub: stub, tail: tail };
 
   } else if (v.type === 'b2b90') {
     const mark1 = v.stub - takeup;
@@ -725,8 +769,8 @@ function drawProfile(p) {
    Field visibility per bend type
    --------------------------------------------------------------- */
 const FIELDS = {
-  stub90:    ['takeup', 'stub', 'tail', 'gain'],
-  b2b90:     ['takeup', 'stub', 'b2b', 'stub2', 'gain'],
+  stub90:    ['takeup', 'stub', 'tail', 'initial'],
+  b2b90:     ['takeup', 'stub', 'b2b', 'stub2'],
   offset:    ['rise', 'dist', 'space', 'tail', 'angle'],
   boxoffset: ['rise', 'dist', 'tail', 'angle'],
   saddle3:   ['rise', 'dist', 'clear', 'tail', 'angle'],
@@ -745,8 +789,8 @@ const LABELS = {
 
 // Starting values per bend type, remembered while you switch between types.
 const MEMORY = {
-  stub90:    { takeup: '5', stub: '12', tail: '24', gain: '2.70' },
-  b2b90:     { takeup: '5', stub: '12', stub2: '12', b2b: '24', gain: '2.70' },
+  stub90:    { takeup: '5', stub: '12', tail: '24', initial: '' },
+  b2b90:     { takeup: '5', stub: '12', stub2: '12', b2b: '24' },
   offset:    { rise: '4', dist: '30', tail: '24', space: '' },
   boxoffset: { rise: '3/8', dist: '2', tail: '24' },
   saddle3:   { rise: '4', dist: '30', clear: '0', tail: '24' },
@@ -863,7 +907,10 @@ function run() {
     tail: parseLen(el('tail').value) || 0,
     space: parseLen(el('space').value),
     takeup: parseLen(el('takeup').value) || 0,
-    gain: parseLen(el('gain').value) || 0
+    // Blank must stay blank on these three so the missing one can be solved for.
+    stubRaw: parseLen(el('stub').value),
+    tailRaw: parseLen(el('tail').value),
+    initialRaw: parseLen(el('initial').value)
   };
   const r = calc(v);
 
@@ -871,6 +918,24 @@ function run() {
     '<div class="kpi ' + (k[2] || '') + '"><div class="k">' + k[0] + '</div><div class="v">' + k[1] + '</div></div>').join('');
 
   el('alerts').innerHTML = r.alerts.map(a => '<div class="alert ' + a[0] + '">' + a[1] + '</div>').join('');
+
+  // A gain worked out from all three measurements is worth keeping for the size.
+  if (r.saveGain !== undefined && isFinite(r.saveGain)) {
+    const z = SIZES[+el('size').value];
+    const same = Math.abs(z.gain - r.saveGain) < 0.005;
+    el('alerts').insertAdjacentHTML('beforeend',
+      '<div class="alert info">' + (same
+        ? 'This is the gain now stored for ' + z.name + ', so blank-field calculations use it.'
+        : frac(z.gain) + ' is currently stored for ' + z.name + '. ' +
+          '<button id="saveGain" type="button">Use ' + frac(r.saveGain) + ' instead</button>') + '</div>');
+    const btn = el('saveGain');
+    if (btn) btn.addEventListener('click', () => {
+      z.gain = r.saveGain;
+      const cell = document.querySelector('[data-chart="gain"][data-i="' + el('size').value + '"]');
+      if (cell) cell.value = z.gain.toFixed(2);
+      run();
+    });
+  }
   el('why').innerHTML = r.why;
 
   const symbol = { arrow: 'Arrow', star: 'Star / tee', notch: 'Center notch' };
@@ -898,16 +963,15 @@ run();
 
 el('size').addEventListener('change', () => {
   // Choosing a size is an explicit "give me this bender's numbers" action.
-  const z = SIZES[+el('size').value];
-  el('takeup').value = z.takeup;
-  el('gain').value = z.gain.toFixed(2);
+  el('takeup').value = SIZES[+el('size').value].takeup;
 });
 
 el('bendType').addEventListener('change', () => { syncFields(); run(); });
-document.querySelectorAll('#inputs input, #inputs select').forEach(i => {
-  i.addEventListener('input', run);
-  i.addEventListener('change', run);
-});
+// Text inputs listen on 'input' only. Adding 'change' as well would re-render on
+// blur, which tears out the save-gain button between mousedown and mouseup and
+// swallows the click.
+document.querySelectorAll('#inputs input').forEach(i => i.addEventListener('input', run));
+document.querySelectorAll('#inputs select').forEach(i => i.addEventListener('change', run));
 </script>
 </body>
 </html>
