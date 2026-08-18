@@ -83,6 +83,11 @@
   .tag.arrow { color: #7dd3fc; border-color: #1e4a63; }
   .tag.star  { color: #fcd34d; border-color: #5a4413; }
   .tag.notch { color: #86efac; border-color: #17512f; }
+  .order {
+    display: inline-block; min-width: 30px; text-align: center; padding: 2px 6px;
+    border-radius: 6px; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.35);
+    color: var(--accent); font-size: 0.76rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
 
   ol.steps { margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.55; }
   ol.steps li { margin-bottom: 7px; }
@@ -132,47 +137,47 @@
     <select id="size"></select>
 
     <div data-f="stub">
-      <label for="stub">Stub height <span class="hint">Back of bend to end of stub</span></label>
+      <label for="stub">Stub height (inches) <span class="hint">Back of bend to end of stub</span></label>
       <input id="stub" value="12" />
     </div>
 
     <div data-f="stub2">
-      <label for="stub2">Second stub height</label>
+      <label for="stub2">Second stub height (inches)</label>
       <input id="stub2" value="12" />
     </div>
 
     <div data-f="b2b">
-      <label for="b2b">Back-to-back dimension <span class="hint">Back of bend 1 to back of bend 2</span></label>
+      <label for="b2b">Back-to-back dimension (inches) <span class="hint">Back of bend 1 to back of bend 2</span></label>
       <input id="b2b" value="24" />
     </div>
 
     <div data-f="rise">
-      <label for="rise" id="riseLabel">Rise / offset depth</label>
+      <label for="rise" id="riseLabel">Rise (inches)</label>
       <input id="rise" value="4" />
     </div>
 
     <div data-f="obsLen">
-      <label for="obsLen">Length of obstruction <span class="hint">Measured along the run</span></label>
+      <label for="obsLen">Length of obstruction (inches) <span class="hint">Measured along the run</span></label>
       <input id="obsLen" value="8" />
     </div>
 
     <div data-f="dist">
-      <label for="dist" id="distLabel">Distance to obstruction</label>
+      <label for="dist" id="distLabel">Distance to obstruction (inches)</label>
       <input id="dist" value="30" />
     </div>
 
     <div data-f="clear">
-      <label for="clear">Clearance <span class="hint">Extra gap added around the obstruction</span></label>
+      <label for="clear">Clearance (inches) <span class="hint">Extra gap added around the obstruction</span></label>
       <input id="clear" value="0" />
     </div>
 
     <div data-f="tail">
-      <label for="tail" id="tailLabel">Tail length <span class="hint">Conduit left past the last bend</span></label>
+      <label for="tail" id="tailLabel">Tail length (inches) <span class="hint">Conduit left past the last bend</span></label>
       <input id="tail" value="24" />
     </div>
 
     <div data-f="space">
-      <label for="space">Space available for the transition <span class="hint">Optional &mdash; limits the angle choice</span></label>
+      <label for="space">Space available for the transition (inches) <span class="hint">Optional &mdash; limits the angle choice</span></label>
       <input id="space" value="" placeholder="leave blank if unlimited" />
     </div>
 
@@ -187,7 +192,7 @@
       <option value="exact">Exact trig (1/sin, tan half-angle)</option>
     </select>
 
-    <p class="note">Type inches as decimals or fractions &mdash; <code>12</code>, <code>12.5</code>, <code>12 1/2</code> and <code>12-1/2</code> all work.</p>
+    <p class="note">All measurements are in inches. Type decimals or fractions &mdash; <code>12</code>, <code>12.5</code>, <code>12 1/2</code> and <code>12-1/2</code> all work.</p>
   </section>
 
   <section>
@@ -201,7 +206,7 @@
     <div class="card">
       <h2>Marks &mdash; measured from the starting end</h2>
       <table id="marksTable">
-        <thead><tr><th>Mark</th><th>From end</th><th>Bender reference</th><th>What it does</th></tr></thead>
+        <thead><tr><th>Bend</th><th>Mark</th><th>From end</th><th>Bender reference</th><th>What it does</th></tr></thead>
         <tbody></tbody>
       </table>
       <p class="note" id="centerPunch"></p>
@@ -398,7 +403,7 @@ function calc(v) {
       ['Gain', frac(gain)], ['Cut length', frac(cut), 'accent'],
       ['Stub', frac(v.stub)], ['Tail', frac(v.tail)]
     ];
-    out.marks = [['Mark 1', mark, 'arrow', 'Bend 90&deg; &mdash; arrow on the mark, stub end toward the floor']];
+    out.marks = [['Mark #1', mark, 'arrow', 'Bend 90&deg; &mdash; arrow on the mark, stub end toward the floor', 1]];
     out.center = mark;
     out.total = Math.max(cut, mark + 4);
     out.steps = [
@@ -421,8 +426,8 @@ function calc(v) {
       ['Gain (each)', frac(gain)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark 1', mark1, 'arrow', 'First 90&deg; &mdash; arrow on the mark'],
-      ['Mark 2', mark2, 'star',  'Second 90&deg; &mdash; <b>star / tee</b> on the mark, bent the same way']
+      ['Mark #1', mark1, 'arrow', 'First 90&deg; &mdash; arrow on the mark', 1],
+      ['Mark #2', mark2, 'star',  'Second 90&deg; &mdash; <b>star / tee</b> on the mark, bent the same way', 2]
     ];
     out.center = (mark1 + mark2) / 2;
     out.total = Math.max(cut, mark2 + 4);
@@ -430,7 +435,7 @@ function calc(v) {
       'Cut ' + frac(cut) + ' (' + frac(v.stub) + ' + ' + frac(v.b2b) + ' + ' + frac(v.stub2) + ' &minus; two gains of ' + frac(gain) + ').',
       'Measure ' + frac(mark1) + ' from the first stub end and mark. Bend a 90&deg; with the <b>arrow</b> on the mark.',
       'Lay the piece down. From the <b>back</b> of that first bend, measure the back-to-back dimension ' + frac(v.b2b) + ' and mark &mdash; that is ' + frac(mark2) + ' from the same starting end.',
-      'Put the <b>star / tee</b> of the bender on mark 2, bend the second 90&deg; in the same direction so the piece closes into a U.',
+      'Put the <b>star / tee</b> of the bender on mark #2, bend the second 90&deg; in the same direction so the piece closes into a U.',
       'Both legs should read ' + frac(v.stub) + ' and ' + frac(v.stub2) + ' from the back of each bend.'
     ];
     out.why = 'The first mark uses take-up (' + frac(size.takeup) + '). The second uses the star/tee because that symbol puts the <em>back</em> of the bend right on the mark, which is what back-to-back measures.';
@@ -456,8 +461,8 @@ function calc(v) {
       ['Cut length', frac(cut), 'accent'], ['Finished run', frac(cut - shrink)]
     ];
     out.marks = [
-      ['Mark #2', mark2, 'arrow', 'Bend #2 &mdash; the lower bend, X back from mark #1'],
-      ['Mark #1', mark1, 'arrow', 'Bend #1 &mdash; the upper bend, distance + shrinkage']
+      ['Mark #2', mark2, 'arrow', 'The lower bend, X back from mark #1 &mdash; bend it after rolling 180&deg;', 2],
+      ['Mark #1', mark1, 'arrow', 'The upper bend, distance + shrinkage &mdash; closest to the obstruction, so bend it first', 1]
     ];
     out.center = (mark1 + mark2) / 2;
     out.total = cut;
@@ -469,8 +474,8 @@ function calc(v) {
       'Cut ' + frac(cut) + '.',
       'Mark #1 = distance to the obstruction ' + frac(v.dist) + ' + shrinkage ' + frac(shrink) + ' = <b>' + frac(mark1) + '</b> from the end.',
       'Measure X = ' + frac(between) + ' back from mark #1 toward the end for <b>mark #2</b> (' + frac(mark2) + ' from the end).',
-      'Arrow on mark #2, bend to ' + a.deg + '&deg;.',
-      'Roll the conduit a half turn so the bend points up, arrow on mark #1, bend to ' + a.deg + '&deg; again.',
+      '<b>Bend mark #1 first</b> &mdash; it is the mark closest to the obstruction. Arrow on mark #1, bend to ' + a.deg + '&deg;.',
+      '<b>Rotate the conduit 180&deg;</b>, arrow on mark #2, bend to ' + a.deg + '&deg;. Both bends must end up in the same plane.',
       'Lay it on the floor &mdash; both ends sit flat and the rise measures ' + frac(v.rise) + ' at the obstruction.'
     ];
     if (pick.tight) out.alerts.push(['bad', pick.why]);
@@ -496,8 +501,8 @@ function calc(v) {
       ['Shrinkage', frac(shrink)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark #1', mark1, 'arrow', 'First bend &mdash; in from the box end'],
-      ['Mark #2', mark2, 'arrow', 'Second bend &mdash; X further back, rolled 180&deg;']
+      ['Mark #1', mark1, 'arrow', 'In from the box end &mdash; closest to the box, so bend it first', 1],
+      ['Mark #2', mark2, 'arrow', 'X further back &mdash; bend it after rolling 180&deg;', 2]
     ];
     out.center = (mark1 + mark2) / 2;
     out.total = cut;
@@ -507,8 +512,8 @@ function calc(v) {
     out.steps = [
       'Measure ' + frac(mark1) + ' from the box end of the conduit and mark &mdash; that is <b>mark #1</b>.',
       'Measure ' + frac(between) + ' further back for <b>mark #2</b> (' + frac(mark2) + ' from the box end).',
-      'Arrow on mark #1, bend to ' + a.deg + '&deg;.',
-      'Roll the conduit a half turn, arrow on mark #2, bend to ' + a.deg + '&deg; again.',
+      '<b>Bend mark #1 first</b> &mdash; it is the mark closest to the box. Arrow on mark #1, bend to ' + a.deg + '&deg;.',
+      '<b>Rotate the conduit 180&deg;</b>, arrow on mark #2, bend to ' + a.deg + '&deg;.',
       'The end should now sit ' + frac(v.rise) + ' off the wall line and land flat on the box.'
     ];
     if (v.rise > 1.5) out.alerts.push(['warn', 'A box offset is normally 3/8" to 1" deep &mdash; ' + frac(v.rise) + ' is deep for stepping onto a box.']);
@@ -533,9 +538,9 @@ function calc(v) {
       ['Total shrink', frac(2 * sideShrink)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark #B', mark1, 'arrow', 'Return bend, ' + row.outer + '&deg;'],
-      ['Mark #A (center)', center, 'notch', 'Center mark &mdash; ' + row.center + '&deg;, bend this one first'],
-      ['Mark #C', mark3, 'arrow', 'Return bend, ' + row.outer + '&deg;, opposite direction']
+      ['Mark #B', mark1, 'arrow', 'Return bend, ' + row.outer + '&deg;, after rolling 180&deg;', 2],
+      ['Mark #A (center)', center, 'notch', 'Center mark &mdash; sits over the obstruction, so bend it first at ' + row.center + '&deg;', 1],
+      ['Mark #C', mark3, 'arrow', 'Return bend, ' + row.outer + '&deg;, same side as mark #B', 3]
     ];
     out.center = center;
     out.total = cut;
@@ -546,8 +551,8 @@ function calc(v) {
       'Cut ' + frac(cut) + '.',
       'Mark #A (center) = ' + frac(v.dist) + ' to the center of the obstruction + shrinkage ' + frac(sideShrink) + ' = <b>' + frac(center) + '</b> from the end.',
       'Step ' + frac(rise * mult) + ' each way from mark #A for <b>mark #B</b> (' + frac(mark1) + ') and <b>mark #C</b> (' + frac(mark3) + ').',
-      'Put the <b>center notch</b> on mark #A and bend ' + row.center + '&deg;.',
-      'Roll the conduit 180&deg;. <b>Arrow</b> on mark #B, bend ' + row.outer + '&deg; on the ' + row.outer + '&deg; line. Roll and repeat on mark #C.',
+      '<b>Bend mark #A first</b> &mdash; it is the mark sitting over the obstruction. <b>Center notch</b> on mark #A, bend ' + row.center + '&deg;.',
+      '<b>Rotate the conduit 180&deg;.</b> <b>Arrow</b> on mark #B, bend ' + row.outer + '&deg; on the ' + row.outer + '&deg; line, then the same on mark #C. All three bends stay in one plane.',
       'Set it over the obstruction &mdash; the saddle should clear by ' + frac(rise) + ' and both ends lie flat.'
     ];
     if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' (obstruction ' + frac(v.rise) + ' + ' + frac(v.clear) + ' clearance).']);
@@ -578,10 +583,10 @@ function calc(v) {
       ['Length of obst', frac(width)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark #B', markB, 'arrow', 'Rise up &mdash; ' + frac(between) + ' back from mark #A'],
-      ['Mark #A', markA, 'arrow', 'Top of the rise &mdash; distance + shrinkage, lands on the near edge'],
-      ['Mark #C', markC, 'arrow', 'Far edge &mdash; mark #A + length of obstruction'],
-      ['Mark #D', markD, 'arrow', 'Back down &mdash; ' + frac(between) + ' past mark #C']
+      ['Mark #B', markB, 'arrow', 'Rise up &mdash; ' + frac(between) + ' back from mark #A, after rolling 180&deg;', 2],
+      ['Mark #A', markA, 'arrow', 'Near edge &mdash; closest to the obstruction, so bend it first', 1],
+      ['Mark #C', markC, 'arrow', 'Far edge &mdash; closest to the obstruction on the other end, bend it first after swinging the conduit around', 3],
+      ['Mark #D', markD, 'arrow', 'Back down &mdash; ' + frac(between) + ' past mark #C, after rolling 180&deg;', 4]
     ];
     out.center = (markA + markC) / 2;
     out.total = cut;
@@ -596,8 +601,11 @@ function calc(v) {
       'Mark #C = mark #A + length of obstruction ' + frac(width) + ' = <b>' + frac(markC) + '</b>.',
       'Mark #B = ' + frac(between) + ' back from mark #A (<b>' + frac(markB) + '</b>); mark #D = ' + frac(between) +
         ' past mark #C (<b>' + frac(markD) + '</b>).',
-      'Align <b>all four marks with the bender arrow</b> and bend each to ' + a.deg + '&deg;, <b>hook facing the obstruction</b>.',
-      'The top section should sit level ' + frac(rise) + ' above the deck and span ' + frac(width) + ' &mdash; check that all four bends stay in one plane.'
+      'All four marks use the <b>bender arrow</b>, every bend is ' + a.deg + '&deg;, and the <b>hook faces the obstruction</b>.',
+      '<b>Bend mark #A first</b> &mdash; the mark closest to the obstruction on this end. Then <b>rotate 180&deg;</b> and bend mark #B.',
+      '<b>Swing the conduit end for end</b> and do the same on the far pair: <b>mark #C first</b> (closest to the obstruction), <b>rotate 180&deg;</b>, then mark #D.',
+      'Before you pull that third bend, check the first two &mdash; it is easy to bend the second pair the wrong way and end up with a Z instead of a saddle. All four bends must lie in one plane with the hump on the same side.',
+      'The top section should sit level ' + frac(rise) + ' above the deck and span ' + frac(width) + '.'
     ];
     if (markB <= 0) out.alerts.push(['bad', 'Mark #B lands ' + frac(-markB) + ' off the end. The obstruction is too close to the end of the conduit for a ' + a.deg + '&deg; bend &mdash; steepen the angle or start farther back.']);
     if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' rise and ' + frac(width) + ' length (obstruction plus ' + frac(v.clear) + ' clearance).']);
@@ -704,14 +712,14 @@ const FIELDS = {
   saddle4:   ['rise', 'obsLen', 'dist', 'clear', 'space', 'tail', 'angle']
 };
 const LABELS = {
-  offset:    { rise: 'Obstruction rise <span class="hint">Height you need to step up to</span>',
-               dist: 'Distance from end of conduit to the obstruction' },
-  boxoffset: { rise: 'Rise <span class="hint">Depth of the box, usually 3/8&Prime;</span>',
-               dist: 'Mark #1 <span class="hint">How far in from the box end the first bend goes</span>' },
-  saddle3:   { rise: 'Obstruction rise <span class="hint">How high the saddle must clear</span>',
-               dist: 'Distance from end of conduit to the <b>center</b> of the obstruction' },
-  saddle4:   { rise: 'Obstruction rise <span class="hint">How high the saddle must clear</span>',
-               dist: 'Distance from end of conduit to the <b>near edge</b> of the obstruction' }
+  offset:    { rise: 'Obstruction rise (inches) <span class="hint">Height you need to step up to</span>',
+               dist: 'Distance from end of conduit to the obstruction (inches)' },
+  boxoffset: { rise: 'Rise (inches) <span class="hint">Depth of the box, usually 3/8&Prime;</span>',
+               dist: 'Mark #1 (inches) <span class="hint">How far in from the box end the first bend goes</span>' },
+  saddle3:   { rise: 'Obstruction rise (inches) <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>center</b> of the obstruction (inches)' },
+  saddle4:   { rise: 'Obstruction rise (inches) <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>near edge</b> of the obstruction (inches)' }
 };
 
 // Starting values per bend type, remembered while you switch between types.
@@ -801,11 +809,11 @@ function syncFields() {
   const show = FIELDS[type];
   document.querySelectorAll('[data-f]').forEach(d => d.classList.toggle('hidden', !show.includes(d.dataset.f)));
   const lab = LABELS[type] || {};
-  el('riseLabel').innerHTML = lab.rise || 'Rise';
-  el('distLabel').innerHTML = lab.dist || 'Distance to obstruction';
+  el('riseLabel').innerHTML = lab.rise || 'Rise (inches)';
+  el('distLabel').innerHTML = lab.dist || 'Distance to obstruction (inches)';
   el('tailLabel').innerHTML = type === 'stub90'
-    ? 'Tail length <span class="hint">Straight run past the 90</span>'
-    : 'Tail length <span class="hint">Conduit left past the last bend</span>';
+    ? 'Tail length (inches) <span class="hint">Straight run past the 90</span>'
+    : 'Tail length (inches) <span class="hint">Conduit left past the last bend</span>';
   buildAngleSelect(type);
 }
 
@@ -835,8 +843,10 @@ function run() {
   el('why').innerHTML = r.why;
 
   const symbol = { arrow: 'Arrow', star: 'Star / tee', notch: 'Center notch' };
+  const ord = n => ['', '1st', '2nd', '3rd', '4th'][n] || n;
   el('marksTable').querySelector('tbody').innerHTML = r.marks.map(m =>
-    '<tr><td>' + m[0] + '</td><td class="num">' + frac(m[1]) + ' <small style="color:#64748b">(' + dec(m[1]) + ')</small></td>' +
+    '<tr><td><span class="order">' + ord(m[4]) + '</span></td><td>' + m[0] + '</td>' +
+    '<td class="num">' + frac(m[1]) + ' <small style="color:#64748b">(' + dec(m[1]) + ')</small></td>' +
     '<td><span class="tag ' + m[2] + '">' + symbol[m[2]] + '</span></td><td>' + m[3] + '</td></tr>').join('');
 
   el('centerPunch').innerHTML = r.center === null ? '' :

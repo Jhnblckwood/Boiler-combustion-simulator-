@@ -26,7 +26,25 @@ marked as such below.
 
 \* not from the handout — see "Beyond the handout" below.
 
-Inputs accept decimals or fractions — `12`, `12.5`, `12 1/2`, `12-1/2`.
+All measurements are in inches. Inputs accept decimals or fractions — `12`,
+`12.5`, `12 1/2`, `12-1/2`.
+
+## Bend order
+
+Bends that come in pairs go **closest to the obstruction first**, then rotate
+the conduit 180° for its partner. The marks table numbers them 1st / 2nd / 3rd
+/ 4th so the order is on screen with the measurements.
+
+| Bend | Order |
+|---|---|
+| Offset | #1 (at the obstruction) → rotate 180° → #2 |
+| Box offset | #1 (nearest the box) → rotate 180° → #2 |
+| 3-point saddle | #A center notch → rotate 180° → #B, #C |
+| 4-point saddle | #A → rotate 180° → #B → **swing the conduit end for end** → #C → rotate 180° → #D |
+
+On a 4-point saddle, check the first pair before pulling the third bend — it is
+easy to put the second pair in the wrong way and end up with a Z instead of a
+saddle. All bends in a set must finish in one plane.
 
 ## Formulas from the handout
 
