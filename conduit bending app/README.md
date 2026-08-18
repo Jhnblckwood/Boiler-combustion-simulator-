@@ -17,8 +17,8 @@ marked as such below.
 
 | Type | You enter | You get |
 |---|---|---|
-| 90° stub-up | take-up, and any two of stub height / tail / initial length | mark #1, the third value solved, gain |
-| Back-to-back 90° * | stub, back-to-back, second stub | mark #1 (arrow), mark #2 (star/tee), cut length |
+| 90° stub-up | take-up, and any three of stub / tail / initial length / gain | mark #1 and the fourth value solved |
+| Back-to-back 90° * | take-up, and any four of stub / back-to-back / second stub / initial length / gain | mark #1 (arrow), mark #2 (star/tee), and the fifth value solved |
 | Offset | rise, distance to obstruction, tail, space available | best angle, multiplier, marks #1–#2, shrinkage, cut length |
 | Box offset | rise, mark #1 distance, tail | marks #1–#2, cut length; defaults to 10° and 3/8" |
 | 3-point saddle | obstruction rise, distance to center, clearance, tail | center + return angles, marks #A/#B/#C, shrinkage, cut length |
@@ -54,21 +54,20 @@ saddle. All bends in a set must finish in one plane.
     CUT LENGTH = (STUB HEIGHT + TAIL) − GAIN
     GAIN       = (STUB HEIGHT + TAIL) − INITIAL LENGTH
 
-Stub height, tail and initial length are three boxes tied together by that last
-formula, so **leave one blank and it gets calculated**:
+Stub height, tail, initial length and gain are four boxes tied together by one
+relation, so **leave any one blank and it gets calculated**:
 
 | Left blank | Solved as |
 |---|---|
 | Initial length | `(stub + tail) − gain` — the usual case, your cut length |
+| Gain | `(stub + tail) − initial` — how you measure your own bender |
 | Tail | `initial + gain − stub` |
 | Stub height | `initial + gain − tail` |
 
-Fill in **all three** and gain is what comes out — that is how you measure your
-own bender: bend a 90, measure the stub and the tail, and you already know the
-length you started with. The app then offers to keep that gain for the selected
-conduit size, so later blank-field calculations use your number instead of the
-default. Anything under 0" or over 12" is rejected as a mismeasurement rather
-than saved.
+Leave gain blank to measure it: bend a 90, measure the stub and the tail, and
+you already know the length you started with. Type that gain back in afterwards
+and it drives everything else. Fill in all four and the app checks they agree,
+flagging the discrepancy rather than silently picking one.
 
 Align your marks with the arrow to bend.
 
@@ -133,14 +132,14 @@ The 4-point saddle page carries the same multiplier and shrinkage table.
 2-1/2" off center mark, 3/16" shrink. 60° center (30° returns) → 2" off center
 mark, 1/4" shrink.
 
-**Take-up is typed in; gain is calculated.** The handout lists both as bender
-info to read off your own tool, and they vary by brand. Take-up is an input on
-the measurements panel defaulting to 5", prefilled when you pick a conduit
-size. Gain is never typed on the 90 screen — it either falls out of all three
-measurements or comes from the stored value for the size.
+**Take-up and gain are both bender values.** The handout lists them as info to
+read off your own tool, and they vary by brand. Take-up is an input defaulting
+to 5". Gain is an input too — type it if you know it, blank it and it is solved
+from the rest.
 
-Those stored defaults come from take-up (the standard field value) and OD (the
-EMT spec), with radius and gain derived so the set stays self-consistent:
+Picking a conduit size prefills both as a starting point. Those prefills come
+from take-up (the standard field value) and OD (the EMT spec), with radius and
+gain derived so the set stays self-consistent:
 
     radius = take-up − OD/2
     gain   = OD + 2R − πR/2
@@ -159,13 +158,19 @@ centerline corner.
 
 **Gain is the value to verify on your own bender.** Published figures for it
 vary between sources, and it changes with the bender's radius. Measure it by
-filling in all three boxes on the 90 screen, then keep it for the size.
+blanking the gain box on either 90 screen and filling in the rest.
 
 ## Beyond the handout
 
 **Back-to-back 90°** — `mark #1 = stub − take-up` (arrow), then
 `mark #2 = mark #1 + back-to-back` bent with the star/tee, which puts the
-*back* of the second bend on the mark. `cut = stub1 + B + stub2 − 2 × gain`.
+*back* of the second bend on the mark. Two bends means two gains:
+
+    initial length = stub + back-to-back + second stub − 2 × gain
+    gain           = (stub + back-to-back + second stub − initial) ÷ 2
+
+Same rule as the single 90 — leave any one of those five blank and it is
+solved from the rest.
 
 **Clearance** — an optional extra gap added around the obstruction on either
 saddle, not in the handout. Leave it at 0 to work the handout's numbers
