@@ -642,6 +642,7 @@ function calc(v) {
     out.center = (mark1 + mark2) / 2;
     out.total = known ? v.desiredRaw : mark2 + 6;
     out.origin = 'box end';
+    out.mirror = true;   // box sits at the right in the drawing below, so match it
     out.why = 'A box offset is a fixed recipe, not a calculation: <b>' + frac(mark1) + ' from the box end for mark #1, ' +
       frac(BOX.between) + ' further for mark #2, both bent ' + BOX.deg + '&deg;</b>. Conduit size does not change it. ' +
       (known ? 'Overall length is the ' + frac(v.desiredRaw) + ' you asked for.'
@@ -755,14 +756,21 @@ function calc(v) {
 /* ---------------------------------------------------------------
    Drawing
    --------------------------------------------------------------- */
-function drawLayout(marks, total, originLabel) {
+// `mirror` puts the origin on the right and measures leftward, so the strip
+// faces the same way as the finished-shape drawing below it.
+function drawLayout(marks, total, originLabel, mirror) {
   const W = 700, H = 130, padL = 30, padR = 30, y = 62, h = 22;
   const span = Math.max(total, 1);
-  const x = p => padL + (p / span) * (W - padL - padR);
+  const x = p => mirror ? (W - padR) - (p / span) * (W - padL - padR)
+                        : padL + (p / span) * (W - padL - padR);
   let s = '<rect x="' + padL + '" y="' + (y - h / 2) + '" width="' + (W - padL - padR) + '" height="' + h +
           '" rx="3" fill="#0f1e33" stroke="#274157"/>';
-  s += '<text x="' + padL + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11">' + (originLabel || 'start') + '</text>';
-  s += '<text x="' + (W - padR) + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11" text-anchor="end">' + frac(span) + '</text>';
+  const originX = mirror ? W - padR : padL;
+  const farX = mirror ? padL : W - padR;
+  s += '<text x="' + originX + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11" text-anchor="' +
+       (mirror ? 'end' : 'start') + '">' + (originLabel || 'start') + '</text>';
+  s += '<text x="' + farX + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11" text-anchor="' +
+       (mirror ? 'start' : 'end') + '">' + frac(span) + '</text>';
   marks.forEach((m, i) => {
     const px = x(m[1]);
     const up = i % 2 === 0;
@@ -1022,7 +1030,7 @@ function run() {
     'Center punch / center of the bend group: <b>' + frac(r.center) + '</b> from the ' + (r.origin || 'starting end') + '. ' +
     'Mark all the way around the conduit so you can see it once the bender is on.';
 
-  el('layoutSvg').innerHTML = drawLayout(r.marks, r.total, r.origin);
+  el('layoutSvg').innerHTML = drawLayout(r.marks, r.total, r.origin, r.mirror);
   const prof = drawProfile(r.profile);
   el('profileSvg').setAttribute('viewBox', '0 0 700 ' + prof.h);
   el('profileSvg').innerHTML = prof.svg;
