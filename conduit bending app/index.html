@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conduit Bending Calculator</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #020617;
+    --panel: #0f172a;
+    --panel-2: #111827;
+    --line: #1f2937;
+    --text: #e5e7eb;
+    --subtle: #94a3b8;
+    --accent: #38bdf8;
+    --good: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top, #0b1225, var(--bg));
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+  header.top { grid-column: 1 / -1; }
+  .card {
+    background: linear-gradient(180deg, #0b1220, var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .card + .card { margin-top: 16px; }
+  h1 { margin: 0; font-size: 1.3rem; letter-spacing: 0.04em; }
+  h2 {
+    margin: 0 0 10px; font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--subtle);
+  }
+  .subtitle { margin: 8px 0 0; color: var(--subtle); font-size: 0.9rem; }
+  label { display: block; font-size: 0.8rem; color: var(--subtle); margin: 12px 0 5px; }
+  label .hint { color: #64748b; font-size: 0.72rem; display: block; margin-top: 2px; }
+  input, select {
+    width: 100%; padding: 9px 10px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--text); font-size: 0.95rem; font-family: inherit;
+  }
+  input:focus, select:focus { outline: 2px solid rgba(56,189,248,0.5); outline-offset: 0; }
+  select#bendType { font-size: 1rem; padding: 11px; border-color: #274157; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hidden { display: none !important; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .kpi { background: var(--panel-2); border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px; }
+  .kpi .k { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--subtle); }
+  .kpi .v { font-size: 1.15rem; font-weight: 600; margin-top: 3px; }
+  .kpi .v small { font-size: 0.72rem; color: var(--subtle); font-weight: 400; }
+  .kpi.accent .v { color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--subtle); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tag {
+    display: inline-block; padding: 2px 7px; border-radius: 999px;
+    font-size: 0.7rem; border: 1px solid var(--line); background: #0b1220; color: var(--subtle);
+  }
+  .tag.arrow { color: #7dd3fc; border-color: #1e4a63; }
+  .tag.star  { color: #fcd34d; border-color: #5a4413; }
+  .tag.notch { color: #86efac; border-color: #17512f; }
+
+  ol.steps { margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.55; }
+  ol.steps li { margin-bottom: 7px; }
+  ol.steps b { color: var(--accent); font-weight: 600; }
+
+  .note { font-size: 0.82rem; color: var(--subtle); line-height: 1.5; margin: 10px 0 0; }
+  .alert { border-radius: 10px; padding: 10px 12px; font-size: 0.85rem; margin-top: 10px; line-height: 1.45; }
+  .alert.warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.35); color: #fcd34d; }
+  .alert.bad  { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
+  .alert.info { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3); color: #bae6fd; }
+
+  svg { width: 100%; height: auto; display: block; }
+  .svgwrap { background: #060c18; border: 1px solid var(--line); border-radius: 11px; padding: 8px; margin-top: 10px; }
+  .svgwrap + .svgwrap { margin-top: 10px; }
+
+  details.charts { margin-top: 16px; }
+  details.charts summary {
+    cursor: pointer; font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--subtle); padding: 4px 0;
+  }
+  .chartgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 12px; }
+  .chartgrid input { padding: 5px 7px; font-size: 0.85rem; }
+  footer { grid-column: 1 / -1; color: #64748b; font-size: 0.78rem; padding: 6px 2px 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="top card">
+    <h1>Conduit Bending Calculator</h1>
+    <p class="subtitle">Pick a bend, enter what you measured, get the angle, the multiplier, every mark, and the cut length.</p>
+    <label for="bendType" style="margin-top:14px">Bend type</label>
+    <select id="bendType">
+      <option value="stub90">90&deg; bend (stub-up)</option>
+      <option value="b2b90">Back-to-back 90&deg; bend</option>
+      <option value="offset">Offset bend</option>
+      <option value="boxoffset">Box offset</option>
+      <option value="saddle3">3-point saddle</option>
+      <option value="saddle4">4-point saddle</option>
+    </select>
+  </header>
+
+  <section class="card" id="inputs">
+    <h2>Measurements</h2>
+
+    <label for="size">Conduit size <span class="hint">Sets take-up, radius and gain</span></label>
+    <select id="size"></select>
+
+    <div data-f="stub">
+      <label for="stub">Stub height <span class="hint">Back of bend to end of stub</span></label>
+      <input id="stub" value="12" />
+    </div>
+
+    <div data-f="stub2">
+      <label for="stub2">Second stub height</label>
+      <input id="stub2" value="12" />
+    </div>
+
+    <div data-f="b2b">
+      <label for="b2b">Back-to-back dimension <span class="hint">Back of bend 1 to back of bend 2</span></label>
+      <input id="b2b" value="24" />
+    </div>
+
+    <div data-f="rise">
+      <label for="rise" id="riseLabel">Rise / offset depth</label>
+      <input id="rise" value="4" />
+    </div>
+
+    <div data-f="obsLen">
+      <label for="obsLen">Length of obstacle <span class="hint">Measured along the run</span></label>
+      <input id="obsLen" value="8" />
+    </div>
+
+    <div data-f="dist">
+      <label for="dist" id="distLabel">Distance to obstacle</label>
+      <input id="dist" value="30" />
+    </div>
+
+    <div data-f="clear">
+      <label for="clear">Clearance <span class="hint">Extra gap added around the obstacle</span></label>
+      <input id="clear" value="0" />
+    </div>
+
+    <div data-f="tail">
+      <label for="tail" id="tailLabel">Tail length <span class="hint">Conduit left past the last bend</span></label>
+      <input id="tail" value="24" />
+    </div>
+
+    <div data-f="space">
+      <label for="space">Space available for the transition <span class="hint">Optional &mdash; limits the angle choice</span></label>
+      <input id="space" value="" placeholder="leave blank if unlimited" />
+    </div>
+
+    <div data-f="angle">
+      <label for="angle">Bend angle</label>
+      <select id="angle"></select>
+    </div>
+
+    <label for="mode">Values used</label>
+    <select id="mode">
+      <option value="chart">Trade chart (rounded multipliers)</option>
+      <option value="exact">Exact trig (1/sin, tan half-angle)</option>
+    </select>
+
+    <p class="note">Type inches as decimals or fractions &mdash; <code>12</code>, <code>12.5</code>, <code>12 1/2</code> and <code>12-1/2</code> all work.</p>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Result</h2>
+      <div class="kpis" id="kpis"></div>
+      <div id="alerts"></div>
+      <p class="note" id="why"></p>
+    </div>
+
+    <div class="card">
+      <h2>Marks &mdash; measured from the starting end</h2>
+      <table id="marksTable">
+        <thead><tr><th>Mark</th><th>From end</th><th>Bender reference</th><th>What it does</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="note" id="centerPunch"></p>
+    </div>
+
+    <div class="card">
+      <h2>Layout &amp; finished shape</h2>
+      <div class="svgwrap"><svg id="layoutSvg" viewBox="0 0 700 130"></svg></div>
+      <div class="svgwrap"><svg id="profileSvg" viewBox="0 0 700 220"></svg></div>
+    </div>
+
+    <div class="card">
+      <h2>Bend it</h2>
+      <ol class="steps" id="steps"></ol>
+    </div>
+  </section>
+
+  <details class="charts card" style="grid-column: 1 / -1;">
+    <summary>Charts &amp; constants &mdash; edit any value to match your book</summary>
+    <div class="chartgrid">
+      <div>
+        <h2 style="margin-top:14px">Take-up &amp; radius (hand bender, EMT)</h2>
+        <table id="sizeTable">
+          <thead><tr><th>Size</th><th>Take-up</th><th>Radius</th><th>Gain</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Gain is computed: <code>gain = 2R &minus; &pi;R/2</code>. Take-up and radius vary by bender brand &mdash; overwrite them with the numbers stamped on yours.</p>
+      </div>
+      <div>
+        <h2 style="margin-top:14px">Offset multipliers &amp; shrink</h2>
+        <table id="offsetTable">
+          <thead><tr><th>Angle</th><th>Multiplier</th><th>Shrink / in</th><th>Exact</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Distance between marks = rise &times; multiplier. Shrink = rise &times; shrink-per-inch; the run loses that much length. Exact column is <code>1/sin&theta;</code> and <code>tan(&theta;/2)</code>.</p>
+      </div>
+      <div>
+        <h2 style="margin-top:14px">3-point saddle</h2>
+        <table id="saddleTable">
+          <thead><tr><th>Center</th><th>Outer</th><th>Multiplier</th><th>Shrink / in</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Multiplier is center mark to each outer mark, per inch of saddle depth. Shrink here is per side &mdash; add it to the center mark, and the whole run loses twice that.</p>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    Charts are the common hand-bender/EMT values (take-up 5&Prime;/6&Prime;/8&Prime;/11&Prime;/14&Prime;/16&Prime;, offset multipliers 6&nbsp;/&nbsp;2.6&nbsp;/&nbsp;2&nbsp;/&nbsp;1.4&nbsp;/&nbsp;1.2, 45&deg; saddle multiplier 2.5). Verify against your own bender and chart before cutting &mdash; check every layout with a tape before you bend.
+  </footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Data: everything the math is built on, all editable in the UI.
+   --------------------------------------------------------------- */
+const SIZES = [
+  { name: '1/2"',    takeup: 5,  radius: 4.00 },
+  { name: '3/4"',    takeup: 6,  radius: 4.50 },
+  { name: '1"',      takeup: 8,  radius: 5.75 },
+  { name: '1-1/4"',  takeup: 11, radius: 7.25 },
+  { name: '1-1/2"',  takeup: 14, radius: 8.25 },
+  { name: '2"',      takeup: 16, radius: 9.50 }
+];
+
+// Offset chart: distance between marks = rise * mult; shrink = rise * shrink.
+const OFFSETS = [
+  { deg: 10,   mult: 6.0, shrink: 1/16 },
+  { deg: 22.5, mult: 2.6, shrink: 3/16 },
+  { deg: 30,   mult: 2.0, shrink: 1/4  },
+  { deg: 45,   mult: 1.4, shrink: 3/8  },
+  { deg: 60,   mult: 1.2, shrink: 1/2  }
+];
+
+// 3-point saddle: center bend is twice the outer bend. Shrink is per side.
+const SADDLES = [
+  { center: 22.5, outer: 11.25, mult: 5.0, shrink: 1/16 },
+  { center: 30,   outer: 15,    mult: 3.7, shrink: 1/8  },
+  { center: 45,   outer: 22.5,  mult: 2.5, shrink: 3/16 },
+  { center: 60,   outer: 30,    mult: 2.0, shrink: 1/4  }
+];
+
+const rad = d => d * Math.PI / 180;
+const gainOf = r => 2 * r - Math.PI * r / 2;          // straight-line corner minus the arc
+const exactMult = d => 1 / Math.sin(rad(d));
+const exactShrink = d => Math.tan(rad(d / 2));
+
+/* ---------------------------------------------------------------
+   Input parsing and fraction formatting
+   --------------------------------------------------------------- */
+function parseLen(str) {
+  if (str === null || str === undefined) return NaN;
+  let s = String(str).trim().replace(/["']/g, '');
+  if (!s) return NaN;
+  let m = s.match(/^(\d+(?:\.\d+)?)[\s-]+(\d+)\/(\d+)$/);   // 12 1/2  or  12-1/2
+  if (m) return parseFloat(m[1]) + parseInt(m[2]) / parseInt(m[3]);
+  m = s.match(/^(\d+)\/(\d+)$/);                            // 1/2
+  if (m) return parseInt(m[1]) / parseInt(m[2]);
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : n;
+}
+
+function frac(x) {
+  if (!isFinite(x)) return '--';
+  const neg = x < 0;
+  x = Math.abs(x);
+  let whole = Math.floor(x);
+  let sixteenths = Math.round((x - whole) * 16);
+  if (sixteenths === 16) { whole += 1; sixteenths = 0; }
+  let out;
+  if (sixteenths === 0) {
+    out = whole + '"';
+  } else {
+    let num = sixteenths, den = 16;
+    while (num % 2 === 0) { num /= 2; den /= 2; }
+    out = (whole ? whole + '-' : '') + num + '/' + den + '"';
+  }
+  return (neg ? '-' : '') + out;
+}
+const dec = x => isFinite(x) ? x.toFixed(2) : '--';
+
+/* ---------------------------------------------------------------
+   Angle selection
+   --------------------------------------------------------------- */
+function pickOffsetAngle(rise, space) {
+  if (isFinite(space) && space > 0) {
+    // Smallest angle that still fits the space: gentler bends pull easier.
+    for (const o of OFFSETS) if (rise * o.mult <= space) {
+      return { row: o, why: 'Smallest angle whose ' + frac(rise * o.mult) +
+        ' between marks still fits the ' + frac(space) + ' available. Gentler angles pull easier and stress the conduit less.' };
+    }
+    const last = OFFSETS[OFFSETS.length - 1];
+    return { row: last, why: 'Even 60&deg; needs ' + frac(rise * last.mult) +
+      ' between marks, more than the ' + frac(space) + ' available. Steepest angle shown &mdash; you need more room or a shallower rise.', tight: true };
+  }
+  let row;
+  if (rise < 1)       row = OFFSETS[0];   // 10 deg
+  else if (rise < 2)  row = OFFSETS[1];   // 22.5 deg
+  else if (rise <= 12) row = OFFSETS[2];  // 30 deg
+  else                row = OFFSETS[3];   // 45 deg
+  return { row: row, why: 'No space limit given, so the angle comes from the rise: ' + frac(rise) +
+    ' works best at ' + row.deg + '&deg; (' + frac(rise * row.mult) + ' between marks).' };
+}
+
+function pickSaddleAngle(rise) {
+  let row;
+  if (rise <= 1)      row = SADDLES[0];
+  else if (rise <= 2) row = SADDLES[1];
+  else if (rise <= 6) row = SADDLES[2];
+  else                row = SADDLES[3];
+  return { row: row, why: 'A ' + frac(rise) + ' obstacle saddles best with a ' + row.center +
+    '&deg; center bend and ' + row.outer + '&deg; outer bends (' + frac(rise * row.mult) + ' out to each side).' };
+}
+
+/* ---------------------------------------------------------------
+   Per-type calculation. Each returns kpis, marks, steps, geometry.
+   --------------------------------------------------------------- */
+function offsetValues(row, exact) {
+  return exact
+    ? { deg: row.deg, mult: exactMult(row.deg), shrink: exactShrink(row.deg) }
+    : { deg: row.deg, mult: row.mult, shrink: row.shrink };
+}
+
+function calc(v) {
+  const size = SIZES[v.sizeIdx];
+  const gain = gainOf(size.radius);
+  const exact = v.mode === 'exact';
+  const out = { kpis: [], marks: [], steps: [], alerts: [], why: '', center: null, profile: null, total: 0 };
+
+  if (v.type === 'stub90') {
+    const mark = v.stub - size.takeup;
+    const cut = v.stub + v.tail - gain;
+    out.kpis = [
+      ['Mark from end', frac(mark), 'accent'], ['Take-up', frac(size.takeup)],
+      ['Gain', frac(gain)], ['Cut length', frac(cut), 'accent'],
+      ['Stub', frac(v.stub)], ['Tail', frac(v.tail)]
+    ];
+    out.marks = [['Mark 1', mark, 'arrow', 'Bend 90&deg; &mdash; arrow on the mark, stub end toward the floor']];
+    out.center = mark;
+    out.total = Math.max(cut, mark + 4);
+    out.steps = [
+      'Cut ' + frac(cut) + '. That is stub ' + frac(v.stub) + ' + tail ' + frac(v.tail) + ' &minus; gain ' + frac(gain) + '.',
+      'From the stub end measure back ' + frac(mark) + ' (' + frac(v.stub) + ' &minus; take-up ' + frac(size.takeup) + ') and mark all the way around.',
+      'Line the <b>arrow</b> up with the mark, the stub end pointing away from the handle.',
+      'Foot pressure on the bender, pull to a full 90&deg;. Check it against a square.'
+    ];
+    out.why = 'Take-up for ' + size.name + ' is ' + frac(size.takeup) + ', so the arrow goes that far back from the finished stub height.';
+    if (mark <= 0) out.alerts.push(['bad', 'Stub of ' + frac(v.stub) + ' is shorter than the ' + frac(size.takeup) + ' take-up for ' + size.name + '. You cannot make this stub with a hand bender &mdash; use a shorter radius or a different method.']);
+    out.profile = { kind: 'L', stub: v.stub, tail: v.tail };
+
+  } else if (v.type === 'b2b90') {
+    const mark1 = v.stub - size.takeup;
+    const mark2 = mark1 + v.b2b;
+    const cut = v.stub + v.b2b + v.stub2 - 2 * gain;
+    out.kpis = [
+      ['Mark 1', frac(mark1), 'accent'], ['Mark 2', frac(mark2), 'accent'],
+      ['Back to back', frac(v.b2b)], ['Take-up', frac(size.takeup)],
+      ['Gain (each)', frac(gain)], ['Cut length', frac(cut), 'accent']
+    ];
+    out.marks = [
+      ['Mark 1', mark1, 'arrow', 'First 90&deg; &mdash; arrow on the mark'],
+      ['Mark 2', mark2, 'star',  'Second 90&deg; &mdash; <b>star / tee</b> on the mark, bent the same way']
+    ];
+    out.center = (mark1 + mark2) / 2;
+    out.total = Math.max(cut, mark2 + 4);
+    out.steps = [
+      'Cut ' + frac(cut) + ' (' + frac(v.stub) + ' + ' + frac(v.b2b) + ' + ' + frac(v.stub2) + ' &minus; two gains of ' + frac(gain) + ').',
+      'Measure ' + frac(mark1) + ' from the first stub end and mark. Bend a 90&deg; with the <b>arrow</b> on the mark.',
+      'Lay the piece down. From the <b>back</b> of that first bend, measure the back-to-back dimension ' + frac(v.b2b) + ' and mark &mdash; that is ' + frac(mark2) + ' from the same starting end.',
+      'Put the <b>star / tee</b> of the bender on mark 2, bend the second 90&deg; in the same direction so the piece closes into a U.',
+      'Both legs should read ' + frac(v.stub) + ' and ' + frac(v.stub2) + ' from the back of each bend.'
+    ];
+    out.why = 'The first mark uses take-up (' + frac(size.takeup) + '). The second uses the star/tee because that symbol puts the <em>back</em> of the bend right on the mark, which is what back-to-back measures.';
+    if (mark1 <= 0) out.alerts.push(['bad', 'Stub is shorter than take-up for ' + size.name + '.']);
+    if (v.b2b < 2 * size.radius) out.alerts.push(['warn', 'Back-to-back of ' + frac(v.b2b) + ' is tighter than two bend radii (' + frac(2 * size.radius) + '). The bends will run into each other.']);
+    out.profile = { kind: 'U', stub: v.stub, stub2: v.stub2, b2b: v.b2b };
+
+  } else if (v.type === 'offset' || v.type === 'boxoffset') {
+    const pick = v.angleIdx >= 0
+      ? { row: OFFSETS[v.angleIdx], why: 'Angle set manually to ' + OFFSETS[v.angleIdx].deg + '&deg;.' }
+      : pickOffsetAngle(v.rise, v.space);
+    const a = offsetValues(pick.row, exact);
+    const between = v.rise * a.mult;
+    const shrink = v.rise * a.shrink;
+    const run = between - shrink;                 // horizontal ground covered by the offset
+    const mark1 = v.dist;
+    const mark2 = mark1 + between;
+    const cut = mark2 + v.tail;
+    out.kpis = [
+      ['Best angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
+      ['Between marks', frac(between), 'accent'], ['Shrink', frac(shrink)],
+      ['Cut length', frac(cut), 'accent'], ['Finished run', frac(cut - shrink)]
+    ];
+    out.marks = [
+      ['Mark 1', mark1, 'arrow', 'First bend &mdash; arrow on the mark'],
+      ['Mark 2', mark2, 'arrow', 'Roll the conduit 180&deg;, arrow on the mark, bend the same angle']
+    ];
+    out.center = (mark1 + mark2) / 2;
+    out.total = cut;
+    out.why = pick.why + ' Multiplier ' + a.mult.toFixed(2) + ' &times; rise ' + frac(v.rise) + ' = ' + frac(between) +
+      ' between marks. The offset eats ' + frac(shrink) + ' of length, so the finished piece runs ' + frac(cut - shrink) + ' end to end.';
+    out.steps = [
+      'Cut ' + frac(cut) + ' &mdash; that already carries the ' + frac(shrink) + ' the offset will swallow.',
+      'Measure ' + frac(mark1) + ' from the end and mark. Measure another ' + frac(between) + ' and mark again (' + frac(mark2) + ' from the end).',
+      'Arrow on mark 1, bend to ' + a.deg + '&deg;.',
+      'Roll the conduit a half turn so the bend points up, arrow on mark 2, bend to ' + a.deg + '&deg; again.',
+      'Lay it on the floor &mdash; both ends should sit flat and the rise should measure ' + frac(v.rise) + '.'
+    ];
+    if (pick.tight) out.alerts.push(['bad', pick.why]);
+    if (v.type === 'boxoffset' && v.rise > 1.5) out.alerts.push(['warn', 'A box offset is normally 1/2" to 1" deep &mdash; ' + frac(v.rise) + ' is deep for stepping into a box knockout.']);
+    out.profile = { kind: 'offset', dist: mark1, run: run, rise: v.rise, tail: v.tail };
+
+  } else if (v.type === 'saddle3') {
+    const rise = v.rise + v.clear;
+    const pick = v.angleIdx >= 0
+      ? { row: SADDLES[v.angleIdx], why: 'Angle set manually to a ' + SADDLES[v.angleIdx].center + '&deg; center bend.' }
+      : pickSaddleAngle(rise);
+    const row = pick.row;
+    const mult = exact ? exactMult(row.outer) : row.mult;
+    const shrinkPer = exact ? exactShrink(row.outer) : row.shrink;
+    const sideShrink = rise * shrinkPer;
+    const center = v.dist + sideShrink;
+    const mark1 = center - rise * mult;
+    const mark3 = center + rise * mult;
+    const cut = mark3 + v.tail;
+    out.kpis = [
+      ['Center bend', row.center + '°', 'accent'], ['Outer bends', row.outer + '°'],
+      ['Multiplier', mult.toFixed(2)], ['Shrink (per side)', frac(sideShrink)],
+      ['Total shrink', frac(2 * sideShrink)], ['Cut length', frac(cut), 'accent']
+    ];
+    out.marks = [
+      ['Mark 1', mark1, 'arrow', 'Outer bend, ' + row.outer + '&deg;'],
+      ['Mark 2 (center)', center, 'notch', 'Center of the saddle &mdash; ' + row.center + '&deg;, bend this one first'],
+      ['Mark 3', mark3, 'arrow', 'Outer bend, ' + row.outer + '&deg;, opposite direction']
+    ];
+    out.center = center;
+    out.total = cut;
+    out.why = pick.why + ' Center mark sits ' + frac(sideShrink) + ' past the center of the obstacle to cover shrink, then ' +
+      frac(rise * mult) + ' (' + mult.toFixed(2) + ' &times; ' + frac(rise) + ') out to each outer mark. The run loses ' + frac(2 * sideShrink) + ' overall.';
+    out.steps = [
+      'Cut ' + frac(cut) + '.',
+      'Center mark: ' + frac(v.dist) + ' to the center of the obstacle + ' + frac(sideShrink) + ' shrink = <b>' + frac(center) + '</b> from the end.',
+      'Step ' + frac(rise * mult) + ' each way from the center mark for marks 1 and 3.',
+      'Put the <b>center/teardrop notch</b> on mark 2 and bend ' + row.center + '&deg;.',
+      'Roll the conduit 180&deg;. Arrow on mark 1, bend ' + row.outer + '&deg;. Roll and repeat on mark 3.',
+      'Set it over the obstacle &mdash; the saddle should clear by ' + frac(rise) + ' and both ends lie flat.'
+    ];
+    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' (obstacle ' + frac(v.rise) + ' + ' + frac(v.clear) + ' clearance).']);
+    if (mark1 <= 0) out.alerts.push(['bad', 'Mark 1 lands ' + frac(-mark1) + ' off the end of the conduit. The obstacle is too close to the end for this angle &mdash; use a steeper center bend or start farther back.']);
+    out.profile = { kind: 'saddle3', dist: v.dist, rise: rise, run: rise * (mult - shrinkPer), tail: v.tail, obs: v.rise };
+
+  } else if (v.type === 'saddle4') {
+    const rise = v.rise + v.clear;
+    const width = v.obsLen + 2 * v.clear;
+    const pick = v.angleIdx >= 0
+      ? { row: OFFSETS[v.angleIdx], why: 'Angle set manually to ' + OFFSETS[v.angleIdx].deg + '&deg;.' }
+      : pickOffsetAngle(rise, v.space);
+    const a = offsetValues(pick.row, exact);
+    const between = rise * a.mult;
+    const shrink = rise * a.shrink;
+    const run = between - shrink;
+    const near = v.dist - v.clear;
+    const mark2 = near + shrink;            // crest lands exactly on the near edge
+    const mark1 = mark2 - between;
+    const mark3 = mark2 + width;
+    const mark4 = mark3 + between;
+    const cut = mark4 + v.tail;
+    out.kpis = [
+      ['Best angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
+      ['Between marks', frac(between), 'accent'], ['Across the top', frac(width)],
+      ['Total shrink', frac(2 * shrink)], ['Cut length', frac(cut), 'accent']
+    ];
+    out.marks = [
+      ['Mark 1', mark1, 'arrow', 'Offset up &mdash; first bend'],
+      ['Mark 2', mark2, 'arrow', 'Offset up &mdash; second bend, conduit now level on top'],
+      ['Mark 3', mark3, 'arrow', 'Offset down &mdash; first bend'],
+      ['Mark 4', mark4, 'arrow', 'Offset down &mdash; second bend, back on the deck']
+    ];
+    out.center = (mark2 + mark3) / 2;
+    out.total = cut;
+    out.why = pick.why + ' Two matching offsets: ' + frac(between) + ' between the marks of each, and ' + frac(width) +
+      ' between mark 2 and mark 3 to span the obstacle. Both offsets together pull ' + frac(2 * shrink) + ' out of the run.';
+    out.steps = [
+      'Cut ' + frac(cut) + '.',
+      'Marks from the end: ' + frac(mark1) + ', ' + frac(mark2) + ', ' + frac(mark3) + ', ' + frac(mark4) + '.',
+      'Arrow on mark 1, bend ' + a.deg + '&deg;. Roll 180&deg;, arrow on mark 2, bend ' + a.deg + '&deg; &mdash; that is the first offset.',
+      'Keeping the conduit flat, arrow on mark 3, bend ' + a.deg + '&deg; the same way as mark 2 was rolled; roll 180&deg; and bend mark 4 to ' + a.deg + '&deg;.',
+      'The top section should sit level ' + frac(rise) + ' above the deck and span ' + frac(width) + ' &mdash; check that all four bends stay in one plane.'
+    ];
+    if (mark1 <= 0) out.alerts.push(['bad', 'Mark 1 lands ' + frac(-mark1) + ' off the end. The obstacle is too close to the end of the conduit for a ' + a.deg + '&deg; offset &mdash; steepen the angle or start farther back.']);
+    if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' rise and ' + frac(width) + ' width (obstacle plus ' + frac(v.clear) + ' clearance).']);
+    if (pick.tight) out.alerts.push(['bad', pick.why]);
+    out.profile = { kind: 'saddle4', dist: near, rise: rise, run: run, width: width, tail: v.tail, obs: v.rise, obsLen: v.obsLen };
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------
+   Drawing
+   --------------------------------------------------------------- */
+function drawLayout(marks, total) {
+  const W = 700, H = 130, padL = 30, padR = 30, y = 62, h = 22;
+  const span = Math.max(total, 1);
+  const x = p => padL + (p / span) * (W - padL - padR);
+  let s = '<rect x="' + padL + '" y="' + (y - h / 2) + '" width="' + (W - padL - padR) + '" height="' + h +
+          '" rx="3" fill="#0f1e33" stroke="#274157"/>';
+  s += '<text x="' + padL + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11">start</text>';
+  s += '<text x="' + (W - padR) + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11" text-anchor="end">' + frac(span) + '</text>';
+  marks.forEach((m, i) => {
+    const px = x(m[1]);
+    const up = i % 2 === 0;
+    s += '<line x1="' + px + '" y1="' + (y - h / 2 - 4) + '" x2="' + px + '" y2="' + (y + h / 2 + 4) + '" stroke="#38bdf8" stroke-width="2"/>';
+    const ty = up ? y - h / 2 - 12 : y + h / 2 + 30;
+    s += '<text x="' + px + '" y="' + ty + '" fill="#38bdf8" font-size="11" text-anchor="middle">' + m[0].replace(/ \(center\)/, '') + '</text>';
+    s += '<text x="' + px + '" y="' + (ty + (up ? -13 : 13)) + '" fill="#94a3b8" font-size="10.5" text-anchor="middle">' + frac(m[1]) + '</text>';
+  });
+  return s;
+}
+
+function drawProfile(p) {
+  const W = 700, padL = 40, padR = 40;
+  if (!p) return { svg: '', h: 120 };
+  let pts = [], obs = null, maxY = 1;
+  if (p.kind === 'L') {
+    pts = [[0, p.stub], [0, 0], [p.tail, 0]];
+    maxY = p.stub;
+  } else if (p.kind === 'U') {
+    pts = [[0, p.stub], [0, 0], [p.b2b, 0], [p.b2b, p.stub2]];
+    maxY = Math.max(p.stub, p.stub2);
+  } else if (p.kind === 'offset') {
+    pts = [[0, 0], [p.dist, 0], [p.dist + p.run, p.rise], [p.dist + p.run + p.tail, p.rise]];
+    maxY = p.rise;
+  } else if (p.kind === 'saddle3') {
+    pts = [[0, 0], [p.dist - p.run, 0], [p.dist, p.rise], [p.dist + p.run, 0], [p.dist + p.run + p.tail, 0]];
+    obs = { x0: p.dist - p.obs / 2, x1: p.dist + p.obs / 2, h: p.obs };
+    maxY = p.rise;
+  } else if (p.kind === 'saddle4') {
+    pts = [[0, 0], [p.dist - p.run, 0], [p.dist, p.rise], [p.dist + p.width, p.rise],
+           [p.dist + p.width + p.run, 0], [p.dist + p.width + p.run + p.tail, 0]];
+    obs = { x0: p.dist, x1: p.dist + p.obsLen, h: p.obs };
+    maxY = p.rise;
+  }
+  const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
+  const spanX = Math.max(...xs) - Math.min(...xs) || 1;
+  const spanY = Math.max(maxY, ...ys) || 1;
+  const sx = (W - padL - padR) / spanX;
+  const sy = Math.min(sx, 100 / spanY);
+  // Height follows the drawing so short bends don't float in dead space.
+  const H = Math.max(120, Math.round(spanY * sy) + 72);
+  const base = H - 42;
+  const X = a => padL + (a - Math.min(...xs)) * sx;
+  const Y = b => base - b * sy;
+
+  let s = '<line x1="' + padL + '" y1="' + base + '" x2="' + (W - padR) + '" y2="' + base +
+          '" stroke="#1f2937" stroke-width="1" stroke-dasharray="4 4"/>';
+  if (obs) {
+    s += '<rect x="' + X(obs.x0) + '" y="' + Y(obs.h) + '" width="' + Math.max(X(obs.x1) - X(obs.x0), 3) +
+         '" height="' + (base - Y(obs.h)) + '" fill="rgba(239,68,68,0.16)" stroke="rgba(239,68,68,0.55)"/>';
+    s += '<text x="' + ((X(obs.x0) + X(obs.x1)) / 2) + '" y="' + (Y(obs.h) - 7) +
+         '" fill="#fca5a5" font-size="11" text-anchor="middle">obstacle ' + frac(obs.h) + '</text>';
+  }
+  const d = pts.map((q, i) => (i ? 'L' : 'M') + X(q[0]) + ' ' + Y(q[1])).join(' ');
+  s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" opacity="0.25"/>';
+  s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+  pts.slice(1, -1).forEach(q => {
+    s += '<circle cx="' + X(q[0]) + '" cy="' + Y(q[1]) + '" r="4" fill="#020617" stroke="#7dd3fc" stroke-width="2"/>';
+  });
+  if (spanY > 0 && p.kind !== 'L' && p.kind !== 'U') {
+    s += '<line x1="' + (padL - 12) + '" y1="' + base + '" x2="' + (padL - 12) + '" y2="' + Y(spanY) +
+         '" stroke="#475569" stroke-width="1"/>';
+    s += '<text x="' + (padL - 16) + '" y="' + ((base + Y(spanY)) / 2) + '" fill="#94a3b8" font-size="11" text-anchor="end">' + frac(spanY) + '</text>';
+  }
+  s += '<text x="' + (W - padR) + '" y="' + (base + 22) + '" fill="#64748b" font-size="11" text-anchor="end">finished shape (side view)</text>';
+  return { svg: s, h: H };
+}
+
+/* ---------------------------------------------------------------
+   Field visibility per bend type
+   --------------------------------------------------------------- */
+const FIELDS = {
+  stub90:    ['stub', 'tail'],
+  b2b90:     ['stub', 'b2b', 'stub2'],
+  offset:    ['rise', 'dist', 'space', 'tail', 'angle'],
+  boxoffset: ['rise', 'dist', 'tail', 'angle'],
+  saddle3:   ['rise', 'dist', 'clear', 'tail', 'angle'],
+  saddle4:   ['rise', 'obsLen', 'dist', 'clear', 'space', 'tail', 'angle']
+};
+const LABELS = {
+  offset:    { rise: 'Offset rise <span class="hint">Height you need to step over or up to</span>',
+               dist: 'Distance from end of conduit to the obstacle' },
+  boxoffset: { rise: 'Box offset depth <span class="hint">Usually 1/2&Prime; to 1&Prime;</span>',
+               dist: 'Distance from end of conduit to the first bend' },
+  saddle3:   { rise: 'Obstacle rise <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>center</b> of the obstacle' },
+  saddle4:   { rise: 'Obstacle rise <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>near edge</b> of the obstacle' }
+};
+
+const el = id => document.getElementById(id);
+
+function buildSizeSelect() {
+  el('size').innerHTML = SIZES.map((s, i) => '<option value="' + i + '">' + s.name + ' &mdash; take-up ' + frac(s.takeup) + '</option>').join('');
+  el('size').value = 0;
+}
+
+function buildAngleSelect(type) {
+  const sel = el('angle');
+  const rows = type === 'saddle3'
+    ? SADDLES.map((s, i) => [i, s.center + '° center / ' + s.outer + '° outer'])
+    : OFFSETS.map((o, i) => [i, o.deg + '°']);
+  sel.innerHTML = '<option value="-1">Auto &mdash; pick the best angle</option>' +
+    rows.map(r => '<option value="' + r[0] + '">' + r[1] + '</option>').join('');
+  sel.value = '-1';
+}
+
+function buildCharts() {
+  el('sizeTable').querySelector('tbody').innerHTML = SIZES.map((s, i) =>
+    '<tr><td>' + s.name + '</td>' +
+    '<td><input data-chart="takeup" data-i="' + i + '" value="' + s.takeup + '"></td>' +
+    '<td><input data-chart="radius" data-i="' + i + '" value="' + s.radius + '"></td>' +
+    '<td class="num" data-gain="' + i + '">' + frac(gainOf(s.radius)) + '</td></tr>').join('');
+
+  el('offsetTable').querySelector('tbody').innerHTML = OFFSETS.map((o, i) =>
+    '<tr><td>' + o.deg + '°</td>' +
+    '<td><input data-chart="omult" data-i="' + i + '" value="' + o.mult + '"></td>' +
+    '<td><input data-chart="oshrink" data-i="' + i + '" value="' + frac(o.shrink).replace(/"$/, '') + '"></td>' +
+    '<td class="num">' + exactMult(o.deg).toFixed(3) + ' / ' + exactShrink(o.deg).toFixed(3) + '</td></tr>').join('');
+
+  el('saddleTable').querySelector('tbody').innerHTML = SADDLES.map((s, i) =>
+    '<tr><td>' + s.center + '°</td><td>' + s.outer + '°</td>' +
+    '<td><input data-chart="smult" data-i="' + i + '" value="' + s.mult + '"></td>' +
+    '<td><input data-chart="sshrink" data-i="' + i + '" value="' + frac(s.shrink).replace(/"$/, '') + '"></td></tr>').join('');
+
+  document.querySelectorAll('[data-chart]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const i = +inp.dataset.i, val = parseLen(inp.value);
+      if (!isFinite(val)) return;
+      switch (inp.dataset.chart) {
+        case 'takeup':  SIZES[i].takeup = val; buildSizeSelectPreserve(); break;
+        case 'radius':  SIZES[i].radius = val;
+                        document.querySelector('[data-gain="' + i + '"]').textContent = frac(gainOf(val)); break;
+        case 'omult':   OFFSETS[i].mult = val; break;
+        case 'oshrink': OFFSETS[i].shrink = val; break;
+        case 'smult':   SADDLES[i].mult = val; break;
+        case 'sshrink': SADDLES[i].shrink = val; break;
+      }
+      run();
+    });
+  });
+}
+
+function buildSizeSelectPreserve() {
+  const keep = el('size').value;
+  buildSizeSelect();
+  el('size').value = keep;
+}
+
+function syncFields() {
+  const type = el('bendType').value;
+  const show = FIELDS[type];
+  document.querySelectorAll('[data-f]').forEach(d => d.classList.toggle('hidden', !show.includes(d.dataset.f)));
+  const lab = LABELS[type] || {};
+  el('riseLabel').innerHTML = lab.rise || 'Rise';
+  el('distLabel').innerHTML = lab.dist || 'Distance to obstacle';
+  el('tailLabel').innerHTML = type === 'stub90'
+    ? 'Tail length <span class="hint">Straight run past the 90</span>'
+    : 'Tail length <span class="hint">Conduit left past the last bend</span>';
+  buildAngleSelect(type);
+  if (type === 'boxoffset') { el('rise').value = '3/4'; el('angle').value = '0'; }
+}
+
+function run() {
+  const type = el('bendType').value;
+  const v = {
+    type: type,
+    sizeIdx: +el('size').value,
+    mode: el('mode').value,
+    angleIdx: +el('angle').value,
+    stub: parseLen(el('stub').value) || 0,
+    stub2: parseLen(el('stub2').value) || 0,
+    b2b: parseLen(el('b2b').value) || 0,
+    rise: parseLen(el('rise').value) || 0,
+    obsLen: parseLen(el('obsLen').value) || 0,
+    dist: parseLen(el('dist').value) || 0,
+    clear: parseLen(el('clear').value) || 0,
+    tail: parseLen(el('tail').value) || 0,
+    space: parseLen(el('space').value)
+  };
+  const r = calc(v);
+
+  el('kpis').innerHTML = r.kpis.map(k =>
+    '<div class="kpi ' + (k[2] || '') + '"><div class="k">' + k[0] + '</div><div class="v">' + k[1] + '</div></div>').join('');
+
+  el('alerts').innerHTML = r.alerts.map(a => '<div class="alert ' + a[0] + '">' + a[1] + '</div>').join('');
+  el('why').innerHTML = r.why;
+
+  const symbol = { arrow: 'Arrow', star: 'Star / tee', notch: 'Center notch' };
+  el('marksTable').querySelector('tbody').innerHTML = r.marks.map(m =>
+    '<tr><td>' + m[0] + '</td><td class="num">' + frac(m[1]) + ' <small style="color:#64748b">(' + dec(m[1]) + ')</small></td>' +
+    '<td><span class="tag ' + m[2] + '">' + symbol[m[2]] + '</span></td><td>' + m[3] + '</td></tr>').join('');
+
+  el('centerPunch').innerHTML = r.center === null ? '' :
+    'Center punch / center of the bend group: <b>' + frac(r.center) + '</b> from the starting end. ' +
+    'Mark all the way around the conduit so you can see it once the bender is on.';
+
+  el('layoutSvg').innerHTML = drawLayout(r.marks, r.total);
+  const prof = drawProfile(r.profile);
+  el('profileSvg').setAttribute('viewBox', '0 0 700 ' + prof.h);
+  el('profileSvg').innerHTML = prof.svg;
+  el('steps').innerHTML = r.steps.map(s => '<li>' + s + '</li>').join('');
+}
+
+buildSizeSelect();
+buildCharts();
+syncFields();
+run();
+
+el('bendType').addEventListener('change', () => { syncFields(); run(); });
+document.querySelectorAll('#inputs input, #inputs select').forEach(i => {
+  i.addEventListener('input', run);
+  i.addEventListener('change', run);
+});
+</script>
+</body>
+</html>
