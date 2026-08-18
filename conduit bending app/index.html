@@ -133,8 +133,13 @@
   <section class="card" id="inputs">
     <h2>Measurements</h2>
 
-    <label for="size">Conduit size <span class="hint">Sets take-up, radius and gain</span></label>
+    <label for="size">Conduit size <span class="hint">Prefills take-up and gain below</span></label>
     <select id="size"></select>
+
+    <div data-f="takeup">
+      <label for="takeup">Stub take-up (inches) <span class="hint">Off your own bender &mdash; it varies by brand</span></label>
+      <input id="takeup" value="5" />
+    </div>
 
     <div data-f="stub">
       <label for="stub">Stub height (inches) <span class="hint">Back of bend to end of stub</span></label>
@@ -174,6 +179,11 @@
     <div data-f="tail">
       <label for="tail" id="tailLabel">Tail length (inches) <span class="hint">Conduit left past the last bend</span></label>
       <input id="tail" value="24" />
+    </div>
+
+    <div data-f="gain">
+      <label for="gain">Gain (inches) <span class="hint">(stub + tail) &minus; the length you started with</span></label>
+      <input id="gain" value="2.70" />
     </div>
 
     <div data-f="space">
@@ -233,7 +243,7 @@
           <thead><tr><th>Size</th><th>OD</th><th>Take-up</th><th>Radius</th><th>Gain</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p class="note"><b>Gain is the one number to check on your own bender.</b> Take-up and OD are standard; radius is derived as <code>take-up &minus; OD/2</code> and gain as <code>OD + 2R &minus; &pi;R/2</code>, the square corner minus the arc, plus one diameter because stub and tail are measured to the back of the bend. Published gain figures vary by bender, so measure yours the way the handout defines it &mdash; bend a 90, then <code>gain = (stub + tail) &minus; the length you started with</code> &mdash; and type it in. Editing OD or take-up reseeds radius and gain; editing gain directly overrides it.</p>
+        <p class="note">These are only the <b>prefills</b> &mdash; picking a conduit size copies its take-up and gain into the two input boxes, and whatever is in those boxes is what the math uses. Both vary bender to bender, so type in yours. Radius is derived as <code>take-up &minus; OD/2</code> and gain as <code>OD + 2R &minus; &pi;R/2</code> (the square corner minus the arc it replaces, plus one diameter because stub and tail are measured to the back of the bend) &mdash; but the handout defines gain as a measured value, so the number to trust is the one you get from bending a 90 and working out <code>(stub + tail) &minus; the length you started with</code>.</p>
       </div>
       <div>
         <h2 style="margin-top:14px">Best angle by rise</h2>
@@ -263,7 +273,7 @@
   </details>
 
   <footer>
-    Multipliers, shrinkage and the best-angle table come from the Electrical Construction Course handout; take-up, radius and gain are the common hand-bender EMT values and need checking against your own bender. Check every layout with a tape before you bend.
+    Multipliers, shrinkage and the best-angle table come from the Electrical Construction Course handout; take-up and gain are typed in on the left and vary bender to bender, so check them against your own. Check every layout with a tape before you bend.
   </footer>
 </div>
 
@@ -398,15 +408,16 @@ function offsetValues(row, exact) {
 
 function calc(v) {
   const size = SIZES[v.sizeIdx];
-  const gain = size.gain;
+  const gain = v.gain;      // bender values, typed in rather than assumed
+  const takeup = v.takeup;
   const exact = v.mode === 'exact';
   const out = { kpis: [], marks: [], steps: [], alerts: [], why: '', center: null, profile: null, total: 0 };
 
   if (v.type === 'stub90') {
-    const mark = v.stub - size.takeup;
+    const mark = v.stub - takeup;
     const cut = v.stub + v.tail - gain;
     out.kpis = [
-      ['Mark from end', frac(mark), 'accent'], ['Take-up', frac(size.takeup)],
+      ['Mark from end', frac(mark), 'accent'], ['Take-up', frac(takeup)],
       ['Gain', frac(gain)], ['Cut length', frac(cut), 'accent'],
       ['Stub', frac(v.stub)], ['Tail', frac(v.tail)]
     ];
@@ -415,21 +426,22 @@ function calc(v) {
     out.total = Math.max(cut, mark + 4);
     out.steps = [
       'Cut ' + frac(cut) + '. That is stub ' + frac(v.stub) + ' + tail ' + frac(v.tail) + ' &minus; gain ' + frac(gain) + '.',
-      'From the stub end measure back ' + frac(mark) + ' (' + frac(v.stub) + ' &minus; take-up ' + frac(size.takeup) + ') and mark all the way around.',
+      'From the stub end measure back ' + frac(mark) + ' (' + frac(v.stub) + ' &minus; take-up ' + frac(takeup) + ') and mark all the way around.',
       'Line the <b>arrow</b> up with the mark, the stub end pointing away from the handle.',
       'Foot pressure on the bender, pull to a full 90&deg;. Check it against a square.'
     ];
-    out.why = 'Take-up for ' + size.name + ' is ' + frac(size.takeup) + ', so the arrow goes that far back from the finished stub height.';
-    if (mark <= 0) out.alerts.push(['bad', 'Stub of ' + frac(v.stub) + ' is shorter than the ' + frac(size.takeup) + ' take-up for ' + size.name + '. You cannot make this stub with a hand bender &mdash; use a shorter radius or a different method.']);
+    out.why = 'Mark #1 = stub height &minus; stub take-up. With the ' + frac(takeup) +
+      ' take-up you entered, the arrow goes that far back from the finished stub height. Cut length = (stub + tail) &minus; gain ' + frac(gain) + '.';
+    if (mark <= 0) out.alerts.push(['bad', 'Stub of ' + frac(v.stub) + ' is shorter than the ' + frac(takeup) + ' take-up you entered. You cannot make this stub &mdash; use a bender with a shorter radius, or a different method.']);
     out.profile = { kind: 'L', stub: v.stub, tail: v.tail };
 
   } else if (v.type === 'b2b90') {
-    const mark1 = v.stub - size.takeup;
+    const mark1 = v.stub - takeup;
     const mark2 = mark1 + v.b2b;
     const cut = v.stub + v.b2b + v.stub2 - 2 * gain;
     out.kpis = [
       ['Mark 1', frac(mark1), 'accent'], ['Mark 2', frac(mark2), 'accent'],
-      ['Back to back', frac(v.b2b)], ['Take-up', frac(size.takeup)],
+      ['Back to back', frac(v.b2b)], ['Take-up', frac(takeup)],
       ['Gain (each)', frac(gain)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
@@ -445,9 +457,11 @@ function calc(v) {
       'Put the <b>star / tee</b> of the bender on mark #2, bend the second 90&deg; in the same direction so the piece closes into a U.',
       'Both legs should read ' + frac(v.stub) + ' and ' + frac(v.stub2) + ' from the back of each bend.'
     ];
-    out.why = 'The first mark uses take-up (' + frac(size.takeup) + '). The second uses the star/tee because that symbol puts the <em>back</em> of the bend right on the mark, which is what back-to-back measures.';
-    if (mark1 <= 0) out.alerts.push(['bad', 'Stub is shorter than take-up for ' + size.name + '.']);
-    if (v.b2b < 2 * size.radius) out.alerts.push(['warn', 'Back-to-back of ' + frac(v.b2b) + ' is tighter than two bend radii (' + frac(2 * size.radius) + '). The bends will run into each other.']);
+    out.why = 'The first mark uses take-up (' + frac(takeup) + '). The second uses the star/tee because that symbol puts the <em>back</em> of the bend right on the mark, which is what back-to-back measures.';
+    if (mark1 <= 0) out.alerts.push(['bad', 'Stub is shorter than the ' + frac(takeup) + ' take-up you entered.']);
+    // Radius follows the take-up the user actually entered, not the stored table.
+    const bendR = takeup - size.od / 2;
+    if (v.b2b < 2 * bendR) out.alerts.push(['warn', 'Back-to-back of ' + frac(v.b2b) + ' is tighter than two bend radii (' + frac(2 * bendR) + '). The bends will run into each other.']);
     out.profile = { kind: 'U', stub: v.stub, stub2: v.stub2, b2b: v.b2b };
 
   } else if (v.type === 'offset') {
@@ -711,8 +725,8 @@ function drawProfile(p) {
    Field visibility per bend type
    --------------------------------------------------------------- */
 const FIELDS = {
-  stub90:    ['stub', 'tail'],
-  b2b90:     ['stub', 'b2b', 'stub2'],
+  stub90:    ['takeup', 'stub', 'tail', 'gain'],
+  b2b90:     ['takeup', 'stub', 'b2b', 'stub2', 'gain'],
   offset:    ['rise', 'dist', 'space', 'tail', 'angle'],
   boxoffset: ['rise', 'dist', 'tail', 'angle'],
   saddle3:   ['rise', 'dist', 'clear', 'tail', 'angle'],
@@ -731,8 +745,8 @@ const LABELS = {
 
 // Starting values per bend type, remembered while you switch between types.
 const MEMORY = {
-  stub90:    { stub: '12', tail: '24' },
-  b2b90:     { stub: '12', stub2: '12', b2b: '24' },
+  stub90:    { takeup: '5', stub: '12', tail: '24', gain: '2.70' },
+  b2b90:     { takeup: '5', stub: '12', stub2: '12', b2b: '24', gain: '2.70' },
   offset:    { rise: '4', dist: '30', tail: '24', space: '' },
   boxoffset: { rise: '3/8', dist: '2', tail: '24' },
   saddle3:   { rise: '4', dist: '30', clear: '0', tail: '24' },
@@ -847,7 +861,9 @@ function run() {
     dist: parseLen(el('dist').value) || 0,
     clear: parseLen(el('clear').value) || 0,
     tail: parseLen(el('tail').value) || 0,
-    space: parseLen(el('space').value)
+    space: parseLen(el('space').value),
+    takeup: parseLen(el('takeup').value) || 0,
+    gain: parseLen(el('gain').value) || 0
   };
   const r = calc(v);
 
@@ -879,6 +895,13 @@ buildSizeSelect();
 buildCharts();
 syncFields();
 run();
+
+el('size').addEventListener('change', () => {
+  // Choosing a size is an explicit "give me this bender's numbers" action.
+  const z = SIZES[+el('size').value];
+  el('takeup').value = z.takeup;
+  el('gain').value = z.gain.toFixed(2);
+});
 
 el('bendType').addEventListener('change', () => { syncFields(); run(); });
 document.querySelectorAll('#inputs input, #inputs select').forEach(i => {

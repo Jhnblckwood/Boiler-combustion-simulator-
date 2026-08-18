@@ -117,10 +117,14 @@ The 4-point saddle page carries the same multiplier and shrinkage table.
 2-1/2" off center mark, 3/16" shrink. 60° center (30° returns) → 2" off center
 mark, 1/4" shrink.
 
-**Take-up, radius and gain are not in the handout** — it lists them as bender
-info to read off your own tool. Take-up is the standard field value and OD is
-the EMT spec; radius and gain are derived from those two so the set stays
-self-consistent:
+**Take-up and gain are typed in, not assumed.** The handout lists them as
+bender info to read off your own tool, and they vary by brand, so both are
+input boxes on the measurements panel — take-up defaults to 5". Picking a
+conduit size prefills them from the table below; edit either and the math
+follows what you typed.
+
+The prefills come from take-up (the standard field value) and OD (the EMT
+spec), with radius and gain derived so the set stays self-consistent:
 
     radius = take-up − OD/2
     gain   = OD + 2R − πR/2
@@ -137,12 +141,10 @@ extra OD is there because stub height and tail are both measured to the **back**
 of the bend, so the corner they imply sits one full diameter outside the
 centerline corner.
 
-**Gain is the one value to verify on your own bender.** Published figures for
-it vary between sources, and it changes with the bender's radius. Measure it
-the way the handout defines it — bend a 90, then
-`gain = (stub + tail) − the length you started with` — and type it into the
-charts panel. Editing OD or take-up reseeds radius and gain; editing gain
-overrides it directly.
+**Gain is the value to verify on your own bender.** Published figures for it
+vary between sources, and it changes with the bender's radius. Measure it the
+way the handout defines it — bend a 90, then
+`gain = (stub + tail) − the length you started with` — and type it in.
 
 ## Beyond the handout
 
