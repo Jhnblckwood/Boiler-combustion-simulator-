@@ -228,7 +228,15 @@
           <thead><tr><th>Size</th><th>Take-up</th><th>Radius</th><th>Gain</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p class="note">Gain is computed: <code>gain = 2R &minus; &pi;R/2</code>. Take-up and radius vary by bender brand &mdash; overwrite them with the numbers stamped on yours.</p>
+        <p class="note">Gain is seeded from the radius (<code>2R &minus; &pi;R/2</code>) and editable &mdash; the handout defines it as <code>(stub + tail) &minus; initial length</code>, so use the number you measured off your own bender. Editing a radius reseeds its gain.</p>
+      </div>
+      <div>
+        <h2 style="margin-top:14px">Best angle by rise</h2>
+        <table id="bestTable">
+          <thead><tr><th>Obstruction rise</th><th>Best angle</th><th>Multiplier</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Used whenever the angle is set to Auto. If a space limit is entered and the chart angle will not fit it, the app steps up to the next angle that does.</p>
       </div>
       <div>
         <h2 style="margin-top:14px">Offset multipliers &amp; shrink</h2>
@@ -241,16 +249,16 @@
       <div>
         <h2 style="margin-top:14px">3-point saddle</h2>
         <table id="saddleTable">
-          <thead><tr><th>Center</th><th>Outer</th><th>Multiplier</th><th>Shrink / in</th></tr></thead>
+          <thead><tr><th>Center bend</th><th>Return bends</th><th>Off center mark</th><th>Shrink amount</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p class="note">Multiplier is center mark to each outer mark, per inch of saddle depth. Shrink here is per side &mdash; add it to the center mark, and the whole run loses twice that.</p>
+        <p class="note">Per inch of obstruction height: how far mark #B and mark #C sit off the center mark, and the shrinkage added to the center mark.</p>
       </div>
     </div>
   </details>
 
   <footer>
-    Charts are the common hand-bender/EMT values (take-up 5&Prime;/6&Prime;/8&Prime;/11&Prime;/14&Prime;/16&Prime;, offset multipliers 6&nbsp;/&nbsp;2.6&nbsp;/&nbsp;2&nbsp;/&nbsp;1.4&nbsp;/&nbsp;1.2, 45&deg; saddle multiplier 2.5). Verify against your own bender and chart before cutting &mdash; check every layout with a tape before you bend.
+    Multipliers, shrinkage and the best-angle table come from the Electrical Construction Course handout; take-up, radius and gain are the common hand-bender EMT values and need checking against your own bender. Check every layout with a tape before you bend.
   </footer>
 </div>
 
@@ -270,22 +278,30 @@ const SIZES = [
 // Offset chart: distance between marks = rise * mult; shrink = rise * shrink.
 const OFFSETS = [
   { deg: 10,   mult: 6.0, shrink: 1/16 },
+  { deg: 15,   mult: 3.9, shrink: 1/8  },
   { deg: 22.5, mult: 2.6, shrink: 3/16 },
   { deg: 30,   mult: 2.0, shrink: 1/4  },
   { deg: 45,   mult: 1.4, shrink: 3/8  },
   { deg: 60,   mult: 1.2, shrink: 1/2  }
 ];
 
+// Handout's best-angle table, by obstruction rise.
+const BEST_ANGLE = [
+  { upTo: 2,        deg: 10,   note: '1" to 2"' },
+  { upTo: 3,        deg: 22.5, note: '2" to 3"' },
+  { upTo: 6,        deg: 30,   note: '3" to 6"' },
+  { upTo: Infinity, deg: 45,   note: '6"+ (tight space)' }
+];
+
 // 3-point saddle: center bend is twice the outer bend. Shrink is per side.
 const SADDLES = [
-  { center: 22.5, outer: 11.25, mult: 5.0, shrink: 1/16 },
-  { center: 30,   outer: 15,    mult: 3.7, shrink: 1/8  },
-  { center: 45,   outer: 22.5,  mult: 2.5, shrink: 3/16 },
-  { center: 60,   outer: 30,    mult: 2.0, shrink: 1/4  }
+  { center: 45, outer: 22.5, mult: 2.5, shrink: 3/16 },
+  { center: 60, outer: 30,   mult: 2.0, shrink: 1/4  }
 ];
 
 const rad = d => d * Math.PI / 180;
 const gainOf = r => 2 * r - Math.PI * r / 2;          // straight-line corner minus the arc
+SIZES.forEach(s => { s.gain = gainOf(s.radius); });   // seeded, then editable per bender
 const exactMult = d => 1 / Math.sin(rad(d));
 const exactShrink = d => Math.tan(rad(d / 2));
 
@@ -310,6 +326,7 @@ function frac(x) {
   x = Math.abs(x);
   let whole = Math.floor(x);
   let sixteenths = Math.round((x - whole) * 16);
+  if (whole === 0 && sixteenths === 0 && x > 0) return (neg ? '-' : '') + 'under 1/16"';
   if (sixteenths === 16) { whole += 1; sixteenths = 0; }
   let out;
   if (sixteenths === 0) {
@@ -327,33 +344,35 @@ const dec = x => isFinite(x) ? x.toFixed(2) : '--';
    Angle selection
    --------------------------------------------------------------- */
 function pickOffsetAngle(rise, space) {
-  if (isFinite(space) && space > 0) {
-    // Smallest angle that still fits the space: gentler bends pull easier.
-    for (const o of OFFSETS) if (rise * o.mult <= space) {
-      return { row: o, why: 'Smallest angle whose ' + frac(rise * o.mult) +
-        ' between marks still fits the ' + frac(space) + ' available. Gentler angles pull easier and stress the conduit less.' };
+  const band = BEST_ANGLE.find(b => rise <= b.upTo);
+  const row = OFFSETS.find(o => o.deg === band.deg);
+  const why = 'Best-angle chart: a ' + frac(rise) + ' rise falls in the ' + band.note +
+    ' band, so ' + row.deg + '&deg; (' + frac(rise * row.mult) + ' between marks).';
+  if (isFinite(space) && space > 0 && rise * row.mult > space) {
+    // Chart angle will not fit the room available, so step up until one does.
+    for (const o of OFFSETS) if (o.deg > row.deg && rise * o.mult <= space) {
+      return { row: o, why: why + ' That needs more than the ' + frac(space) +
+        ' available, so stepped up to ' + o.deg + '&deg; (' + frac(rise * o.mult) + ' between marks).' };
     }
     const last = OFFSETS[OFFSETS.length - 1];
-    return { row: last, why: 'Even 60&deg; needs ' + frac(rise * last.mult) +
-      ' between marks, more than the ' + frac(space) + ' available. Steepest angle shown &mdash; you need more room or a shallower rise.', tight: true };
+    return { row: last, why: 'Even 60&deg; needs ' + frac(rise * last.mult) + ' between marks, more than the ' +
+      frac(space) + ' available. Steepest angle shown &mdash; you need more room or a shallower rise.', tight: true };
   }
-  let row;
-  if (rise < 1)       row = OFFSETS[0];   // 10 deg
-  else if (rise < 2)  row = OFFSETS[1];   // 22.5 deg
-  else if (rise <= 12) row = OFFSETS[2];  // 30 deg
-  else                row = OFFSETS[3];   // 45 deg
-  return { row: row, why: 'No space limit given, so the angle comes from the rise: ' + frac(rise) +
-    ' works best at ' + row.deg + '&deg; (' + frac(rise * row.mult) + ' between marks).' };
+  return { row: row, why: why };
 }
 
-function pickSaddleAngle(rise) {
-  let row;
-  if (rise <= 1)      row = SADDLES[0];
-  else if (rise <= 2) row = SADDLES[1];
-  else if (rise <= 6) row = SADDLES[2];
-  else                row = SADDLES[3];
-  return { row: row, why: 'A ' + frac(rise) + ' obstacle saddles best with a ' + row.center +
-    '&deg; center bend and ' + row.outer + '&deg; outer bends (' + frac(rise * row.mult) + ' out to each side).' };
+// The handout gives 45 deg and 60 deg center bends. 45 is the default; 60 pulls the
+// outer marks in closer (2" per inch instead of 2-1/2"), which is what saves you when
+// the obstruction sits close to the end of the conduit.
+function pickSaddleAngle(rise, dist) {
+  const wide = SADDLES[0], tight = SADDLES[1];
+  if (isFinite(dist) && dist > 0 && rise * wide.mult > dist && rise * tight.mult <= dist) {
+    return { row: tight, why: 'A 45&deg; center bend would put mark #B ' + frac(rise * wide.mult) +
+      ' back from the center mark, past the end of the conduit. Stepped up to a 60&deg; center bend, which pulls the outer marks in to ' +
+      frac(rise * tight.mult) + '.' };
+  }
+  return { row: wide, why: 'A ' + frac(rise) + ' obstruction saddles with a 45&deg; center bend and 22.5&deg; return bends &mdash; ' +
+    frac(rise * wide.mult) + ' (2-1/2 &times; ' + frac(rise) + ') out to each side of the center mark.' };
 }
 
 /* ---------------------------------------------------------------
@@ -367,7 +386,7 @@ function offsetValues(row, exact) {
 
 function calc(v) {
   const size = SIZES[v.sizeIdx];
-  const gain = gainOf(size.radius);
+  const gain = size.gain;
   const exact = v.mode === 'exact';
   const out = { kpis: [], marks: [], steps: [], alerts: [], why: '', center: null, profile: null, total: 0 };
 
@@ -419,46 +438,87 @@ function calc(v) {
     if (v.b2b < 2 * size.radius) out.alerts.push(['warn', 'Back-to-back of ' + frac(v.b2b) + ' is tighter than two bend radii (' + frac(2 * size.radius) + '). The bends will run into each other.']);
     out.profile = { kind: 'U', stub: v.stub, stub2: v.stub2, b2b: v.b2b };
 
-  } else if (v.type === 'offset' || v.type === 'boxoffset') {
+  } else if (v.type === 'offset') {
+    // Handout: MARK #1 = DIST + SHRINKAGE, and MARK #2 sits X back toward the
+    // reference end, where X = MULTIPLIER * RISE.
     const pick = v.angleIdx >= 0
       ? { row: OFFSETS[v.angleIdx], why: 'Angle set manually to ' + OFFSETS[v.angleIdx].deg + '&deg;.' }
       : pickOffsetAngle(v.rise, v.space);
     const a = offsetValues(pick.row, exact);
+    const between = v.rise * a.mult;              // X
+    const shrink = v.rise * a.shrink;
+    const mark1 = v.dist + shrink;
+    const mark2 = mark1 - between;
+    const cut = mark1 + v.tail;
+    out.kpis = [
+      ['Best angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
+      ['X (between marks)', frac(between), 'accent'], ['Shrinkage', frac(shrink)],
+      ['Cut length', frac(cut), 'accent'], ['Finished run', frac(cut - shrink)]
+    ];
+    out.marks = [
+      ['Mark #2', mark2, 'arrow', 'Bend #2 &mdash; the lower bend, X back from mark #1'],
+      ['Mark #1', mark1, 'arrow', 'Bend #1 &mdash; the upper bend, distance + shrinkage']
+    ];
+    out.center = (mark1 + mark2) / 2;
+    out.total = cut;
+    out.why = pick.why + ' Mark #1 = distance ' + frac(v.dist) + ' + shrinkage ' + frac(shrink) + ' = ' + frac(mark1) +
+      '. X = multiplier ' + a.mult.toFixed(2) + ' &times; rise ' + frac(v.rise) + ' = ' + frac(between) +
+      ', so mark #2 lands at ' + frac(mark2) + '. The offset pulls ' + frac(shrink) +
+      ' out of the run, which the cut length already carries.';
+    out.steps = [
+      'Cut ' + frac(cut) + '.',
+      'Mark #1 = distance to the obstruction ' + frac(v.dist) + ' + shrinkage ' + frac(shrink) + ' = <b>' + frac(mark1) + '</b> from the end.',
+      'Measure X = ' + frac(between) + ' back from mark #1 toward the end for <b>mark #2</b> (' + frac(mark2) + ' from the end).',
+      'Arrow on mark #2, bend to ' + a.deg + '&deg;.',
+      'Roll the conduit a half turn so the bend points up, arrow on mark #1, bend to ' + a.deg + '&deg; again.',
+      'Lay it on the floor &mdash; both ends sit flat and the rise measures ' + frac(v.rise) + ' at the obstruction.'
+    ];
+    if (pick.tight) out.alerts.push(['bad', pick.why]);
+    if (mark2 <= 0) out.alerts.push(['bad', 'Mark #2 lands ' + frac(-mark2) +
+      ' off the end of the conduit. The obstruction is too close to the end for a ' + a.deg + '&deg; offset &mdash; steepen the angle or start farther back.']);
+    out.profile = { kind: 'offset', dist: mark2, run: between - shrink, rise: v.rise, tail: v.tail, obsAt: v.dist };
+
+  } else if (v.type === 'boxoffset') {
+    // Handout: two 10 deg bends, mark #1 a short stub in from the box end,
+    // mark #2 one multiplier-length further back. Shrink is negligible here.
+    const pick = v.angleIdx >= 0
+      ? { row: OFFSETS[v.angleIdx], why: 'Angle set manually to ' + OFFSETS[v.angleIdx].deg + '&deg;.' }
+      : { row: OFFSETS[0], why: 'Box offsets use 10&deg; bends (multiplier 6.0).' };
+    const a = offsetValues(pick.row, exact);
     const between = v.rise * a.mult;
     const shrink = v.rise * a.shrink;
-    const run = between - shrink;                 // horizontal ground covered by the offset
     const mark1 = v.dist;
     const mark2 = mark1 + between;
     const cut = mark2 + v.tail;
     out.kpis = [
-      ['Best angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
-      ['Between marks', frac(between), 'accent'], ['Shrink', frac(shrink)],
-      ['Cut length', frac(cut), 'accent'], ['Finished run', frac(cut - shrink)]
+      ['Bend angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
+      ['Rise', frac(v.rise)], ['X (between marks)', frac(between), 'accent'],
+      ['Shrinkage', frac(shrink)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark 1', mark1, 'arrow', 'First bend &mdash; arrow on the mark'],
-      ['Mark 2', mark2, 'arrow', 'Roll the conduit 180&deg;, arrow on the mark, bend the same angle']
+      ['Mark #1', mark1, 'arrow', 'First bend &mdash; in from the box end'],
+      ['Mark #2', mark2, 'arrow', 'Second bend &mdash; X further back, rolled 180&deg;']
     ];
     out.center = (mark1 + mark2) / 2;
     out.total = cut;
-    out.why = pick.why + ' Multiplier ' + a.mult.toFixed(2) + ' &times; rise ' + frac(v.rise) + ' = ' + frac(between) +
-      ' between marks. The offset eats ' + frac(shrink) + ' of length, so the finished piece runs ' + frac(cut - shrink) + ' end to end.';
+    out.why = pick.why + ' Mark #1 sits ' + frac(mark1) + ' in from the box end, then X = multiplier ' + a.mult.toFixed(2) +
+      ' &times; rise ' + frac(v.rise) + ' = ' + frac(between) + ' back to mark #2. Shrinkage is only ' + frac(shrink) +
+      ' at this angle, small enough that the handout ignores it.';
     out.steps = [
-      'Cut ' + frac(cut) + ' &mdash; that already carries the ' + frac(shrink) + ' the offset will swallow.',
-      'Measure ' + frac(mark1) + ' from the end and mark. Measure another ' + frac(between) + ' and mark again (' + frac(mark2) + ' from the end).',
-      'Arrow on mark 1, bend to ' + a.deg + '&deg;.',
-      'Roll the conduit a half turn so the bend points up, arrow on mark 2, bend to ' + a.deg + '&deg; again.',
-      'Lay it on the floor &mdash; both ends should sit flat and the rise should measure ' + frac(v.rise) + '.'
+      'Measure ' + frac(mark1) + ' from the box end of the conduit and mark &mdash; that is <b>mark #1</b>.',
+      'Measure ' + frac(between) + ' further back for <b>mark #2</b> (' + frac(mark2) + ' from the box end).',
+      'Arrow on mark #1, bend to ' + a.deg + '&deg;.',
+      'Roll the conduit a half turn, arrow on mark #2, bend to ' + a.deg + '&deg; again.',
+      'The end should now sit ' + frac(v.rise) + ' off the wall line and land flat on the box.'
     ];
-    if (pick.tight) out.alerts.push(['bad', pick.why]);
-    if (v.type === 'boxoffset' && v.rise > 1.5) out.alerts.push(['warn', 'A box offset is normally 1/2" to 1" deep &mdash; ' + frac(v.rise) + ' is deep for stepping into a box knockout.']);
-    out.profile = { kind: 'offset', dist: mark1, run: run, rise: v.rise, tail: v.tail };
+    if (v.rise > 1.5) out.alerts.push(['warn', 'A box offset is normally 3/8" to 1" deep &mdash; ' + frac(v.rise) + ' is deep for stepping onto a box.']);
+    out.profile = { kind: 'offset', dist: v.tail, run: between - shrink, rise: v.rise, tail: mark1 };
 
   } else if (v.type === 'saddle3') {
     const rise = v.rise + v.clear;
     const pick = v.angleIdx >= 0
       ? { row: SADDLES[v.angleIdx], why: 'Angle set manually to a ' + SADDLES[v.angleIdx].center + '&deg; center bend.' }
-      : pickSaddleAngle(rise);
+      : pickSaddleAngle(rise, v.dist);
     const row = pick.row;
     const mult = exact ? exactMult(row.outer) : row.mult;
     const shrinkPer = exact ? exactShrink(row.outer) : row.shrink;
@@ -473,24 +533,25 @@ function calc(v) {
       ['Total shrink', frac(2 * sideShrink)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark 1', mark1, 'arrow', 'Outer bend, ' + row.outer + '&deg;'],
-      ['Mark 2 (center)', center, 'notch', 'Center of the saddle &mdash; ' + row.center + '&deg;, bend this one first'],
-      ['Mark 3', mark3, 'arrow', 'Outer bend, ' + row.outer + '&deg;, opposite direction']
+      ['Mark #B', mark1, 'arrow', 'Return bend, ' + row.outer + '&deg;'],
+      ['Mark #A (center)', center, 'notch', 'Center mark &mdash; ' + row.center + '&deg;, bend this one first'],
+      ['Mark #C', mark3, 'arrow', 'Return bend, ' + row.outer + '&deg;, opposite direction']
     ];
     out.center = center;
     out.total = cut;
-    out.why = pick.why + ' Center mark sits ' + frac(sideShrink) + ' past the center of the obstacle to cover shrink, then ' +
-      frac(rise * mult) + ' (' + mult.toFixed(2) + ' &times; ' + frac(rise) + ') out to each outer mark. The run loses ' + frac(2 * sideShrink) + ' overall.';
+    out.why = pick.why + ' Mark #A = distance ' + frac(v.dist) + ' + shrinkage ' + frac(sideShrink) + ' = ' + frac(center) +
+      '. Marks #B and #C sit ' + frac(rise * mult) + ' (' + mult.toFixed(2) + ' &times; ' + frac(rise) +
+      ') to each side. The run loses ' + frac(2 * sideShrink) + ' overall.';
     out.steps = [
       'Cut ' + frac(cut) + '.',
-      'Center mark: ' + frac(v.dist) + ' to the center of the obstacle + ' + frac(sideShrink) + ' shrink = <b>' + frac(center) + '</b> from the end.',
-      'Step ' + frac(rise * mult) + ' each way from the center mark for marks 1 and 3.',
-      'Put the <b>center/teardrop notch</b> on mark 2 and bend ' + row.center + '&deg;.',
-      'Roll the conduit 180&deg;. Arrow on mark 1, bend ' + row.outer + '&deg;. Roll and repeat on mark 3.',
-      'Set it over the obstacle &mdash; the saddle should clear by ' + frac(rise) + ' and both ends lie flat.'
+      'Mark #A (center) = ' + frac(v.dist) + ' to the center of the obstruction + shrinkage ' + frac(sideShrink) + ' = <b>' + frac(center) + '</b> from the end.',
+      'Step ' + frac(rise * mult) + ' each way from mark #A for <b>mark #B</b> (' + frac(mark1) + ') and <b>mark #C</b> (' + frac(mark3) + ').',
+      'Put the <b>center notch</b> on mark #A and bend ' + row.center + '&deg;.',
+      'Roll the conduit 180&deg;. <b>Arrow</b> on mark #B, bend ' + row.outer + '&deg; on the ' + row.outer + '&deg; line. Roll and repeat on mark #C.',
+      'Set it over the obstruction &mdash; the saddle should clear by ' + frac(rise) + ' and both ends lie flat.'
     ];
     if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' (obstacle ' + frac(v.rise) + ' + ' + frac(v.clear) + ' clearance).']);
-    if (mark1 <= 0) out.alerts.push(['bad', 'Mark 1 lands ' + frac(-mark1) + ' off the end of the conduit. The obstacle is too close to the end for this angle &mdash; use a steeper center bend or start farther back.']);
+    if (mark1 <= 0) out.alerts.push(['bad', 'Mark #B lands ' + frac(-mark1) + ' off the end of the conduit. The obstruction is too close to the end even for a 60&deg; center bend &mdash; start farther back.']);
     out.profile = { kind: 'saddle3', dist: v.dist, rise: rise, run: rise * (mult - shrinkPer), tail: v.tail, obs: v.rise };
 
   } else if (v.type === 'saddle4') {
@@ -515,10 +576,10 @@ function calc(v) {
       ['Total shrink', frac(2 * shrink)], ['Cut length', frac(cut), 'accent']
     ];
     out.marks = [
-      ['Mark 1', mark1, 'arrow', 'Offset up &mdash; first bend'],
-      ['Mark 2', mark2, 'arrow', 'Offset up &mdash; second bend, conduit now level on top'],
-      ['Mark 3', mark3, 'arrow', 'Offset down &mdash; first bend'],
-      ['Mark 4', mark4, 'arrow', 'Offset down &mdash; second bend, back on the deck']
+      ['Mark #1', mark1, 'arrow', 'Offset up &mdash; first bend'],
+      ['Mark #2', mark2, 'arrow', 'Offset up &mdash; second bend, conduit now level on top'],
+      ['Mark #3', mark3, 'arrow', 'Offset down &mdash; first bend'],
+      ['Mark #4', mark4, 'arrow', 'Offset down &mdash; second bend, back on the deck']
     ];
     out.center = (mark2 + mark3) / 2;
     out.total = cut;
@@ -531,7 +592,7 @@ function calc(v) {
       'Keeping the conduit flat, arrow on mark 3, bend ' + a.deg + '&deg; the same way as mark 2 was rolled; roll 180&deg; and bend mark 4 to ' + a.deg + '&deg;.',
       'The top section should sit level ' + frac(rise) + ' above the deck and span ' + frac(width) + ' &mdash; check that all four bends stay in one plane.'
     ];
-    if (mark1 <= 0) out.alerts.push(['bad', 'Mark 1 lands ' + frac(-mark1) + ' off the end. The obstacle is too close to the end of the conduit for a ' + a.deg + '&deg; offset &mdash; steepen the angle or start farther back.']);
+    if (mark1 <= 0) out.alerts.push(['bad', 'Mark #1 lands ' + frac(-mark1) + ' off the end. The obstacle is too close to the end of the conduit for a ' + a.deg + '&deg; offset &mdash; steepen the angle or start farther back.']);
     if (v.clear > 0) out.alerts.push(['info', 'Working from ' + frac(rise) + ' rise and ' + frac(width) + ' width (obstacle plus ' + frac(v.clear) + ' clearance).']);
     if (pick.tight) out.alerts.push(['bad', pick.why]);
     out.profile = { kind: 'saddle4', dist: near, rise: rise, run: run, width: width, tail: v.tail, obs: v.rise, obsLen: v.obsLen };
@@ -564,7 +625,7 @@ function drawLayout(marks, total) {
 function drawProfile(p) {
   const W = 700, padL = 40, padR = 40;
   if (!p) return { svg: '', h: 120 };
-  let pts = [], obs = null, maxY = 1;
+  let pts = [], obs = null, mark = null, maxY = 1;
   if (p.kind === 'L') {
     pts = [[0, p.stub], [0, 0], [p.tail, 0]];
     maxY = p.stub;
@@ -574,6 +635,7 @@ function drawProfile(p) {
   } else if (p.kind === 'offset') {
     pts = [[0, 0], [p.dist, 0], [p.dist + p.run, p.rise], [p.dist + p.run + p.tail, p.rise]];
     maxY = p.rise;
+    if (isFinite(p.obsAt)) mark = { x: p.obsAt, label: 'obstruction' };
   } else if (p.kind === 'saddle3') {
     pts = [[0, 0], [p.dist - p.run, 0], [p.dist, p.rise], [p.dist + p.run, 0], [p.dist + p.run + p.tail, 0]];
     obs = { x0: p.dist - p.obs / 2, x1: p.dist + p.obs / 2, h: p.obs };
@@ -603,6 +665,11 @@ function drawProfile(p) {
     s += '<text x="' + ((X(obs.x0) + X(obs.x1)) / 2) + '" y="' + (Y(obs.h) - 7) +
          '" fill="#fca5a5" font-size="11" text-anchor="middle">obstacle ' + frac(obs.h) + '</text>';
   }
+  if (mark) {
+    s += '<line x1="' + X(mark.x) + '" y1="' + Y(spanY * 1.15) + '" x2="' + X(mark.x) + '" y2="' + base +
+         '" stroke="#fca5a5" stroke-width="1" stroke-dasharray="3 3"/>';
+    s += '<text x="' + X(mark.x) + '" y="' + (Y(spanY * 1.15) - 4) + '" fill="#fca5a5" font-size="11" text-anchor="middle">' + mark.label + '</text>';
+  }
   const d = pts.map((q, i) => (i ? 'L' : 'M') + X(q[0]) + ' ' + Y(q[1])).join(' ');
   s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" opacity="0.25"/>';
   s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -630,15 +697,26 @@ const FIELDS = {
   saddle4:   ['rise', 'obsLen', 'dist', 'clear', 'space', 'tail', 'angle']
 };
 const LABELS = {
-  offset:    { rise: 'Offset rise <span class="hint">Height you need to step over or up to</span>',
-               dist: 'Distance from end of conduit to the obstacle' },
-  boxoffset: { rise: 'Box offset depth <span class="hint">Usually 1/2&Prime; to 1&Prime;</span>',
-               dist: 'Distance from end of conduit to the first bend' },
-  saddle3:   { rise: 'Obstacle rise <span class="hint">How high the saddle must clear</span>',
-               dist: 'Distance from end of conduit to the <b>center</b> of the obstacle' },
-  saddle4:   { rise: 'Obstacle rise <span class="hint">How high the saddle must clear</span>',
-               dist: 'Distance from end of conduit to the <b>near edge</b> of the obstacle' }
+  offset:    { rise: 'Obstruction rise <span class="hint">Height you need to step up to</span>',
+               dist: 'Distance from end of conduit to the obstruction' },
+  boxoffset: { rise: 'Rise <span class="hint">Depth of the box, usually 3/8&Prime;</span>',
+               dist: 'Mark #1 <span class="hint">How far in from the box end the first bend goes</span>' },
+  saddle3:   { rise: 'Obstruction rise <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>center</b> of the obstruction' },
+  saddle4:   { rise: 'Obstruction rise <span class="hint">How high the saddle must clear</span>',
+               dist: 'Distance from end of conduit to the <b>near edge</b> of the obstruction' }
 };
+
+// Starting values per bend type, remembered while you switch between types.
+const MEMORY = {
+  stub90:    { stub: '12', tail: '24' },
+  b2b90:     { stub: '12', stub2: '12', b2b: '24' },
+  offset:    { rise: '4', dist: '30', tail: '24', space: '' },
+  boxoffset: { rise: '3/8', dist: '2', tail: '24' },
+  saddle3:   { rise: '4', dist: '30', clear: '0', tail: '24' },
+  saddle4:   { rise: '4', obsLen: '8', dist: '30', clear: '0', tail: '24', space: '' }
+};
+let currentType = 'stub90';
 
 const el = id => document.getElementById(id);
 
@@ -662,7 +740,11 @@ function buildCharts() {
     '<tr><td>' + s.name + '</td>' +
     '<td><input data-chart="takeup" data-i="' + i + '" value="' + s.takeup + '"></td>' +
     '<td><input data-chart="radius" data-i="' + i + '" value="' + s.radius + '"></td>' +
-    '<td class="num" data-gain="' + i + '">' + frac(gainOf(s.radius)) + '</td></tr>').join('');
+    '<td><input data-chart="gain" data-i="' + i + '" value="' + s.gain.toFixed(3) + '"></td></tr>').join('');
+
+  el('bestTable').querySelector('tbody').innerHTML = BEST_ANGLE.map(b =>
+    '<tr><td>' + b.note + '</td><td>' + b.deg + '°</td><td class="num">' +
+    OFFSETS.find(o => o.deg === b.deg).mult.toFixed(2) + '</td></tr>').join('');
 
   el('offsetTable').querySelector('tbody').innerHTML = OFFSETS.map((o, i) =>
     '<tr><td>' + o.deg + '°</td>' +
@@ -681,9 +763,13 @@ function buildCharts() {
       if (!isFinite(val)) return;
       switch (inp.dataset.chart) {
         case 'takeup':  SIZES[i].takeup = val; buildSizeSelectPreserve(); break;
-        case 'radius':  SIZES[i].radius = val;
-                        document.querySelector('[data-gain="' + i + '"]').textContent = frac(gainOf(val)); break;
-        case 'omult':   OFFSETS[i].mult = val; break;
+        case 'radius':  SIZES[i].radius = val; SIZES[i].gain = gainOf(val);
+                        document.querySelector('[data-chart="gain"][data-i="' + i + '"]').value = SIZES[i].gain.toFixed(3); break;
+        case 'gain':    SIZES[i].gain = val; break;
+        case 'omult':   OFFSETS[i].mult = val;
+                        document.querySelectorAll('#bestTable tbody tr').forEach((tr, j) => {
+                          tr.cells[2].textContent = OFFSETS.find(o => o.deg === BEST_ANGLE[j].deg).mult.toFixed(2);
+                        }); break;
         case 'oshrink': OFFSETS[i].shrink = val; break;
         case 'smult':   SADDLES[i].mult = val; break;
         case 'sshrink': SADDLES[i].shrink = val; break;
@@ -701,6 +787,10 @@ function buildSizeSelectPreserve() {
 
 function syncFields() {
   const type = el('bendType').value;
+  // Stash what is on screen for the type we are leaving, restore the new one's.
+  Object.keys(MEMORY[currentType]).forEach(k => { MEMORY[currentType][k] = el(k).value; });
+  currentType = type;
+  Object.entries(MEMORY[type]).forEach(([k, val]) => { el(k).value = val; });
   const show = FIELDS[type];
   document.querySelectorAll('[data-f]').forEach(d => d.classList.toggle('hidden', !show.includes(d.dataset.f)));
   const lab = LABELS[type] || {};
@@ -710,7 +800,6 @@ function syncFields() {
     ? 'Tail length <span class="hint">Straight run past the 90</span>'
     : 'Tail length <span class="hint">Conduit left past the last bend</span>';
   buildAngleSelect(type);
-  if (type === 'boxoffset') { el('rise').value = '3/4'; el('angle').value = '0'; }
 }
 
 function run() {
