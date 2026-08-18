@@ -230,10 +230,10 @@
       <div>
         <h2 style="margin-top:14px">Take-up &amp; radius (hand bender, EMT)</h2>
         <table id="sizeTable">
-          <thead><tr><th>Size</th><th>Take-up</th><th>Radius</th><th>Gain</th></tr></thead>
+          <thead><tr><th>Size</th><th>OD</th><th>Take-up</th><th>Radius</th><th>Gain</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p class="note">Gain is seeded from the radius (<code>2R &minus; &pi;R/2</code>) and editable &mdash; the handout defines it as <code>(stub + tail) &minus; initial length</code>, so use the number you measured off your own bender. Editing a radius reseeds its gain.</p>
+        <p class="note"><b>Gain is the one number to check on your own bender.</b> Take-up and OD are standard; radius is derived as <code>take-up &minus; OD/2</code> and gain as <code>OD + 2R &minus; &pi;R/2</code>, the square corner minus the arc, plus one diameter because stub and tail are measured to the back of the bend. Published gain figures vary by bender, so measure yours the way the handout defines it &mdash; bend a 90, then <code>gain = (stub + tail) &minus; the length you started with</code> &mdash; and type it in. Editing OD or take-up reseeds radius and gain; editing gain directly overrides it.</p>
       </div>
       <div>
         <h2 style="margin-top:14px">Best angle by rise</h2>
@@ -271,13 +271,16 @@
 /* ---------------------------------------------------------------
    Data: everything the math is built on, all editable in the UI.
    --------------------------------------------------------------- */
+// Take-up is the well-established field value; OD is the EMT spec. The bend
+// radius follows from them (take-up puts the arrow at the tangent point, half a
+// diameter out from the centerline), and gain follows from the radius.
 const SIZES = [
-  { name: '1/2"',    takeup: 5,  radius: 4.00 },
-  { name: '3/4"',    takeup: 6,  radius: 4.50 },
-  { name: '1"',      takeup: 8,  radius: 5.75 },
-  { name: '1-1/4"',  takeup: 11, radius: 7.25 },
-  { name: '1-1/2"',  takeup: 14, radius: 8.25 },
-  { name: '2"',      takeup: 16, radius: 9.50 }
+  { name: '1/2"',    takeup: 5,  od: 0.706 },
+  { name: '3/4"',    takeup: 6,  od: 0.922 },
+  { name: '1"',      takeup: 8,  od: 1.163 },
+  { name: '1-1/4"',  takeup: 11, od: 1.510 },
+  { name: '1-1/2"',  takeup: 14, od: 1.740 },
+  { name: '2"',      takeup: 16, od: 2.197 }
 ];
 
 // Offset chart: distance between marks = rise * mult; shrink = rise * shrink.
@@ -305,8 +308,12 @@ const SADDLES = [
 ];
 
 const rad = d => d * Math.PI / 180;
-const gainOf = r => 2 * r - Math.PI * r / 2;          // straight-line corner minus the arc
-SIZES.forEach(s => { s.gain = gainOf(s.radius); });   // seeded, then editable per bender
+const radiusOf = z => z.takeup - z.od / 2;
+// Stub height and tail are both measured to the BACK of the bend, so the square
+// corner they imply is one full diameter outside the centerline corner:
+// gain = OD + (2R - piR/2).
+const gainOf = z => z.od + 2 * z.radius - Math.PI * z.radius / 2;
+SIZES.forEach(z => { z.radius = radiusOf(z); z.gain = gainOf(z); });
 const exactMult = d => 1 / Math.sin(rad(d));
 const exactShrink = d => Math.tan(rad(d / 2));
 
@@ -753,9 +760,10 @@ function buildAngleSelect(type) {
 function buildCharts() {
   el('sizeTable').querySelector('tbody').innerHTML = SIZES.map((s, i) =>
     '<tr><td>' + s.name + '</td>' +
+    '<td><input data-chart="od" data-i="' + i + '" value="' + s.od + '"></td>' +
     '<td><input data-chart="takeup" data-i="' + i + '" value="' + s.takeup + '"></td>' +
-    '<td><input data-chart="radius" data-i="' + i + '" value="' + s.radius + '"></td>' +
-    '<td><input data-chart="gain" data-i="' + i + '" value="' + s.gain.toFixed(3) + '"></td></tr>').join('');
+    '<td><input data-chart="radius" data-i="' + i + '" value="' + s.radius.toFixed(2) + '"></td>' +
+    '<td><input data-chart="gain" data-i="' + i + '" value="' + s.gain.toFixed(2) + '"></td></tr>').join('');
 
   el('bestTable').querySelector('tbody').innerHTML = BEST_ANGLE.map(b =>
     '<tr><td>' + b.note + '</td><td>' + b.deg + '°</td><td class="num">' +
@@ -776,10 +784,17 @@ function buildCharts() {
     inp.addEventListener('input', () => {
       const i = +inp.dataset.i, val = parseLen(inp.value);
       if (!isFinite(val)) return;
+      const reseed = () => {
+        SIZES[i].radius = radiusOf(SIZES[i]);
+        SIZES[i].gain = gainOf(SIZES[i]);
+        document.querySelector('[data-chart="radius"][data-i="' + i + '"]').value = SIZES[i].radius.toFixed(2);
+        document.querySelector('[data-chart="gain"][data-i="' + i + '"]').value = SIZES[i].gain.toFixed(2);
+      };
       switch (inp.dataset.chart) {
-        case 'takeup':  SIZES[i].takeup = val; buildSizeSelectPreserve(); break;
-        case 'radius':  SIZES[i].radius = val; SIZES[i].gain = gainOf(val);
-                        document.querySelector('[data-chart="gain"][data-i="' + i + '"]').value = SIZES[i].gain.toFixed(3); break;
+        case 'od':      SIZES[i].od = val; reseed(); break;
+        case 'takeup':  SIZES[i].takeup = val; reseed(); buildSizeSelectPreserve(); break;
+        case 'radius':  SIZES[i].radius = val; SIZES[i].gain = gainOf(SIZES[i]);
+                        document.querySelector('[data-chart="gain"][data-i="' + i + '"]').value = SIZES[i].gain.toFixed(2); break;
         case 'gain':    SIZES[i].gain = val; break;
         case 'omult':   OFFSETS[i].mult = val;
                         document.querySelectorAll('#bestTable tbody tr').forEach((tr, j) => {

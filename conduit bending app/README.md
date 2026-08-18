@@ -118,18 +118,31 @@ The 4-point saddle page carries the same multiplier and shrinkage table.
 mark, 1/4" shrink.
 
 **Take-up, radius and gain are not in the handout** — it lists them as bender
-info to read off your own tool. The app ships the common hand-bender EMT
-values and they are the first thing to check:
+info to read off your own tool. Take-up is the standard field value and OD is
+the EMT spec; radius and gain are derived from those two so the set stays
+self-consistent:
+
+    radius = take-up − OD/2
+    gain   = OD + 2R − πR/2
 
 | Size | 1/2" | 3/4" | 1" | 1-1/4" | 1-1/2" | 2" |
 |---|---|---|---|---|---|---|
+| OD | 0.706" | 0.922" | 1.163" | 1.510" | 1.740" | 2.197" |
 | Take-up | 5" | 6" | 8" | 11" | 14" | 16" |
-| Radius | 4" | 4-1/2" | 5-3/4" | 7-1/4" | 8-1/4" | 9-1/2" |
-| Gain | 1-11/16" | 1-15/16" | 2-1/2" | 3-1/8" | 3-9/16" | 4-1/16" |
+| Radius | 4.65" | 5.54" | 7.42" | 10.24" | 13.13" | 14.90" |
+| Gain | 2-11/16" | 3-5/16" | 4-3/8" | 5-15/16" | 7-3/8" | 8-9/16" |
 
-Gain is seeded from the radius as `2R − πR/2` and is directly editable — the
-handout defines it as a measured quantity, `(stub + tail) − initial length`, so
-overwrite it with what you measure off your bender.
+`2R − πR/2` is the square corner minus the quadrant arc that replaces it. The
+extra OD is there because stub height and tail are both measured to the **back**
+of the bend, so the corner they imply sits one full diameter outside the
+centerline corner.
+
+**Gain is the one value to verify on your own bender.** Published figures for
+it vary between sources, and it changes with the bender's radius. Measure it
+the way the handout defines it — bend a 90, then
+`gain = (stub + tail) − the length you started with` — and type it into the
+charts panel. Editing OD or take-up reseeds radius and gain; editing gain
+overrides it directly.
 
 ## Beyond the handout
 
@@ -144,5 +157,18 @@ exactly.
 **Exact mode** swaps every chart multiplier for `1/sin θ` and every shrinkage
 for `tan(θ/2)` — the pure geometry, before the rounding the chart carries.
 Useful for checking, not for matching the book.
+
+## Checked against outside sources
+
+Spot-checked against published worked examples and trade references:
+
+- 4" offset at 30° → 8" between marks, 1" shrink ✓
+- 11" stub in 1/2" EMT → mark at 6"; take-up 5" / 6" / 8" for 1/2" / 3/4" / 1" ✓
+- Multipliers as `1/sin θ`: 22° → 2.6, 15° → 3.86 ✓
+- 4" three-point saddle at 45°/22.5°: `4/sin(22.5) − 4/tan(22.5)` = 0.80"
+  shrinkage per side, against the chart's 3/16" × 4" = 3/4" ✓
+- Three-point saddle 2.5 multiplier and 3/16" per inch shrink ✓
+
+Gain was the one value the sources disagreed on — see above.
 
 Check every layout with a tape before you bend.
