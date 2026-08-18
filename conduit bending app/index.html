@@ -139,8 +139,10 @@
   <section class="card" id="inputs">
     <h2>Measurements</h2>
 
-    <label for="size">Conduit size <span class="hint">Prefills take-up and gain below</span></label>
-    <select id="size"></select>
+    <div data-f="size">
+      <label for="size">Conduit size <span class="hint">Prefills take-up and gain below</span></label>
+      <select id="size"></select>
+    </div>
 
     <div data-f="takeup">
       <label for="takeup">Stub take-up (inches) <span class="hint">Off your own bender &mdash; it varies by brand</span></label>
@@ -197,6 +199,11 @@
       <input id="gain" value="2.70" placeholder="leave blank to calculate" />
     </div>
 
+    <div data-f="desired">
+      <label for="desired">Desired length (inches) <span class="hint">Finished length of the piece &mdash; optional</span></label>
+      <input id="desired" value="" placeholder="leave blank if not known" />
+    </div>
+
     <div data-f="space">
       <label for="space">Space available for the transition (inches) <span class="hint">Optional &mdash; limits the angle choice</span></label>
       <input id="space" value="" placeholder="leave blank if unlimited" />
@@ -207,11 +214,13 @@
       <select id="angle"></select>
     </div>
 
-    <label for="mode">Values used</label>
-    <select id="mode">
-      <option value="chart">Trade chart (rounded multipliers)</option>
-      <option value="exact">Exact trig (1/sin, tan half-angle)</option>
-    </select>
+    <div data-f="mode">
+      <label for="mode">Values used</label>
+      <select id="mode">
+        <option value="chart">Trade chart (rounded multipliers)</option>
+        <option value="exact">Exact trig (1/sin, tan half-angle)</option>
+      </select>
+    </div>
 
     <p class="note">All measurements are in inches. Type decimals or fractions &mdash; <code>12</code>, <code>12.5</code>, <code>12 1/2</code> and <code>12-1/2</code> all work.</p>
   </section>
@@ -225,7 +234,7 @@
     </div>
 
     <div class="card">
-      <h2>Marks &mdash; measured from the starting end</h2>
+      <h2 id="marksHead">Marks &mdash; measured from the starting end</h2>
       <table id="marksTable">
         <thead><tr><th>Bend</th><th>Mark</th><th>From end</th><th>Bender reference</th><th>What it does</th></tr></thead>
         <tbody></tbody>
@@ -321,6 +330,10 @@ const BEST_ANGLE = [
   { upTo: 6,        deg: 30,   note: '3" to 6"' },
   { upTo: Infinity, deg: 45,   note: '6"+ (tight space)' }
 ];
+
+// Box offset is a fixed recipe, not a calculation: always these marks, always
+// 10 degrees. Nothing about the job changes them.
+const BOX = { deg: 10, mark1: 2, between: 2.25, rise: 3 / 8 };
 
 // 3-point saddle: center bend is twice the outer bend. Shrink is per side.
 const SADDLES = [
@@ -612,40 +625,36 @@ function calc(v) {
     out.profile = { kind: 'offset', dist: mark2, run: between - shrink, rise: v.rise, tail: v.tail, obsAt: v.dist };
 
   } else if (v.type === 'boxoffset') {
-    // Handout: two 10 deg bends, mark #1 a short stub in from the box end,
-    // mark #2 one multiplier-length further back. Shrink is negligible here.
-    const pick = v.angleIdx >= 0
-      ? { row: OFFSETS[v.angleIdx], why: 'Angle set manually to ' + OFFSETS[v.angleIdx].deg + '&deg;.' }
-      : { row: OFFSETS[0], why: 'Box offsets use 10&deg; bends (multiplier 6.0).' };
-    const a = offsetValues(pick.row, exact);
-    const between = v.rise * a.mult;
-    const shrink = v.rise * a.shrink;
-    const mark1 = v.dist;
-    const mark2 = mark1 + between;
-    const cut = mark2 + v.tail;
+    // Fixed recipe. The only variable is the finished length of the piece.
+    const mark1 = BOX.mark1;
+    const mark2 = mark1 + BOX.between;
+    const known = isFinite(v.desiredRaw);
     out.kpis = [
-      ['Bend angle', a.deg + '°', 'accent'], ['Multiplier', a.mult.toFixed(2)],
-      ['Rise', frac(v.rise)], ['X (between marks)', frac(between), 'accent'],
-      ['Shrinkage', frac(shrink)], ['Cut length', frac(cut), 'accent']
+      ['Bend angle', BOX.deg + '°', 'accent'], ['Rise', frac(BOX.rise)],
+      ['Mark #1', frac(mark1), 'accent'], ['Mark #2', frac(mark2), 'accent'],
+      ['Between marks', frac(BOX.between)],
+      ['Overall length', known ? frac(v.desiredRaw) : 'Undetermined', known ? 'accent' : '']
     ];
     out.marks = [
-      ['Mark #1', mark1, 'arrow', 'In from the box end &mdash; closest to the box, so bend it first', 1],
-      ['Mark #2', mark2, 'arrow', 'X further back &mdash; bend it after rolling 180&deg;', 2]
+      ['Mark #1', mark1, 'arrow', 'Always ' + frac(mark1) + ' in from the box end &mdash; bend this one first', 1],
+      ['Mark #2', mark2, 'arrow', 'Always ' + frac(BOX.between) + ' past mark #1 &mdash; bend after rotating 180&deg;', 2]
     ];
     out.center = (mark1 + mark2) / 2;
-    out.total = cut;
-    out.why = pick.why + ' Mark #1 sits ' + frac(mark1) + ' in from the box end, then X = multiplier ' + a.mult.toFixed(2) +
-      ' &times; rise ' + frac(v.rise) + ' = ' + frac(between) + ' back to mark #2. Shrinkage is only ' + frac(shrink) +
-      ' at this angle, small enough that the handout ignores it.';
+    out.total = known ? v.desiredRaw : mark2 + 6;
+    out.origin = 'box end';
+    out.why = 'A box offset is a fixed recipe, not a calculation: <b>' + frac(mark1) + ' from the box end for mark #1, ' +
+      frac(BOX.between) + ' further for mark #2, both bent ' + BOX.deg + '&deg;</b>. Conduit size does not change it. ' +
+      (known ? 'Overall length is the ' + frac(v.desiredRaw) + ' you asked for.'
+             : 'Overall length is <b>undetermined</b> until you enter a desired length.');
     out.steps = [
-      'Measure ' + frac(mark1) + ' from the box end of the conduit and mark &mdash; that is <b>mark #1</b>.',
-      'Measure ' + frac(between) + ' further back for <b>mark #2</b> (' + frac(mark2) + ' from the box end).',
-      '<b>Bend mark #1 first</b> &mdash; it is the mark closest to the box. Arrow on mark #1, bend to ' + a.deg + '&deg;.',
-      '<b>Rotate the conduit 180&deg;</b>, arrow on mark #2, bend to ' + a.deg + '&deg;.',
-      'The end should now sit ' + frac(v.rise) + ' off the wall line and land flat on the box.'
+      'Measure <b>' + frac(mark1) + '</b> from the box end of the conduit and mark &mdash; that is mark #1.',
+      'Measure <b>' + frac(BOX.between) + '</b> further along for mark #2 (' + frac(mark2) + ' from the box end).',
+      '<b>Bend mark #1 first</b> &mdash; arrow on the mark, bend to ' + BOX.deg + '&deg;.',
+      '<b>Rotate the conduit 180&deg;</b>, arrow on mark #2, bend to ' + BOX.deg + '&deg;.',
+      'The end now sits ' + frac(BOX.rise) + ' off the wall line and lands flat on the box.'
     ];
-    if (v.rise > 1.5) out.alerts.push(['warn', 'A box offset is normally 3/8" to 1" deep &mdash; ' + frac(v.rise) + ' is deep for stepping onto a box.']);
-    out.profile = { kind: 'offset', dist: v.tail, run: between - shrink, rise: v.rise, tail: mark1 };
+    if (!known) out.alerts.push(['info', 'Enter a desired length if you want the overall length. The marks and the bends do not change either way.']);
+    out.profile = { kind: 'box', mark1: mark1, mark2: mark2, rise: BOX.rise, total: known ? v.desiredRaw : mark2 + 8 };
 
   } else if (v.type === 'saddle3') {
     const rise = v.rise + v.clear;
@@ -746,13 +755,13 @@ function calc(v) {
 /* ---------------------------------------------------------------
    Drawing
    --------------------------------------------------------------- */
-function drawLayout(marks, total) {
+function drawLayout(marks, total, originLabel) {
   const W = 700, H = 130, padL = 30, padR = 30, y = 62, h = 22;
   const span = Math.max(total, 1);
   const x = p => padL + (p / span) * (W - padL - padR);
   let s = '<rect x="' + padL + '" y="' + (y - h / 2) + '" width="' + (W - padL - padR) + '" height="' + h +
           '" rx="3" fill="#0f1e33" stroke="#274157"/>';
-  s += '<text x="' + padL + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11">start</text>';
+  s += '<text x="' + padL + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11">' + (originLabel || 'start') + '</text>';
   s += '<text x="' + (W - padR) + '" y="' + (y + h / 2 + 16) + '" fill="#64748b" font-size="11" text-anchor="end">' + frac(span) + '</text>';
   marks.forEach((m, i) => {
     const px = x(m[1]);
@@ -768,7 +777,7 @@ function drawLayout(marks, total) {
 function drawProfile(p) {
   const W = 700, padL = 40, padR = 40;
   if (!p) return { svg: '', h: 120 };
-  let pts = [], obs = null, mark = null, maxY = 1;
+  let pts = [], obs = null, mark = null, box = null, maxY = 1;
   if (p.kind === 'L') {
     pts = [[0, p.stub], [0, 0], [p.tail, 0]];
     maxY = p.stub;
@@ -779,6 +788,12 @@ function drawProfile(p) {
     pts = [[0, 0], [p.dist, 0], [p.dist + p.run, p.rise], [p.dist + p.run + p.tail, p.rise]];
     maxY = p.rise;
     if (isFinite(p.obsAt)) mark = { x: p.obsAt, label: 'obstruction' };
+  } else if (p.kind === 'box') {
+    // Box on the right; the short stub runs into it, the long run goes off left.
+    const L = p.total;
+    pts = [[0, 0], [L - p.mark2, 0], [L - p.mark1, p.rise], [L, p.rise]];
+    maxY = p.rise;
+    box = { x: L, y: p.rise };
   } else if (p.kind === 'saddle3') {
     pts = [[0, 0], [p.dist - p.run, 0], [p.dist, p.rise], [p.dist + p.run, 0], [p.dist + p.run + p.tail, 0]];
     obs = { x0: p.dist - p.obs / 2, x1: p.dist + p.obs / 2, h: p.obs };
@@ -792,7 +807,7 @@ function drawProfile(p) {
   const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
   const spanX = Math.max(...xs) - Math.min(...xs) || 1;
   const spanY = Math.max(maxY, ...ys) || 1;
-  const sx = (W - padL - padR) / spanX;
+  const sx = (W - padL - (box ? padR + 34 : padR)) / spanX;
   const sy = Math.min(sx, 100 / spanY);
   // Height follows the drawing so short bends don't float in dead space.
   const H = Math.max(120, Math.round(spanY * sy) + 72);
@@ -813,6 +828,13 @@ function drawProfile(p) {
          '" stroke="#fca5a5" stroke-width="1" stroke-dasharray="3 3"/>';
     s += '<text x="' + X(mark.x) + '" y="' + (Y(spanY * 1.15) - 4) + '" fill="#fca5a5" font-size="11" text-anchor="middle">' + mark.label + '</text>';
   }
+  if (box) {
+    const bw = 26, bh = 40;
+    s += '<rect x="' + X(box.x) + '" y="' + (Y(box.y) - bh / 2) + '" width="' + bw + '" height="' + bh +
+         '" rx="3" fill="rgba(56,189,248,0.16)" stroke="#38bdf8"/>';
+    s += '<text x="' + (X(box.x) + bw / 2) + '" y="' + (Y(box.y) - bh / 2 - 7) +
+         '" fill="#7dd3fc" font-size="11" text-anchor="middle">box</text>';
+  }
   const d = pts.map((q, i) => (i ? 'L' : 'M') + X(q[0]) + ' ' + Y(q[1])).join(' ');
   s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" opacity="0.25"/>';
   s += '<path d="' + d + '" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -832,18 +854,18 @@ function drawProfile(p) {
    Field visibility per bend type
    --------------------------------------------------------------- */
 const FIELDS = {
-  stub90:    ['takeup', 'stub', 'tail', 'initial', 'gain'],
-  b2b90:     ['takeup', 'stub', 'b2b', 'stub2', 'initial', 'gain'],
-  offset:    ['rise', 'dist', 'space', 'tail', 'angle'],
-  boxoffset: ['rise', 'dist', 'tail', 'angle'],
-  saddle3:   ['rise', 'dist', 'clear', 'tail', 'angle'],
-  saddle4:   ['rise', 'obsLen', 'dist', 'clear', 'space', 'tail', 'angle']
+  // Only fields that actually change the answer for that bend.
+  stub90:    ['size', 'takeup', 'stub', 'tail', 'initial', 'gain'],
+  b2b90:     ['size', 'takeup', 'stub', 'b2b', 'stub2', 'initial', 'gain'],
+  offset:    ['rise', 'dist', 'space', 'tail', 'angle', 'mode'],
+  boxoffset: ['desired'],
+  saddle3:   ['rise', 'dist', 'clear', 'tail', 'angle', 'mode'],
+  saddle4:   ['rise', 'obsLen', 'dist', 'clear', 'space', 'tail', 'angle', 'mode']
 };
 const LABELS = {
   offset:    { rise: 'Obstruction rise (inches) <span class="hint">Height you need to step up to</span>',
                dist: 'Distance from end of conduit to the obstruction (inches)' },
-  boxoffset: { rise: 'Rise (inches) <span class="hint">Depth of the box, usually 3/8&Prime;</span>',
-               dist: 'Mark #1 (inches) <span class="hint">How far in from the box end the first bend goes</span>' },
+
   saddle3:   { rise: 'Obstruction rise (inches) <span class="hint">How high the saddle must clear</span>',
                dist: 'Distance from end of conduit to the <b>center</b> of the obstruction (inches)' },
   saddle4:   { rise: 'Obstruction rise (inches) <span class="hint">How high the saddle must clear</span>',
@@ -855,7 +877,7 @@ const MEMORY = {
   stub90:    { takeup: '5', stub: '12', tail: '24', initial: '', gain: '2.70' },
   b2b90:     { takeup: '5', stub: '12', stub2: '12', b2b: '24', initial: '', gain: '2.70' },
   offset:    { rise: '4', dist: '30', tail: '24', space: '' },
-  boxoffset: { rise: '3/8', dist: '2', tail: '24' },
+  boxoffset: { desired: '' },
   saddle3:   { rise: '4', dist: '30', clear: '0', tail: '24' },
   saddle4:   { rise: '4', obsLen: '8', dist: '30', clear: '0', tail: '24', space: '' }
 };
@@ -976,7 +998,8 @@ function run() {
     initialRaw: parseLen(el('initial').value),
     stub2Raw: parseLen(el('stub2').value),
     b2bRaw: parseLen(el('b2b').value),
-    gainRaw: parseLen(el('gain').value)
+    gainRaw: parseLen(el('gain').value),
+    desiredRaw: parseLen(el('desired').value)
   };
   const r = calc(v);
 
@@ -994,11 +1017,12 @@ function run() {
     '<td class="num">' + frac(m[1]) + ' <small style="color:#64748b">(' + dec(m[1]) + ')</small></td>' +
     '<td><span class="tag ' + m[2] + '">' + symbol[m[2]] + '</span></td><td>' + m[3] + '</td></tr>').join('');
 
+  el('marksHead').innerHTML = 'Marks &mdash; measured from the ' + (r.origin || 'starting end');
   el('centerPunch').innerHTML = r.center === null ? '' :
-    'Center punch / center of the bend group: <b>' + frac(r.center) + '</b> from the starting end. ' +
+    'Center punch / center of the bend group: <b>' + frac(r.center) + '</b> from the ' + (r.origin || 'starting end') + '. ' +
     'Mark all the way around the conduit so you can see it once the bender is on.';
 
-  el('layoutSvg').innerHTML = drawLayout(r.marks, r.total);
+  el('layoutSvg').innerHTML = drawLayout(r.marks, r.total, r.origin);
   const prof = drawProfile(r.profile);
   el('profileSvg').setAttribute('viewBox', '0 0 700 ' + prof.h);
   el('profileSvg').innerHTML = prof.svg;

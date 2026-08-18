@@ -20,7 +20,7 @@ marked as such below.
 | 90° stub-up | take-up, and any three of stub / tail / initial length / gain | mark #1 and the fourth value solved |
 | Back-to-back 90° * | take-up, and any four of stub / back-to-back / second stub / initial length / gain | mark #1 (arrow), mark #2 (star/tee), and the fifth value solved |
 | Offset | rise, distance to obstruction, tail, space available | best angle, multiplier, marks #1–#2, shrinkage, cut length |
-| Box offset | rise, mark #1 distance, tail | marks #1–#2, cut length; defaults to 10° and 3/8" |
+| Box offset | nothing, or a desired length | fixed marks #1–#2 and bends; overall length if a desired length is given |
 | 3-point saddle | obstruction rise, distance to center, clearance, tail | center + return angles, marks #A/#B/#C, shrinkage, cut length |
 | 4-point saddle | rise, length of obstruction, distance to obstruction, clearance, tail | best angle, marks #A–#D, shrinkage, cut length |
 
@@ -81,10 +81,17 @@ Align your marks with the arrow to bend.
 to mark #1 is what lands the finished conduit at the obstruction rather than
 short of it. Align your marks with the arrow.
 
-**Box offset** — two 10° bends. Mark #1 goes a short distance in from the box
-end (2" in the handout example), mark #2 sits `MULTIPLIER × RISE` further back.
-With the handout's 3/8" rise that is 6.0 × 3/8" = 2-1/4" between marks.
-Shrinkage at 10° is under 1/16" here, which is why the handout ignores it.
+**Box offset** — a fixed recipe, not a calculation:
+
+    MARK #1 = 2" from the box end
+    MARK #2 = 2-1/4" further along  (4-1/4" from the box end)
+    Both bends 10 degrees. Bend mark #1 first, rotate 180, bend mark #2.
+
+None of it varies — not with conduit size, not with anything else, so the
+screen has no rise, angle or distance to set. The one optional input is a
+desired length; give it and you get the overall length back, leave it and the
+overall length reads **undetermined**. The marks and the bends are the same
+either way.
 
 **3-point saddle** (for round obstructions)
 
