@@ -39,9 +39,9 @@ for the values, and fails to parse older V20 projects, so it isn't used.)
    signature.
 
 **Versions:** verified on **V20** (RH250), **V35** (RH800) and **V37**
-(CCS_230021, water tube). The auto-detection is built to carry across the
-versions in between and newer ones; if a future file reads wrong, it's usually
-one more name-offset to add.
+(CCS_230021 and CCS_240020, water tube). The auto-detection is built to carry
+across the versions in between and newer ones; if a future file reads wrong,
+it's usually one more name-offset to add.
 
 ### The `.L5K` path
 
@@ -110,16 +110,29 @@ just says `O2 trim enabled.` or `O2 trim disabled.` without naming the tag; run
 
 ### Fresh air loop
 
-`FreshAirLoopEnable` gates the Fresh Air column: when it's `0` the column is
-dropped entirely rather than shown full of positions the boiler never uses.
+`FreshAirDamperLoopEnabled` gates the Fresh Air column: when it's `0` the
+column is dropped entirely rather than shown full of positions the boiler never
+uses. (`FreshAirLoopDisabled` is the inverse and is a `TIMER` in at least one
+project — it's deliberately not consulted.)
 
 If either flag tag is missing the reader keeps the column / falls back to
 "does the characterizer hold data" — hiding a commissioned curve is worse than
 showing one that isn't used.
 
-Both flags are read by comparing the raw 4 bytes against zero, so it doesn't
-matter whether the tag is a `BOOL`, `DINT` or `REAL` (decoding as float32
-would be wrong for an integer tag — a `DINT` of 1 reads as `1.4e-45`).
+### Reading flag tags
+
+Both flags are read by comparing the payload bytes against zero rather than
+decoding a number, so the tag's type doesn't matter. That cuts both ways:
+
+* a `BOOL` payload is **1 byte**, so a fixed 4-byte read misses it entirely;
+* decoding an integer tag as float32 is wrong — a `DINT` of 1 reads as
+  `1.4e-45`.
+
+The payload is located by scanning **backwards** from the end of the record for
+the length word that accounts for the remaining bytes. Backwards matters: the
+421-byte `BOOL` records carry header bytes at offset 74 that satisfy the same
+equation (claiming a 343-byte payload), so a forward scan latches onto the
+wrong block and the flag reads as unset.
 
 ### Auto-detection
 

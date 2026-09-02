@@ -379,7 +379,9 @@ const WT_TAGS = {
                 [], []]
 };
 // Fresh air is optional — when the loop is off the column is dropped.
-const FRESH_AIR_ENABLE_TAGS=["FreshAirLoopEnable","FreshAirLoopEnabled","FreshAirEnable","FreshAirLoop_Enable"];
+// Enable-sense tags only: FreshAirLoopDisabled is the inverse (and a TIMER in
+// at least one project), so it is deliberately not in this list.
+const FRESH_AIR_ENABLE_TAGS=["FreshAirDamperLoopEnabled","FreshAirLoopEnabled","FreshAirLoopEnable","FreshAirDamperEnable","FreshAirEnable"];
 // O2 trim state. This tag is inverted: in standby means trim is NOT running,
 // so 0 = enabled and 1 = disabled.
 const O2_STANDBY_TAGS=["OxygenTrimInStandby","O2TrimInStandby","OxygenTrimStandby"];
@@ -396,29 +398,40 @@ function hasCharacterizers(comps){
   return false;
 }
 /* A tag value record ends with <u32 byte-count><that many bytes of float32>. */
+/* Candidate [offset,length] value blocks, the one nearest the end first.
+   Scanning BACKWARDS matters: unrelated header bytes earlier in the record can
+   coincidentally satisfy the length equation (one 421-byte BOOL record has a
+   spurious match at offset 74 claiming a 343-byte payload), and the real block
+   is always the one at the end. */
+function wtPayloads(buf){
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), n=buf.length;
+  const out=[];
+  for(let k=n-4;k>=0;k--) if(_u32(dv,k)===n-k-4) out.push([k+4, n-k-4]);
+  return out;
+}
 function wtDecodeReals(buf){
   if(!buf) return null;
-  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), n=buf.length;
-  for(let k=0;k<n-4;k++){
-    const ln=_u32(dv,k);
-    if(ln!==n-k-4 || ln<4 || (ln%4)) continue;
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength);
+  for(const [off,ln] of wtPayloads(buf)){
+    if(ln<4 || (ln%4)) continue;
     const vals=[]; let ok=true;
-    for(let i=0;i<ln/4;i++){const v=_f32(dv,k+4+4*i); if(!(isFinite(v)&&v>-1e9&&v<1e9)){ok=false;break;} vals.push(v);}
+    for(let i=0;i<ln/4;i++){const v=_f32(dv,off+4*i); if(!(isFinite(v)&&v>-1e9&&v<1e9)){ok=false;break;} vals.push(v);}
     if(ok) return vals;
   }
   return null;
 }
-/* Read a 4-byte scalar as an on/off flag — true, false, or null if unreadable.
-   Compared against zero as raw bytes so it works whether the tag is a BOOL,
-   DINT or REAL (decoding as float32 would be wrong for an integer tag). */
+/* Read a scalar as an on/off flag — true, false, or null if unreadable.
+   Payload bytes are compared against zero rather than decoded to a number, so
+   it works whichever type the tag is. That matters both ways: a BOOL stores a
+   single byte (a 4-byte read misses it entirely), and decoding an integer tag
+   as float32 would be wrong — a DINT of 1 reads as 1.4e-45. */
+const FLAG_WIDTHS=[1,2,4,8];           // BOOL, INT, DINT/REAL, LINT
 function wtDecodeFlag(buf){
   if(!buf) return null;
-  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), n=buf.length;
-  for(let k=0;k<n-4;k++){
-    const ln=_u32(dv,k);
-    if(ln!==n-k-4) continue;
-    if(ln!==4) return null;            // not a scalar payload
-    return _i32(dv,k+4)!==0;
+  for(const [off,ln] of wtPayloads(buf)){
+    if(FLAG_WIDTHS.indexOf(ln)<0) continue;
+    for(let i=0;i<ln;i++) if(buf[off+i]!==0) return true;
+    return false;
   }
   return null;
 }

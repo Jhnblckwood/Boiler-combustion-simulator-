@@ -86,8 +86,11 @@ WT_TAGS = {
 
 # Fresh air is optional on these boilers — when the loop is switched off the
 # column is dropped rather than shown full of unused positions.
-FRESH_AIR_ENABLE_TAGS = ["FreshAirLoopEnable", "FreshAirLoopEnabled",
-                         "FreshAirEnable", "FreshAirLoop_Enable"]
+# Enable-sense tags only: FreshAirLoopDisabled is the inverse (and a TIMER in
+# at least one project), so it is deliberately not in this list.
+FRESH_AIR_ENABLE_TAGS = ["FreshAirDamperLoopEnabled", "FreshAirLoopEnabled",
+                         "FreshAirLoopEnable", "FreshAirDamperEnable",
+                         "FreshAirEnable"]
 
 # O2 trim state. This tag is inverted: in standby means trim is NOT running,
 # so 0 = enabled and 1 = disabled.
@@ -133,45 +136,57 @@ def has_characterizers(comps) -> bool:
 # Value decoding
 # ---------------------------------------------------------------------------
 
+def _payloads(buf):
+    """Candidate ``(offset, length)`` value blocks, the one nearest the end first.
+
+    A record ends with ``<u32 byte-count><that many bytes>``, so the payload is
+    found by locating the length word that exactly accounts for the remaining
+    bytes. Scanning *backwards* matters: unrelated header bytes earlier in the
+    record can coincidentally satisfy that equation (one 421-byte BOOL record
+    has a spurious match at offset 74 claiming a 343-byte payload), and the
+    real block is always the one at the end.
+    """
+    n = len(buf)
+    for k in range(n - 4, -1, -1):
+        if struct.unpack_from("<I", buf, k)[0] == n - k - 4:
+            yield k + 4, n - k - 4
+
+
 def decode_reals(buf):
     """Pull the REAL payload off the end of a tag value record.
 
-    The record ends with ``<u32 byte-count><that many bytes of little-endian
-    float32>``, so the payload is found by locating the length word that
-    exactly accounts for the remaining bytes. Works for both a scalar (4 bytes)
-    and an array (4 x N).
+    Works for both a scalar (4 bytes) and an array (4 x N).
     """
     if buf is None:
         return None
-    n = len(buf)
-    for k in range(0, n - 4):
-        ln = struct.unpack_from("<I", buf, k)[0]
-        if ln != n - k - 4 or ln < 4 or ln % 4:
+    for off, ln in _payloads(buf):
+        if ln < 4 or ln % 4:
             continue
-        vals = list(struct.unpack_from("<%df" % (ln // 4), buf, k + 4))
+        vals = list(struct.unpack_from("<%df" % (ln // 4), buf, off))
         if all(math.isfinite(v) and -1e9 < v < 1e9 for v in vals):
             return vals
     return None
 
 
-def decode_flag(buf):
-    """Read a 4-byte scalar as an on/off flag — ``True``, ``False`` or ``None``.
+# Scalar payload widths that can carry an on/off flag: BOOL is 1 byte, INT 2,
+# DINT/REAL 4, LINT 8.
+_FLAG_WIDTHS = (1, 2, 4, 8)
 
-    The raw bytes are compared against zero rather than decoded to a number,
-    so this works whichever type the tag happens to be: a ``BOOL``, ``DINT`` or
-    ``REAL`` is zero exactly when all four bytes are zero. (Decoding as float32
-    would be wrong for an integer tag — a ``DINT`` of 1 reads as 1.4e-45.)
+
+def decode_flag(buf):
+    """Read a scalar tag as an on/off flag — ``True``, ``False`` or ``None``.
+
+    The payload bytes are compared against zero rather than decoded to a
+    number, so this works whichever type the tag happens to be. That matters
+    both ways: a ``BOOL`` stores a single byte (so a 4-byte read would miss it
+    entirely), and decoding an integer tag as float32 would be wrong — a
+    ``DINT`` of 1 reads as 1.4e-45.
     """
     if buf is None:
         return None
-    n = len(buf)
-    for k in range(0, n - 4):
-        ln = struct.unpack_from("<I", buf, k)[0]
-        if ln != n - k - 4:
-            continue
-        if ln != 4:                       # not a scalar payload
-            return None
-        return struct.unpack_from("<i", buf, k + 4)[0] != 0
+    for off, ln in _payloads(buf):
+        if ln in _FLAG_WIDTHS:
+            return any(buf[off:off + ln])
     return None
 
 
