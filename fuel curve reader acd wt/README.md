@@ -98,15 +98,28 @@ tries a list of aliases.
 ### O2 trim
 
 Each fuel trims off **its own** characterizer — `OxygenTrimCharacterizer_Gas_Y`
-for gas, `OxygenTrimCharacterizer_Oil_Y` for #2 oil — and the note under the
-table names the tag each fuel's column actually came from.
+for gas, `OxygenTrimCharacterizer_Oil_Y` for #2 oil.
 
-The column is shown when an O2 characterizer holds data. (Unlike firetube,
-there's no `DesiredO2.Cfg.O2Curve` bit to gate on — the water-tube
-`OxygenTrimEnableDisable` tag is a `REAL` setpoint, not an enable flag.)
+Whether the column appears is decided by **`OxygenTrimInStandby`**, which is
+**inverted** — `0` = trim enabled, `1` = trim in standby (disabled). The footer
+just says `O2 trim enabled.` or `O2 trim disabled.` without naming the tag; run
+`--tags` if you need to see which tag drove it.
 
 > The two fuels having identical O2 numbers is normal in an uncommissioned
 > file; they're read from separate tags, so real differences do show up.
+
+### Fresh air loop
+
+`FreshAirLoopEnable` gates the Fresh Air column: when it's `0` the column is
+dropped entirely rather than shown full of positions the boiler never uses.
+
+If either flag tag is missing the reader keeps the column / falls back to
+"does the characterizer hold data" — hiding a commissioned curve is worse than
+showing one that isn't used.
+
+Both flags are read by comparing the raw 4 bytes against zero, so it doesn't
+matter whether the tag is a `BOOL`, `DINT` or `REAL` (decoding as float32
+would be wrong for an integer tag — a `DINT` of 1 reads as `1.4e-45`).
 
 ### Auto-detection
 
@@ -209,7 +222,8 @@ ACD and L5K produce the identical table.
 |------|---------|
 | `curve_gui.py` | Drag-and-drop GUI; auto-detects `.ACD` / `.L5K`, shows the "Decrypting ACD…" popup. |
 | `acd_reader.py` | Reads real curve values straight from a binary `.ACD`; picks the water-tube or firetube path. |
-| `wt_reader.py` | Water-tube characterizer decoding (tag map, aliases, `REAL` array payloads). |
+| `wt_reader.py` | Water-tube characterizer decoding (tag map, aliases, `REAL` array payloads, enable flags). |
+| `test_wt_flags.py` | `python test_wt_flags.py` — checks the fresh-air and O2-trim flag logic against synthetic value records, so it runs without an `.ACD` to hand. |
 | `fuel_curves.py` | `.L5K` extraction + shared table building (column set and point count are per-file). |
 | `curve_extractor.py` | Shared helpers / original single-set extractor. |
 | `Fuel Curve Reader.html` | No-install single-file reader — `.ACD` + `.L5K`, water tube + firetube. |

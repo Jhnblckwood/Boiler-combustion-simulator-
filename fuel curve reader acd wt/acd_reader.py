@@ -324,6 +324,18 @@ if __name__ == "__main__":
         # Which tags fed each column — worth checking on a file whose naming
         # hasn't been seen before.
         print("Tag map")
+        # The enable/standby decisions are kept out of the table footer, so
+        # this is where you check which tag drove them.
+        fa_tag = getattr(result, "fresh_air_tag", None)
+        if fa_tag:
+            state = getattr(result, "fresh_air_on", None)
+            print("  Fresh air loop  %s = %s -> column %s"
+                  % (fa_tag, 1 if state else 0, "shown" if state else "dropped"))
+        o2_tag = getattr(result, "o2_source_tag", None)
+        if o2_tag:
+            print("  O2 trim         %s = %s -> %s"
+                  % (o2_tag, 0 if result.o2_trim_enabled else 1,
+                     "enabled" if result.o2_trim_enabled else "disabled"))
         for fuel in result.fuels:
             print(f"  Fuel {fuel.number} — {fuel.name}")
             for col, cc in fuel.columns.items():

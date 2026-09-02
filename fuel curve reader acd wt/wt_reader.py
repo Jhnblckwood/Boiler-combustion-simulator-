@@ -84,6 +84,16 @@ WT_TAGS = {
     ),
 }
 
+# Fresh air is optional on these boilers — when the loop is switched off the
+# column is dropped rather than shown full of unused positions.
+FRESH_AIR_ENABLE_TAGS = ["FreshAirLoopEnable", "FreshAirLoopEnabled",
+                         "FreshAirEnable", "FreshAirLoop_Enable"]
+
+# O2 trim state. This tag is inverted: in standby means trim is NOT running,
+# so 0 = enabled and 1 = disabled.
+O2_STANDBY_TAGS = ["OxygenTrimInStandby", "O2TrimInStandby",
+                   "OxygenTrimStandby"]
+
 
 def _candidates(templates, fuel_key):
     """Expand ``{F}`` in each template across that fuel's name aliases."""
@@ -144,6 +154,36 @@ def decode_reals(buf):
     return None
 
 
+def decode_flag(buf):
+    """Read a 4-byte scalar as an on/off flag — ``True``, ``False`` or ``None``.
+
+    The raw bytes are compared against zero rather than decoded to a number,
+    so this works whichever type the tag happens to be: a ``BOOL``, ``DINT`` or
+    ``REAL`` is zero exactly when all four bytes are zero. (Decoding as float32
+    would be wrong for an integer tag — a ``DINT`` of 1 reads as 1.4e-45.)
+    """
+    if buf is None:
+        return None
+    n = len(buf)
+    for k in range(0, n - 4):
+        ln = struct.unpack_from("<I", buf, k)[0]
+        if ln != n - k - 4:
+            continue
+        if ln != 4:                       # not a scalar payload
+            return None
+        return struct.unpack_from("<i", buf, k + 4)[0] != 0
+    return None
+
+
+def _flag(lookup, names):
+    """First name that resolves to a scalar flag wins; ``(value, tag_name)``."""
+    for nm in names:
+        val = decode_flag(lookup(nm))
+        if val is not None:
+            return val, nm
+    return None, None
+
+
 def _scalar(lookup, names):
     """First name that resolves wins; returns ``(value, tag_name)``."""
     for nm in names:
@@ -177,14 +217,23 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
     ``lookup(tag_name)`` returns that tag's raw value-record bytes, or ``None``.
     """
     data = MultiFuelData(source_file=source_file, controller_name=controller_name)
-    data.column_order = WT_COLUMNS
+
+    # Fresh air loop off -> drop the column entirely. If the tag can't be read
+    # the column stays: hiding a commissioned curve is worse than showing one
+    # the boiler doesn't use.
+    fresh_air_on, fa_tag = _flag(lookup, FRESH_AIR_ENABLE_TAGS)
+    columns = [c for c in WT_COLUMNS
+               if not (c == "Fresh Air" and fresh_air_on is False)]
+    data.column_order = columns
+    data.fresh_air_on = fresh_air_on
+    data.fresh_air_tag = fa_tag
 
     points = 0
-    o2_tags = []          # per-fuel O2 trim source, for the note
+    o2_tags = []          # per-fuel O2 trim source, for `--tags`
 
     for number, key in enumerate(("gas", "oil"), start=1):
         fuel = FuelCurves(number=number, name=FUEL_TITLE[key])
-        for col in WT_COLUMNS:
+        for col in columns:
             curve_tpl, purge_tpl, ltoff_tpl = WT_TAGS[col]
             curve, tag = _array(lookup, _candidates(curve_tpl, key))
             if curve is None:
@@ -206,18 +255,15 @@ def build_watertube(lookup, source_file=None, controller_name=None) -> MultiFuel
         data.fuels.append(fuel)
 
     data.point_count = points or None
-    # There's no single Cfg bit here the way the firetube DesiredO2 tag has, so
-    # the O2 column is shown whenever an O2 characterizer actually holds data.
-    data.o2_trim_enabled = bool(o2_tags)
 
+    # O2 trim comes from the standby tag, which is inverted: 0 = enabled.
+    # Falls back to "is there any characterizer data" if the tag is missing.
+    standby, o2_tag = _flag(lookup, O2_STANDBY_TAGS)
+    data.o2_trim_enabled = (not standby) if standby is not None else bool(o2_tags)
+    data.o2_source_tag = o2_tag
+    data.o2_curve_tags = o2_tags
+
+    data.notes.append("Water-tube program.")
     data.notes.append(
-        "Water-tube program — curves read from the "
-        "<actuator>Characterizer_<fuel>_Y arrays (the _X breakpoint arrays are "
-        "the firing-rate axis and are not shown).")
-    if o2_tags:
-        data.notes.append(
-            "O2 trim is per fuel — "
-            + ", ".join("%s from %s" % (f, t) for f, t in o2_tags) + ".")
-    else:
-        data.notes.append("No O2 trim characterizer data — O2 column omitted.")
+        "O2 trim " + ("enabled." if data.o2_trim_enabled else "disabled."))
     return data

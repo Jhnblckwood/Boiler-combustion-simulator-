@@ -378,6 +378,11 @@ const WT_TAGS = {
   "O2":        [["OxygenTrimCharacterizer_{F}_Y","O2TrimCharacterizer_{F}_Y","OxygenCharacterizer_{F}_Y"],
                 [], []]
 };
+// Fresh air is optional — when the loop is off the column is dropped.
+const FRESH_AIR_ENABLE_TAGS=["FreshAirLoopEnable","FreshAirLoopEnabled","FreshAirEnable","FreshAirLoop_Enable"];
+// O2 trim state. This tag is inverted: in standby means trim is NOT running,
+// so 0 = enabled and 1 = disabled.
+const O2_STANDBY_TAGS=["OxygenTrimInStandby","O2TrimInStandby","OxygenTrimStandby"];
 function wtCandidates(templates, fuel){
   const out=[];
   for(const tpl of templates){
@@ -403,11 +408,40 @@ function wtDecodeReals(buf){
   }
   return null;
 }
+/* Read a 4-byte scalar as an on/off flag — true, false, or null if unreadable.
+   Compared against zero as raw bytes so it works whether the tag is a BOOL,
+   DINT or REAL (decoding as float32 would be wrong for an integer tag). */
+function wtDecodeFlag(buf){
+  if(!buf) return null;
+  const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), n=buf.length;
+  for(let k=0;k<n-4;k++){
+    const ln=_u32(dv,k);
+    if(ln!==n-k-4) continue;
+    if(ln!==4) return null;            // not a scalar payload
+    return _i32(dv,k+4)!==0;
+  }
+  return null;
+}
+function wtFlag(lookup, names){
+  for(const nm of names){
+    const v=wtDecodeFlag(lookup(nm));
+    if(v!==null) return [v, nm];
+  }
+  return [null, null];
+}
+
 function wtExtract(lookup){
   const fuels=[]; let points=0; const o2Tags=[];
+
+  // Fresh air loop off -> drop the column entirely. If the tag can't be read
+  // the column stays: hiding a commissioned curve is worse than showing one
+  // the boiler doesn't use.
+  const [freshAirOn] = wtFlag(lookup, FRESH_AIR_ENABLE_TAGS);
+  const COLUMNS = WT_COLUMNS.filter(c => !(c==="Fresh Air" && freshAirOn===false));
+
   for(let n=0;n<WT_FUELS.length;n++){
     const fuel=WT_FUELS[n], cols={};
-    for(const col of WT_COLUMNS){
+    for(const col of COLUMNS){
       const [curveT, purgeT, ltoffT] = WT_TAGS[col];
       // Alias lists are priority-ordered — the first name that resolves wins.
       let curve=null, curveTag=null;
@@ -432,13 +466,15 @@ function wtExtract(lookup){
   }
   const rowLabels=["purge","LtOff"];
   for(let i=1;i<=points;i++) rowLabels.push(String(i));
+  // O2 trim comes from the standby tag, which is inverted: 0 = enabled.
+  // Falls back to "is there any characterizer data" if the tag is missing.
+  const [standby] = wtFlag(lookup, O2_STANDBY_TAGS);
+  const o2en = (standby!==null) ? !standby : (o2Tags.length>0);
+
   return {
-    o2en:o2Tags.length>0, fuels, controller:"",
-    columnOrder:WT_COLUMNS, rowLabels,
-    o2note:"Water-tube program — curves read from the &lt;actuator&gt;Characterizer_&lt;fuel&gt;_Y arrays "
-          +"(the _X breakpoint arrays are the firing-rate axis and are not shown). "
-          +(o2Tags.length ? "O2 trim is per fuel — "+o2Tags.join(", ")+"."
-                          : "No O2 trim characterizer data — O2 column omitted.")
+    o2en, fuels, controller:"",
+    columnOrder:COLUMNS, rowLabels,
+    o2note:"Water-tube program. O2 trim "+(o2en?"enabled.":"disabled.")
   };
 }
 
