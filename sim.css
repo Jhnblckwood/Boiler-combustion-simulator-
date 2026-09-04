@@ -1,0 +1,207 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Boiler Combustion Simulator — shared styles
+   Used by both desktop.html and mobile.html. Layout-specific rules
+   (range sliders, stepper buttons, sticky strips) live in each page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: #020817;
+  background-image: radial-gradient(ellipse at 20% 0%, #0c1a3a 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 100%, #0a1628 0%, transparent 50%);
+  font-family: 'Share Tech Mono', monospace;
+  color: #e2e8f0;
+  padding-bottom: 40px;
+}
+
+/* ── Buttons ── */
+.btn { font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; border-radius: 10px; border: 2px solid; padding: 14px 0; cursor: pointer; transition: all 0.2s; width: 100%; }
+.btn:disabled { cursor: not-allowed; opacity: 0.5; }
+.btn-save  { background: #166534; border-color: #16a34a; color: #4ade80; }
+.btn-save.saved { background: #14532d; border-color: #4ade80; }
+.btn-save:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 4px 20px #4ade8060; }
+.btn-next  { background: #0f172a; border-color: #1e293b; color: #334155; }
+.btn-next.active { background: #0c1a3a; border-color: #38bdf8; color: #38bdf8; cursor: pointer; }
+.btn-next.active:hover { transform: translateY(-1px); box-shadow: 0 4px 20px #38bdf860; }
+.btn-back  { background: transparent; border: 1px solid #334155; border-radius: 8px; color: #64748b; font-size: 12px; cursor: pointer; font-family: 'Share Tech Mono', monospace; padding: 10px 0; width: 100%; transition: all 0.2s; }
+.btn-export { background: #0f0f2e; border: 2px solid #818cf8; border-radius: 8px; color: #818cf8; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Share Tech Mono', monospace; padding: 10px 0; width: 100%; letter-spacing: 0.05em; transition: all 0.2s; }
+.btn-export.flash { background: #1e1b4b; }
+
+/* ── Header ── */
+#header {
+  background: linear-gradient(180deg, #0f172a 0%, #020817 100%);
+  border-bottom: 1px solid #1e293b;
+  padding: 20px 24px 16px;
+}
+.header-inner { max-width: 960px; margin: 0 auto; }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.header-subtitle { font-size: 11px; color: #e2e8f0; letter-spacing: 0.2em; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; }
+h1 {
+  font-size: 22px; font-weight: 900; font-family: 'Exo 2', sans-serif; line-height: 1;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.skill-toggle { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.skill-toggle-label { font-size: 10px; color: #94a3b8; letter-spacing: 0.15em; text-transform: uppercase; }
+.skill-toggle-btns { display: flex; gap: 0; border: 1px solid #334155; border-radius: 6px; overflow: hidden; }
+.skill-btn { background: #1e293b; color: #94a3b8; border: none; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 0.08em; }
+.skill-btn.beginner.active { background: #10b981; color: #fff; }
+.skill-btn.advanced.active { background: #38bdf8; color: #0b1120; }
+.saved-count { text-align: right; }
+.saved-label { font-size: 10px; color: #cbd5e1; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 3px; font-weight: 600; }
+#savedCountNum { font-size: 28px; font-weight: 700; color: #38bdf8; line-height: 1; font-family: 'Exo 2', sans-serif; }
+#savedCountNum span { font-size: 14px; color: #94a3b8; }
+.progress-dots { display: flex; align-items: center; gap: 4px; margin-top: 16px; }
+.dot-wrap { display: flex; align-items: center; gap: 4px; }
+.dot-wrap.grow { flex: 1; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #1e293b; border: 2px solid #334155; transition: all 0.3s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.dot.current { width: 20px; height: 20px; background: #0f172a; border-color: #38bdf8; box-shadow: 0 0 10px #38bdf840; }
+.dot.saved { background: #14532d; border-color: #4ade80; }
+.dot.unsaved-past { background: #7f1d1d; border-color: #f87171; }
+.dot-inner { width: 6px; height: 6px; border-radius: 50%; background: #38bdf8; }
+.dot-inner-saved { width: 4px; height: 4px; border-radius: 50%; background: #4ade80; }
+.dot-line { height: 2px; flex: 1; min-width: 8px; background: #1e293b; border-radius: 1px; transition: background 0.3s; }
+.dot-line.done { background: #4ade8040; }
+.progress-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.08em; }
+
+#main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ── Cards ── */
+.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
+.card.unstable { border-color: #7f1d1d; }
+.point-header { display: flex; justify-content: space-between; align-items: center; }
+.point-meta-label { font-size: 11px; color: #cbd5e1; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 2px; font-weight: 600; }
+.point-name { font-size: 28px; font-weight: 900; font-family: 'Exo 2', sans-serif; color: #38bdf8; line-height: 1; }
+.firing-box { text-align: right; background: #1e293b; border-radius: 8px; padding: 8px 14px; }
+.firing-label { font-size: 10px; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+.firing-val { font-size: 32px; font-weight: 700; color: #818cf8; line-height: 1; font-family: 'Exo 2', sans-serif; }
+.firing-val .unit { font-size: 14px; color: #94a3b8; }
+
+/* ── Control readouts ── */
+.slider-wrap { margin-bottom: 16px; }
+.slider-wrap:last-of-type { margin-bottom: 0; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.slider-label { font-size: 12px; font-weight: 600; color: #cbd5e1; letter-spacing: 0.08em; text-transform: uppercase; }
+.slider-val { font-size: 22px; font-weight: 700; font-family: 'Share Tech Mono', monospace; }
+.slider-val span { font-size: 12px; color: #cbd5e1; }
+.slider-val.gas { color: #fb923c; text-shadow: 0 0 12px #fb923c60; }
+.slider-val.air { color: #38bdf8; text-shadow: 0 0 12px #38bdf860; }
+.slider-val.vfd { color: #22d3ee; text-shadow: 0 0 12px #22d3ee60; }
+.slider-val.fgr { color: #a78bfa; text-shadow: 0 0 12px #a78bfa60; }
+.vfd-sub { font-size: 11px; color: #cbd5e1; margin-top: 3px; text-align: right; letter-spacing: 0.05em; font-weight: 500; }
+
+/* ── Gauge bars ── */
+.gauge-wrap { margin-bottom: 8px; }
+.gauge-header { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 3px; font-family: 'Share Tech Mono', monospace; }
+.gauge-val { font-weight: 700; }
+.gauge-track { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
+.gauge-track.marked { position: relative; }
+.gauge-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.3s; }
+.gauge-marker { position: absolute; top: -2px; width: 2px; height: 10px; background: #f87171; border-radius: 1px; }
+
+/* ── Gas flow meter ── */
+.flow-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+.flow-label { font-size: 10px; color: #fde68a; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+.flow-cfh { font-size: 34px; font-weight: 900; font-family: 'Exo 2', sans-serif; color: #facc15; line-height: 1; text-shadow: 0 0 14px #facc1580; }
+.flow-cfh span { font-size: 14px; color: #fde68a; }
+.flow-mmbtu { font-size: 24px; font-weight: 900; font-family: 'Exo 2', sans-serif; color: #facc15; line-height: 1; text-shadow: 0 0 10px #facc1580; }
+.flow-mmbtu span { font-size: 12px; color: #fde68a; }
+.flow-scale { display: flex; justify-content: space-between; font-size: 9px; color: #cbd5e1; margin-top: 2px; }
+.flow-scale .limit { color: #f87171; font-weight: 700; }
+.heat-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; border-radius: 6px; padding: 7px 12px; margin-top: 10px; }
+.heat-label { font-size: 10px; color: #86efac; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+.heat-output-size { font-size: 18px; line-height: 1; }
+.heat-val { font-weight: 900; font-family: 'Exo 2', sans-serif; color: #4ade80; }
+.heat-val.glow { text-shadow: 0 0 10px #4ade8040; }
+.heat-val .unit { font-size: 11px; color: #86efac; }
+.heat-val .eff { font-size: 14px; }
+
+/* ── Live simulation card ── */
+.sim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.sim-header.tight { margin-bottom: 10px; }
+.sim-title { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: #e2e8f0; font-weight: 700; }
+.sim-sub { font-size: 9px; color: #94a3b8; letter-spacing: 0.04em; }
+.lag-display { font-size: 10px; color: #475569; letter-spacing: 0.04em; margin-top: 2px; }
+.lag-display .cold { color: #475569; }
+.lag-display .hot  { color: #fb923c; }
+.flame-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.1em; }
+.flame-stable { background: #14532d; color: #4ade80; }
+.flame-unstable { background: #7f1d1d; color: #f87171; }
+.hint-box { font-size: 10px; border: 1px solid; border-radius: 6px; padding: 7px 10px; letter-spacing: 0.03em; }
+#coHint { color: #fbbf24; background: #292100; border-color: #854d0e; margin-top: 10px; }
+#noxTarget { margin-top: 8px; }
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.stat-box { background: #1e293b; border-radius: 6px; padding: 8px 12px; }
+.stat-label { font-size: 10px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
+.stat-val { font-size: 18px; font-weight: 700; color: #94a3b8; font-family: 'Exo 2', sans-serif; }
+.stat-val.stack { color: #fb923c; }
+
+/* ── Table ── */
+.table-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; max-height: 360px; overflow-y: auto; }
+.table-title { font-size: 12px; color: #e2e8f0; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+th { text-align: right; padding-bottom: 6px; font-weight: 600; font-size: 10px; letter-spacing: 0.1em; color: #cbd5e1; }
+th:first-child { text-align: left; }
+td { padding: 4px 4px; text-align: right; }
+td:first-child { text-align: left; }
+tr.cur-row { background: #0c1a3a; border-left: 2px solid #38bdf8; }
+tr:not(.cur-row) { border-left: 2px solid transparent; }
+
+.validation-box { background: #2d0a0a; border: 1px solid #7f1d1d; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #f87171; margin-bottom: 12px; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.btn-row2 { display: flex; gap: 10px; }
+
+/* ── Tune Mode Toggle ── */
+.tune-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid #334155; margin-bottom: 12px; }
+.tune-toggle-btn { flex: 1; padding: 10px 0; font-family: 'Share Tech Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.25s; text-align: center; }
+.tune-toggle-btn.rough { background: #0f172a; color: #475569; }
+.tune-toggle-btn.rough.active { background: #1e3a5f; color: #38bdf8; box-shadow: inset 0 -2px 0 #38bdf8; }
+.tune-toggle-btn.fine  { background: #0f172a; color: #475569; }
+.tune-toggle-btn.fine.active  { background: #3b1a0a; color: #fb923c; box-shadow: inset 0 -2px 0 #fb923c; }
+.fine-hint { font-size: 10px; color: #fb923c; background: #2d1a0a; border: 1px solid #854d0e; border-radius: 6px; padding: 7px 10px; margin-bottom: 12px; letter-spacing: 0.03em; }
+
+/* ── Flameout overlay ── */
+#flameoutOverlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(2,8,23,0.92); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+}
+.flameout-box {
+  background: #0f172a; border: 2px solid #dc2626;
+  border-radius: 16px; padding: 40px 48px; text-align: center;
+  max-width: 440px; width: 90%;
+  box-shadow: 0 0 60px #dc262640, 0 0 120px #dc262620;
+}
+.flameout-icon { font-size: 48px; margin-bottom: 12px; }
+.flameout-title { font-family: 'Exo 2', sans-serif; font-size: 28px; font-weight: 900; color: #f87171; letter-spacing: 0.05em; margin-bottom: 8px; }
+.flameout-sub { font-size: 11px; color: #f87171; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; }
+#flameoutReason {
+  font-size: 12px; color: #94a3b8; line-height: 1.7;
+  background: #1e293b; border-radius: 8px; padding: 12px 16px;
+  margin-bottom: 28px; font-family: 'Share Tech Mono', monospace;
+}
+.flameout-note { font-size: 11px; color: #cbd5e1; margin-bottom: 20px; letter-spacing: 0.05em; }
+#btnRelight {
+  font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: 700;
+  letter-spacing: 0.1em; padding: 16px 40px; border-radius: 10px;
+  background: #7f1d1d; border: 2px solid #dc2626; color: #fca5a5;
+  cursor: pointer; transition: all 0.2s; width: 100%;
+}
+#btnRelight:hover { background: #991b1b; box-shadow: 0 4px 24px #dc262660; }
+
+/* ── Footer ── */
+.footer { max-width: 960px; margin: 40px auto 0; padding: 0 16px; }
+.footer-inner { border-top: 1px solid #1e293b; padding: 24px 0; text-align: center; }
+.footer-title { font-family: 'Exo 2', sans-serif; font-size: 22px; font-weight: 900; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+.footer-credits { font-size: 13px; color: #fbbf24; letter-spacing: 0.05em; line-height: 1.9; font-weight: 600; margin-top: 16px; }
+.footer-credits .name { color: #4ade80; font-weight: 800; text-shadow: 0 0 8px #4ade8060; }
+.switch-link { text-align: center; margin: 30px 0; }
+.switch-link a { color: #38bdf8; font-size: 14px; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  h1 { font-size: 18px; }
+}
